@@ -1,0 +1,25 @@
+---
+description: Ember 论文写作仓库 — 讨论记录、主题归纳与冲突处理规范
+alwaysApply: true
+---
+
+# Ember Paper Writing Workflow
+
+本仓库用于云原生向量数据库（tail latency）论文写作中的想法沉淀。遵守根目录 `WORKFLOW.md`。
+
+## 每次对话
+
+**开始前**：阅读 `discussions/`、`summaries/` 及相关历史上下文，再回答。
+
+**结束后（必须）**：
+1. 在 `discussions/` 写入或更新会话记录（日期、主题、要点、共识、未决项、与旧记录关系）
+2. 若有稳定结论，更新 `summaries/` 对应主题文件
+3. 新观点与既有记录冲突时，在回复中显式列出冲突；用户裁定后更新 summary，并标注被取代的旧结论
+
+## 归纳
+
+应用户要求或讨论积累足够时，按主题维护 `summaries/`，不删除 `discussions/` 历史。
+
+## 语言
+
+用户用中文时，记录与回复默认中文；技术术语可保留英文。
