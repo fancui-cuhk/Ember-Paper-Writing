@@ -39,12 +39,21 @@
 
 | Dimension | Cloud-Hosted (AWS Opensearch, AWS RDS PG+pgvector) | Cloud-Native (Pinecone, Milvus 2.x, Turbopuffer) | **Ember (our system)** |
 |-----------|-------------------------------------|--------------------------------------------------|-------|
-| **Low TCO** | ❌ compute always-on; indexes on expensive RAM or SSD | ✅ on-demand compute scaling; indexes on cheap object storage (AWS S3) | ✅ |
-| **Low average latency** | ✅ compute always on; indexes always hot (RAM/SSD-resident) | ✅ most queries (except for cold start ones) are fast: indexes cached on compute nodes | ✅ |
-| **Low tail latency** | ✅ single-tenant | ❌ cold start queries need to prepare compute + load indexes; noisy neighbors due to multi-tenancy | ✅ |
-| **High scalability** | ❌ manual provisioning; hard to scale up to billion-scale | ✅ auto-scaling | ✅ |
-| **High availability** | ⚠️ operational burden on user | ✅ fully-managed by vendor | ✅ |
-| **Recall tunability** | ⚠️ varies (some expose parameters; others optimize internally) | ⚠️ varies (some expose parameters; others optimize internally) | ✅ |
+| **Low TCO** | ❌ | ✅ | ✅ |
+| **Low average latency** | ✅ | ✅ | ✅ |
+| **Low tail latency** | ✅ | ❌ | ✅ |
+| **High scalability** | ❌ | ✅ | ✅ |
+| **High availability** | ⚠️ | ✅ | ✅ |
+| **Recall tunability** | ⚠️ | ⚠️ | ✅ |
+
+**Details:**
+
+- **Low TCO**: Cloud-hosted systems keep compute always-on and store indexes on expensive RAM or SSD. Cloud-native systems use on-demand compute scaling and store indexes on cheap object storage (AWS S3).
+- **Low average latency**: Cloud-hosted systems keep indexes always hot (RAM/SSD-resident). In cloud-native systems, most queries (except cold start ones) are fast because indexes are cached on compute nodes.
+- **Low tail latency**: Cloud-hosted systems are single-tenant. Cloud-native systems suffer from cold start queries (need to prepare compute + load indexes) and noisy neighbors due to multi-tenancy.
+- **High scalability**: Cloud-hosted systems require manual provisioning and are hard to scale to billion-scale. Cloud-native systems support auto-scaling.
+- **High availability**: Cloud-hosted systems place operational burden on the user. Cloud-native systems are fully-managed by the vendor.
+- **Recall tunability**: Both cloud-hosted and cloud-native systems vary — some expose parameters, others optimize internally.
 
 **Key insight:**
 
