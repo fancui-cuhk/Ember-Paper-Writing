@@ -8,6 +8,7 @@
 |------|------|
 | [`discussions/`](discussions/) | 每次与 Agent 交流的原始记录 |
 | [`summaries/`](summaries/) | 按主题归纳后的稳定结论 |
+| [`related-work/`](related-work/) | 相关论文与系统的阅读笔记 |
 | [`WORKFLOW.md`](WORKFLOW.md) | 人机协作规范（Agent 行为准则） |
 
 ## 使用方式
