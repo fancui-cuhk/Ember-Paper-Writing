@@ -19,14 +19,13 @@ Building on the analysis of production workloads and existing systems, we identi
 | Dimension | Description | Why It Matters |
 |-----------|-------------|----------------|
 | **Low TCO** | Total cost of ownership must be economical at billion-scale; users pay for actual resources consumed | Enables cost-effective long-term operation of large-scale AI workloads |
-| **Low Average Latency** | Typical query response in milliseconds | Supports interactive applications (chatbots, real-time search) |
-| **Low Tail Latency** | p99 / p999 latency bounded and predictable, even under adverse conditions | Critical for SLA-bound production services; stragglers cause timeouts and poor UX |
-| **High Scalability** | System responds to load fluctuations by scaling resources up or down | Matches the bursty, unpredictable nature of AI workloads |
-| **High Availability** | Data durability guarantees and fault tolerance | Production systems cannot tolerate data loss or extended outages |
-| **Tunability** | Ability to trade off accuracy for speed per query based on application needs | Different use cases demand different recall/latency trade-offs |
-| **Performance Stability** | Predictable performance despite shared cloud infrastructure | Users should not experience latency spikes from "noisy neighbors" or resource contention |
+| **Low average latency** | At a given recall target, typical queries complete with low latency | Supports interactive applications (chatbots, real-time search) |
+| **Low tail latency** | At a given recall target, p99 / p999 latency is bounded and predictable | Critical for SLA-bound production services; stragglers cause timeouts and poor UX |
+| **High scalability** | System responds to load fluctuations by scaling resources up or down | Matches the bursty, unpredictable nature of AI workloads |
+| **High availability** | Data durability guarantees and fault tolerance | Production systems cannot tolerate data loss or extended outages |
+| **Recall tunability** | Users can explicitly select different recall targets to trade off accuracy for latency based on workload requirements | Different workloads demand different recall levels; some prioritize high performance at lower recall, others require high recall |
 
-These dimensions are **not independent** — they represent a fundamental tension in system design. Cloud-hosted systems excel at latency predictability but fail on cost and elasticity. Cloud-native systems achieve cost efficiency and elasticity but struggle with tail latency, particularly on the **cold path** when data is not resident in compute memory.
+These dimensions are **logically orthogonal** — Performance dimensions describe latency at a fixed recall target, while Recall tunability describes the ability to choose among multiple recall targets. Cloud-hosted systems excel at latency predictability but fail on cost and elasticity. Cloud-native systems achieve cost efficiency and elasticity but struggle with tail latency, particularly on the **cold path** when data is not resident in compute memory.
 
 ---
 
