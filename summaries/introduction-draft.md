@@ -4,50 +4,25 @@
 
 ---
 
-## 1. Background: Vector Search as AI Infrastructure
+## 1. Background
 
-**Standing as a cloud vendor, we observe:**
-
-- LLMs and generative AI have transformed how enterprises interact with unstructured data
-- Representation learning enables semantic search via vector similarity
-- RAG, multi-modal recommendation, intelligent QA are now production workloads
-- **User demand for vector databases has shifted from experimental to production-grade**
-
-**Key observation from production deployments (2024-2026):**
-
-- Users prioritize: hybrid search, metadata filtering performance, operational simplicity, cost predictability
-- Latency target: sub-100ms p99 for interactive applications
-- Scale range: from <10M vectors (pgvector sufficient) to billion-scale (dedicated systems required)
-- Filtering is critical: "searching all vectors is slow; filtering to 10K then searching is fast"
-
-**Research gap we identify:**
-
-- Cloud-native architecture promises cost efficiency and elasticity
-- But tail latency under disaggregation remains unaddressed
-- This gap blocks universal adoption for latency-sensitive AI applications
+- In the LLM era, vector search has become foundational infrastructure for RAG, recommendation, and semantic retrieval.
+- Production vector volume routinely reaches billion scale, and continues to grow.
+- Not all vectors are accessed equally.
+    - Some workloads involve frequent queries (e.g., real-time recommendation, active RAG sessions);
+    - others involve infrequent or archival access (e.g., historical compliance records, long-tail user content).
+- These requirements pose new challenges for vector database design.
 
 ---
 
-## 2. What Users Need: Six Core Dimensions
+## 2. What Users Expect
 
-**Note on workload size and recall target:**
-
-> TCO and latency are inherently tied to workload scale and recall requirements. A system may achieve low TCO at 10M vectors with 80% recall, but the same TCO at 1B vectors with 95% recall is a different problem. Unless otherwise noted, our analysis assumes **billion-scale workloads with a target recall of 90%+**.
-
-**Six dimensions:**
-
-- **Low TCO**: Economical at billion-scale; pay for actual usage
-- **Low average latency**: At a given recall target, typical queries complete with low latency
-- **Low tail latency**: At a given recall target, p99 / p999 latency is bounded and predictable
-- **High scalability**: Elastic response to load fluctuations (scale up/down)
-- **High availability**: Data durability and fault tolerance
-- **Recall tunability**: Users can explicitly select different recall targets to trade off accuracy for latency based on workload requirements
-
-**Tunability check (Pinecone, Milvus, Turbopuffer):**
-
-- **Pinecone** (S1/P1 pods): exposes `ef_search` → users can tune recall vs latency
-- **Milvus**: exposes `nprobe` → users can tune recall vs latency
-- **Turbopuffer**: SPFresh is self-optimizing, targets 90-95% recall@10 automatically, does NOT expose `nprobe`-like parameters; provides recall endpoint for testing, higher recall available case-by-case → **limited tunability**
+- **Low TCO**: Supports billion-scale workloads economically and efficiently
+- **Low average latency**: On average, queries complete with low latency, ms or tens of ms
+- **Low tail latency**: p99 / p999 latency is bounded and predictable -- under 500 ms
+- **High scalability**: System can handle growing data volume and bursty query load gracefully
+- **High availability**: Data durability guarantees and fault tolerance
+- **Recall tunability**: Users can explictily tune index parameters for recall-latency tradeoffs
 
 ---
 
@@ -55,36 +30,36 @@
 
 ### 3.1 Two Approaches
 
-- **Cloud-hosted**: Traditional vector databases (OpenSearch, pgvector, self-hosted Milvus 1.x) rehosted on cloud VMs without fundamental architectural change
+- **Cloud-hosted**: Provisioned vector databases/engines (OpenSearch, PostgreSQL+pgvector, Milvus 1.x) rehosted on cloud VMs without fundamental architectural change
+  - For good performance, stores vectors and vector indexes on RAM or local SSDs
+
 - **Cloud-native**: Systems designed from the ground up for cloud infrastructure (Milvus 2.x, Pinecone, Turbopuffer, LindormVector)
 
 ### 3.2 Comparison on User Value Dimensions
 
-| Dimension | Cloud-Hosted (EC2/RDS, self-hosted) | Cloud-Native (Pinecone, Milvus 2.x, Turbopuffer) |
-|-----------|-------------------------------------|--------------------------------------------------|
-| **Low TCO** | ❌ High: VM-hour billing, provision for peak, idle resources wasted | ✅ High: resource pooling, elastic scaling, pay-per-use models |
-| **Low average latency** | ✅ Low (warm, memory-resident) | ✅ Low (when cached) |
-| **Low tail latency** | ✅ Predictable (single-tenant, always warm) | ❌ Problematic (cold start query can spike to seconds) |
-| **High scalability** | ❌ Manual provisioning, slow to scale | ✅ Auto-scaling, stateless compute |
-| **High availability** | ⚠️ Self-managed, operational burden on user | ✅ Managed, SLA-backed |
-| **Recall tunability** | ✅ Full control (user manages index) | ⚠️ Varies: Pinecone/Milvus expose parameters; Turbopuffer is self-optimizing with limited user control |
+| Dimension | Cloud-Hosted (AWS Opensearch, AWS RDS PG+pgvector) | Cloud-Native (Pinecone, Milvus 2.x, Turbopuffer) | **Ember (our system)** |
+|-----------|-------------------------------------|--------------------------------------------------|-------|
+| **Low TCO** | ❌ compute always-on; indexes on expensive RAM or SSD | ✅ on-demand compute scaling; indexes on cheap object storage (AWS S3) | ✅ |
+| **Low average latency** | ✅ compute always on; indexes always hot (RAM/SSD-resident) | ✅ most queries (except for cold start ones) are fast: indexes cached on compute nodes | ✅ |
+| **Low tail latency** | ✅ single-tenant | ❌ cold start queries need to prepare compute + load indexes; noisy neighbors due to multi-tenancy | ✅ |
+| **High scalability** | ❌ manual provisioning; hard to scale up to billion-scale | ✅ auto-scaling | ✅ |
+| **High availability** | ⚠️ operational burden on user | ✅ fully-managed by vendor | ✅ |
+| **Recall tunability** | ⚠️ varies (some expose parameters; others optimize internally) | ⚠️ varies (some expose parameters; others optimize internally) | ✅ |
 
 **Key insight:**
 
-Cloud-native systems are superior on TCO, scalability, and availability — the dimensions that matter for production AI workloads at scale. However, they introduce a new problem: **tail latency under disaggregation**.
+In the LLM era, cloud-hosted solutions are becoming obsolete due to its high TCO and limited scalability. Customers with billion-scale vector corpora or bursty query loads suffer a lot on such systems.
+
+Moving forward, we argue that the cloud-native architecture is the future, and we focus our discussions on them in the following.
 
 ---
 
 ## 4. Cloud-Native Architecture
 
-**Objective description (no marketing language):**
-
 ```
-[Architecture diagram: cloud-native-vector-db-architecture.png]
-
 Components:
 - Compute Layer: Stateless query nodes with local cache (memory/SSD)
-- Storage Layer: Durable, elastic storage (object storage or distributed filesystem)
+- Storage Layer: Durable, elastic storage (object storage)
 - Metadata Service: Coordinator (etcd/ZooKeeper) for index metadata, cluster state
 - Data Flow: Index segments stored in storage layer; compute nodes load segments on demand
 
@@ -99,13 +74,7 @@ Key properties:
 - Multiple tenants share the compute and storage pools
 ```
 
-**This architecture enables:**
-
-- Cost efficiency through resource pooling
-- Elastic scaling without data movement
-- Separation of concerns (compute vs storage)
-
-**But it also creates the tail latency problem (next section).**
+**But, this architecture leads to the tail latency problem (next section).**
 
 ---
 
@@ -117,9 +86,19 @@ Cloud-native architecture is superior on TCO, scalability, and availability. How
 
 **Tail latency is unacceptable.**
 
-### 5.1 What Causes Tail Latency?
+**At billion scale:**
 
-In a disaggregated architecture, when a query arrives and the required index data is not resident in compute memory, the system must perform a **cold start query** — fetching data from the storage layer before query execution can begin.
+| System              | Cold Start Query Latency                        |
+| ------------------- | ----------------------------------------------- |
+| Pinecone Serverless | Up to ~20 seconds                               |
+| Milvus / Zilliz     | Multi-second segment loading                    |
+| Turbopuffer         | ~400–900ms at 1M scale, higher at billion scale |
+
+For RAG, real-time search, and interactive AI applications, tail latency at this scale is a **blocking problem**.
+
+### 5.1 What Causes Such High Tail Latency?
+
+In the disaggregated architecture, when a query arrives, and the required index data is not resident in compute memory or SSD cache, the system must perform a **cold start query** — fetching data from the storage layer before query execution can begin.
 
 This happens due to:
 
@@ -135,21 +114,11 @@ This happens due to:
 - p99 tail: 500ms–1s+ under load
 - No latency SLA
 
-**At billion scale:**
-
-| System | Cold Start Query Latency | Source |
-|--------|--------------------------|--------|
-| Pinecone Serverless | Up to ~20 seconds | Pinecone engineering blog, 2024 |
-| Milvus / Zilliz | Multi-second segment loading | Production reports |
-| Turbopuffer | ~400–900ms at 1M scale, higher at billion scale | Turbopuffer docs |
-
-For RAG, real-time search, and interactive AI applications, tail latency at this scale is a **blocking problem**.
-
 ---
 
 ## 6. Root Causes
 
-**Four structural reasons why tail latency is hard to solve in disaggregated vector databases:**
+**Four structural reasons why tail latency is hard to solve in cloud-native vector databases:**
 
 1. **Disaggregation penalty for index-structured workloads**
    - Graph traversal (HNSW) is data-dependent; each hop determines the next node
@@ -174,7 +143,7 @@ For RAG, real-time search, and interactive AI applications, tail latency at this
 
 ## 7. Research Gap and Our Contribution
 
-**Standing as a cloud vendor:**
+**Standing from the perspective of cloud vector database design:**
 
 - We observe that cloud-native architecture is the inevitable direction for large-scale vector databases (TCO, scalability, availability)
 - We also observe that tail latency under disaggregation is a fundamental blocker for latency-sensitive AI workloads
