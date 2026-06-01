@@ -33,7 +33,7 @@
 - **Cloud-hosted**: Provisioned vector databases/engines (OpenSearch, PostgreSQL+pgvector, Milvus 1.x) rehosted on cloud VMs without fundamental architectural change
   - For good performance, stores vectors and vector indexes on RAM or local SSDs
 
-- **Cloud-native**: Systems designed from the ground up for cloud infrastructure (Milvus 2.x, Pinecone, Turbopuffer, LindormVector)
+- **Cloud-native**: Systems designed from the ground up for cloud infrastructure (Milvus 2.x, Pinecone, Turbopuffer)
 
 ### 3.2 Comparison on User Value Dimensions
 
@@ -169,7 +169,6 @@ Ember is a cloud-native vector database that addresses the tail latency problem 
 ## Open Questions
 
 - How to precisely define "workload size + recall target" assumptions in the motivation table?
-- Should we include LindormVector in the comparison table (different storage assumption: ESSD vs S3)?
 - Data source citations for cold start latency numbers (need authoritative references)
 
 ---
