@@ -135,24 +135,27 @@ For RAG, real-time search, and interactive LLM applications, tail latency at thi
 
 > Key message: Analyze the root causes behind high tail latency / slow cold start queries.
 
-1. **Disaggregation penalty for index-structured workloads**
-   - Graph traversal (HNSW) is data-dependent; each hop determines the next node
-   - Prefetching and streaming are infeasible
-   - Substantial portions of the index must be resident before meaningful execution
+#### Root Cause 1: Storage disaggregation penalty
 
-2. **Read amplification vs. request amplification tradeoff**
-   - Monolithic files (Milvus): load entire structure to use small fraction → read amplification
-   - Per-cluster objects (Turbopuffer): nprobe parallel storage requests, each with tail latency variance → request amplification
-   - Neither achieves sub-second cold start at billion scale on high-latency storage
+Storage disaggregation is key to many cloud advantages: e.g., elastic scaling, etc. But, it is born with a cost: compute nodes must load data from remote storage frequently.
 
-3. **Storage layer opacity**
-   - Object storage exposes no interface for placement hints, co-location, or read-ahead
-   - Database cannot express access patterns to storage layer
+Disaggregation works well for workloads that can stream or process data in independent chunks, e.g., OLAP table scans. However, vector index search — especially HNSW — is data-dependent: each hop determines the next node to fetch. The entire index, or a substantial portion of it, must reside in memory or otherwise queries will be blocked. This data transfer via network is on the critical path of every cold query – expensive and slow!
 
-4. **Heterogeneous access patterns**
-   - Multi-tenant systems have vastly different query rates across tenants
-   - Within a single index, query load concentrates on popular vector neighborhoods
-   - Static storage layout cannot efficiently serve all patterns
+#### Root Cause 2: Read amplification vs. Excessive unparallelizable IOs
+
+We either (1) load the index in its entirety before query execution, or (2) load index chunks on demand.
+
+(1) leads to severe read amplification. Only a small portion of the index is actually required by a query.
+
+(2) leads to unparallelizable IOs, especially for HNSW. IVF can alleviate.
+
+Milvus and Pinecone choose (1) – store a full index as one file and load it in its entirety before query.
+
+#### Root Cause 3: Opacity of object storage vs. Heterogeneous and skewed access patterns
+
+On one end, object storage is completely opaque. It exposes no interface for placement hints, co-location of frequently co-accessed clusters, or access-frequency metadata. E.g., it cannot express "these two clusters are always probed together, store them adjacent".
+
+On the other end, access-aware optimization is important in vector DBs: In a multi-tenant system, tenants have vastly different query rates — some query continuously, many are cold archives. Within a single index, query load concentrates on popular vector neighborhoods; access is far from uniform. A single static storage layout cannot efficiently serve all access patterns simultaneously.
 
 ---
 
