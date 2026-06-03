@@ -1,8 +1,41 @@
 # Cold vs. Hot Query Paths: Pinecone, Milvus 2.x, Turbopuffer
 
 **Purpose:** Evidence-backed execution paths for vector **search** queries, with object-storage I/O and latency notes.  
-**Last updated:** 2026-06-02  
+**Last updated:** 2026-06-03  
 **Scope:** Public documentation and vendor blogs only. Where the vendor does not publish a number, this doc says **not published** — no invented breakdowns.
+
+---
+
+## Appendix A: MinIO vs Amazon S3
+
+**MinIO** is an open-source, **S3 API–compatible** object store (self-hosted or on-prem). Milvus tiered-storage benchmarks in the cited blog use a **MinIO cluster**, not necessarily AWS S3.
+
+**Common deployment motives (project notes, 2026-06-03):**
+
+1. **Local dev/test** — Build and test S3-oriented software against MinIO without AWS credentials or cost; same API surface (`GetObject`, `PutObject`, etc.).
+2. **Privacy / data sovereignty** — Enterprises that avoid storing data in public cloud S3 can run MinIO in a private cluster for S3-like durability and APIs under their own trust boundary.
+
+**Paper implication:** Do not treat MinIO benchmark throughput/latency as identical to production AWS S3 without remeasurement.
+
+---
+
+## Appendix B: Milvus blog timings (do not add across rows)
+
+| Metric | When | Do not confuse with |
+|--------|------|---------------------|
+| Data download + index loading | `Collection.load()` only | Per-query latency |
+| Cold data search P99 (~120 ms in tiered benchmark) | After load; on-demand fetch + search | Sum of load-phase seconds |
+
+See `discussions/2026-06-03-milvus-terminology-s3-fundamentals-minio.md` for full narrative and S3 bandwidth fundamentals.
+
+---
+
+## Appendix C: S3 read model (sketch)
+
+- Each `GET` pays **TTFB** then body transfer; not local-disk “seek.”
+- **Single connection** ~5 Gbps cap (~625 MB/s) per AWS guidance; higher aggregate needs **parallel GETs** or **byte-range** splits on large objects.
+- **Many small GETs** → latency-bound; **8–16 MiB** objects often better for analytics throughput ([Durner et al., VLDB 2023](../related-work/anyblob-vldb2023.md): base ~30 ms, ~20 ms/MiB, ~200–250 concurrent GETs for 100 Gbit/s).
+- Parallel slab/chunk reads can raise **aggregate MB/s** but cold-query wall time still limited by dependencies, client concurrency, and index build — see session discussion above.
 
 ---
 
@@ -286,4 +319,5 @@ From [tiered blog](https://milvus.io/blog/milvus-tiered-storage-80-less-vector-s
 
 - `discussions/2026-05-30-root-cause-analysis.md`
 - `discussions/2026-06-02-s3-vectors-positioning-and-open-questions.md`
-- Session 2026-06-02: user request for evidence-backed cold/hot paths and S3 round-trip accounting.
+- `discussions/2026-06-02-cold-hot-query-paths-evidence.md`
+- `discussions/2026-06-03-milvus-terminology-s3-fundamentals-minio.md` — load vs query metrics, S3 bandwidth, slab parallelism, MinIO notes

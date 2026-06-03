@@ -21,3 +21,4 @@
 | 文件 | 系统/论文 | 阅读日期 |
 |------|-----------|----------|
 | [lindorm-vector-sigmod2026.md](lindorm-vector-sigmod2026.md) | LindormVector (SIGMOD 2026 Industry) | 2026-05-28 |
+| [anyblob-vldb2023.md](anyblob-vldb2023.md) | AnyBlob / S3 OLAP performance (PVLDB 2023) | 2026-06-03 |
