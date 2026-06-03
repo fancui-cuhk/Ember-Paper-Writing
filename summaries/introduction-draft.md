@@ -36,8 +36,8 @@
 
 > Key mesasge: Existing cloud vector database options cannot satisfy user expectations.
 
-- **Cloud-hosted**: Provisioned vector databases/engines (OpenSearch, PostgreSQL+pgvector, Milvus 1.x) hosted on cloud VMs without architectural change. For good performance, such systems store vector indexes on RAM or local SSDs.
-  
+- **Cloud-hosted**: Provisioned vector databases/engines hosted on cloud VMs without architectural change (OpenSearch, PostgreSQL+pgvector, Milvus 1.x).
+
 - **Cloud-native**: Systems designed from the ground up for cloud infrastructure (Milvus 2.x, Pinecone, Turbopuffer).
 
 - We put our system Ember here as well.
@@ -54,26 +54,19 @@
 
 **Details:**
 
-- **Low TCO**.
-  - Cloud-hosted systems keep compute always-on and store indexes on expensive RAM or SSD, so cost is extremely high.
-  - Cloud-native systems use on-demand compute scaling and store indexes on cheap object storage (AWS S3).
+**Cloud-Hosted (AWS OpenSearch, AWS RDS PG+pgvector):**
+- **Low TCO**: Compute is always-on and indexes reside on expensive RAM or local SSD, resulting in 10-100X higher storage cost and 2-10X higher compute cost compared to cloud-native alternatives.
+- **Low average latency**: Compute is always-on and indexes are kept "hot" in RAM/SSD, so queries complete in ~10ms.
+- **Low tail latency**: Performance is stable and bounded (~100ms) with no cold start query spikes, as reported by Uber OpenSearch (June 2026).
+- **High scalability**: Manual provisioning is required; compute and storage must scale together due to the monolithic architecture.
+- **High availability**: High availability is achievable but requires explicit multi-AZ provisioning, increasing operational cost and complexity.
 
-- **Low average latency**.
-  - Cloud-hosted systems keep compute always-on and indexes always "hot" (RAM/SSD-resident), so all queries are fast.
-  - In cloud-native systems, most queries (except for cold start ones -- will be elaborated later) are fast because indexes are already cached on compute nodes or SSD caches.
-
-- **Low tail latency**.
-  - As discussed before, in cloud-hosted systems, compute is always on, indexes are always hot, so performance is stable. [Uber OpenSearch blog (June 2026)]
-  - Cloud-native systems suffer from slow cold start queries, so tail latency is high.
-
-- **High scalability**.
-  - Cloud-hosted systems often require manual provisioning and scaling; compute/storage must scale together due to the monolithic architecture.
-  - Cloud-native systems are designed for auto, elastic scaling; compute/storage can scale independently.
-
-- **High availability**.
-  - For cloud-hosted systems, the operational burden for availability is often on the user side.
-  - Cloud-native systems provide high availability by default.
-
+**Cloud-Native (Pinecone, Milvus 2.x, Turbopuffer):**
+- **Low TCO**: On-demand compute scaling and cheap object storage (AWS S3) deliver significantly lower total cost of ownership.
+- **Low average latency**: Most queries (except cold start queries) complete in ~15ms because indexes are cached on compute nodes or local SSD caches.
+- **Low tail latency**: Cold start queries cause tail latency to reach seconds to ~20s (system- and scale-dependent; see §5), which is unacceptable for interactive applications.
+- **High scalability**: Designed for automatic, elastic scaling; compute and storage scale independently.
+- **High availability**: High availability is provided by default through managed replication and failover.
 
 **Key insight:**
 
