@@ -78,3 +78,26 @@ both are **paid resources** — the cost model may erase object-storage **$/TiB*
 ## Source (author message, 2026-06-03, paraphrased faithfully)
 
 Author stated the four S3 bandwidth conditions, ~10 GB/s achievable when all hold, AnyBlob as OLAP proof point, and three vector-search objections: (1) random HNSW/IVF access vs sequential OLAP — on-demand = latency-bound low bandwidth vs bulk = read amplification; (2) heavy vector distance CPU + parallel GET CPU load; (3) cost of high CPU + high bandwidth hardware.
+
+---
+
+## Clarification: Many small objects vs one large object in vector databases
+
+**Question raised (2026-06-03):** Is the claim that “many 16 MB objects are more common for vector DBs” well-supported?
+
+**Evidence-based answer:**
+
+The picture is **nuanced** and depends on what is being stored:
+
+| What is stored | Common pattern in Milvus (most studied system) | Source |
+|----------------|------------------------------------------------|--------|
+| **Raw vector data / field data** | Split into **multiple smaller objects** (binlogs in Storage v1; row groups / chunks in Storage v2, often ~16 MB) | Milvus Storage v2 design (PR #41001), tiered storage documentation |
+| **ANN index files** (HNSW, IVF, etc.) | Usually stored as **one or a small number of objects per segment**; loaded as complete units | Milvus Tiered Storage Overview: “Indexes are loaded on demand at the segment level. Index files must be fetched as complete units and cannot be split across chunks.” |
+
+**Conclusion for the note:**
+
+- The “many smaller objects” pattern **is common** for raw embedding storage in Milvus.
+- It is **less common** for the actual ANN index structures themselves.
+- AnyBlob-style 8–16 MiB chunking is therefore more directly applicable to field data than to index files in current vector database implementations.
+
+This distinction should be kept when discussing read amplification or parallel GET strategies for cold vector queries.
