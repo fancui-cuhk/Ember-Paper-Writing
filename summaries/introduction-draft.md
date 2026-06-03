@@ -16,6 +16,7 @@
     - Vector search workload patterns are increasingly heterogeneous:
         - Some workloads involve frequent queries (e.g., real-time recommendation, active RAG sessions);
         - others involve infrequent or archival access (e.g., historical compliance records, long-tail user content).
+        - As noted by Milvus, up to 80% of infrastructure resources can be spent on data that is rarely queried (Milvus Tiered Storage blog, Dec 2025).
 
 ---
 
@@ -25,7 +26,7 @@
 
 - **Low TCO**: Supports billion-scale workloads efficiently.
 - **Low average latency**: In most cases, queries should complete with low latency -- ms or tens of ms.
-- **Low tail latency**: Tail latency is low and predictable -- under 500ms.
+- **Low tail latency**: Applications require sub-second cold start query latency to avoid user-observable stalls in interactive settings (Zilliz FAQ on RAG latency; LLM application latency optimization literature).
 - **High scalability**: System can handle growing data volume and bursty query load gracefully.
 - **High availability**: Fault tolerance and data durability.
 
@@ -47,7 +48,7 @@
 |-----------|-------------------------------------|--------------------------------------------------|-------|
 | **Low TCO** | ❌ compared to the other two options: 10-100X higher storage cost; 2-10X higher compute cost | ✅ | ✅ |
 | **Low average latency** | ✅ ~10ms | ✅ ~15ms | ✅ ~12ms |
-| **Low tail latency** | ✅ ~100ms | ❌ ~10s | ✅ ~500ms |
+| **Low tail latency** | ✅ ~100ms | ❌ seconds to ~20 seconds | ✅ ~500ms |
 | **High scalability** | ❌ | ✅ | ✅ |
 | **High availability** | ⚠️ | ✅ | ✅ |
 
@@ -62,7 +63,7 @@
   - In cloud-native systems, most queries (except for cold start ones -- will be elaborated later) are fast because indexes are already cached on compute nodes or SSD caches.
 
 - **Low tail latency**.
-  - As discussed before, in cloud-hosted systems, compute is always on, indexes are always hot, so performance is stable.
+  - As discussed before, in cloud-hosted systems, compute is always on, indexes are always hot, so performance is stable. [Uber OpenSearch blog (June 2026)]
   - Cloud-native systems suffer from slow cold start queries, so tail latency is high.
 
 - **High scalability**.

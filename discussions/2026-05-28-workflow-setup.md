@@ -1,36 +1,36 @@
-# 会话记录：工作流与仓库结构确立
+# Session: Workflow and Repository Structure Setup
 
-- **日期**：2026-05-28
-- **主题标签**：`meta` `workflow` `repository-setup`
+- **Date**: 2026-05-28
+- **Topic Tags**: `meta` `workflow` `repository-setup`
 
-## 用户意图
+## User Intent
 
-博士生正在构建 **tail latency 表现较好的云原生向量数据库**，希望用本仓库：
+The PhD student is building a **cloud-native vector database with strong tail latency characteristics** and intends to use this repository for the following purposes:
 
-1. 记录、组织研究想法，辅助论文写作
-2. 与 Agent 不定期交流；每次交流前 Agent 应回顾历史讨论与已记录文件
-3. 每次交流后 Agent 应写入记录；发现新旧想法冲突时要显式告知
-4. 若用户认定旧想法有误，Agent 应更新既有记录（而非仅追加）
-5. 不定期按主题归纳总结，产出主题化文件
-6. 目录划分：
-   - `discussions/` — 平时讨论记录
-   - `summaries/` — 归纳总结后的主题文件
+1. Record and organize research ideas to support paper writing
+2. Engage in periodic discussions with the Agent; the Agent should review historical discussions and existing files before each session
+3. After each discussion, the Agent should write a record; any conflicts between new and old ideas must be explicitly reported
+4. If the user determines that an old idea is incorrect, the Agent should update the existing record (rather than only appending)
+5. Periodically synthesize discussions into theme-based summary files
+6. Directory structure:
+   - `discussions/` — session records
+   - `summaries/` — synthesized topic-level files
 
-## 讨论要点与共识
+## Discussion Points and Consensus
 
-- 已创建 `WORKFLOW.md` 作为人机协作的权威规范
-- 已创建 `.cursor/rules/paper-writing-workflow.mdc`，使 Cursor Agent 在后续会话中默认遵循该规范
-- 冲突处理：先告警 → 用户裁定 → 更新 `summaries/`，并在讨论记录中标注取代关系；不删除历史讨论原文
+- Created `WORKFLOW.md` as the authoritative specification for human–agent collaboration
+- Created `.cursor/rules/paper-writing-workflow.mdc` so that the Cursor Agent follows the workflow by default in future sessions
+- Conflict handling process: first raise an alert → user decides → update `summaries/` and mark the superseded relationship in the discussion record; do not delete historical discussion text
 
-## 未决问题
+## Open Questions
 
-- （暂无）后续可在首次讨论具体技术方向时补充
+- None at this stage; can be supplemented once the first technical discussion begins
 
-## 与旧记录的关系
+## Relation to Prior Records
 
-- **首次会话**，无历史冲突
+- This is the **first session**; no historical conflicts exist
 
-## 后续动作
+## Follow-up Actions
 
-- 等待用户就具体研究方向（架构、tail latency 机制、实验设计等）展开讨论
-- 积累若干讨论后，在 `summaries/` 中建立首批主题文件
+- Wait for the user to initiate discussion on specific research directions (architecture, tail latency mechanisms, experiment design, etc.)
+- After accumulating several discussions, create the first batch of theme-based files in `summaries/`

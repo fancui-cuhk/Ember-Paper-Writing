@@ -1,20 +1,20 @@
-# Related Work（相关文献）
+# Related Work
 
-记录读过的论文与系统，供 Introduction / Related Work 写作引用。
+Records of papers and systems that have been read, for citation in the Introduction / Related Work sections.
 
-## 文件命名
+## File Naming
 
-`related-work/<系统或论文简称>-<会议或年份>.md`
+`related-work/<system-or-paper-abbreviation>-<conference-year>.md`
 
-示例：`lindorm-vector-sigmod2026.md`
+Example: `lindorm-vector-sigmod2026.md`
 
-## 单篇记录建议结构
+## Recommended Structure for Individual Notes
 
-1. **Bibliography** — 标题、作者、会议、DOI/链接  
-2. **Paper Summary** — 问题、架构、贡献（基于原文 + 公开资料）  
-3. **与 Ember 的关系** — 相似点、差异、是否解决我们的核心问题  
-4. **作者阅读笔记** — 你的判断与待验证点  
-5. **论文写作用途** — 可放在 Related Work 的哪一段、如何引用  
+1. **Bibliography** — Title, authors, venue, DOI/link  
+2. **Paper Summary** — Problem, architecture, contributions (based on the paper + public materials)  
+3. **Relation to Ember** — Similarities, differences, whether it addresses our core problem  
+4. **Reading Notes** — Personal judgment and points to be verified  
+5. **Usage in the Paper** — Which section of Related Work it can be placed in, and how to cite it  
 
 ## 索引
 

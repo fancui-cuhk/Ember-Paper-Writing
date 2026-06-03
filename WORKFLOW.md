@@ -1,87 +1,87 @@
-# Ember 论文写作 — 协作工作流
+# Ember Paper Writing — Collaboration Workflow
 
-本仓库用于记录、组织博士生在 **云原生向量数据库（侧重 tail latency）** 方向上的研究想法，支撑论文写作。
+This repository is used to record and organize a PhD student's research ideas in the direction of **cloud-native vector databases (with emphasis on tail latency)**, supporting paper writing.
 
-## 目录结构
+## Directory Structure
 
-| 路径 | 用途 |
-|------|------|
-| `discussions/` | 每次交流的原始记录（按时间/会话归档） |
-| `summaries/` | 按主题归纳、整合后的知识条目 |
-| `related-work/` | 读过的相关论文与系统的阅读笔记 |
-| `WORKFLOW.md` | 本文件：人机协作规范（权威说明） |
+| Path | Purpose |
+|------|---------|
+| `discussions/` | Raw records of each discussion (archived by date/session) |
+| `summaries/` | Synthesized knowledge entries organized by topic |
+| `related-work/` | Reading notes on related papers and systems |
+| `WORKFLOW.md` | This file: human–agent collaboration guidelines (authoritative specification) |
 
-## 研究背景（固定上下文）
+## Research Background (Fixed Context)
 
-- **角色**：计算机博士生
-- **目标系统**：tail latency 表现较好的云原生向量数据库
-- **本仓库目的**：沉淀想法、发现冲突、支撑论文各章节（动机、设计、实验、相关工作等）
+- **Role**: Computer Science PhD student
+- **Target System**: Cloud-native vector database with strong tail latency performance
+- **Repository Purpose**: Accumulate ideas, surface conflicts, and support various sections of the paper (motivation, design, experiments, related work, etc.)
 
-## 每次交流时 Agent 应做的事
+## What the Agent Should Do During Each Discussion
 
-### 交流开始前
+### Before the Discussion
 
-1. 浏览 `discussions/` 中近期及相关的历史记录
-2. 浏览 `summaries/` 中与当前话题相关的主题文件
-3. 浏览 `related-work/` 中与当前话题相关的文献笔记
-3. 若可访问，参考同项目下的历史 agent 对话记录（agent transcripts）
-4. 基于已有知识展开讨论，避免重复劳动或前后矛盾而不自知
+1. Review recent and relevant historical records in `discussions/`
+2. Review topic files in `summaries/` related to the current discussion
+3. Review literature notes in `related-work/` related to the current topic
+4. If accessible, reference historical agent transcripts from the same project
+5. Base the discussion on existing knowledge to avoid redundant work or unnoticed contradictions
 
-### 交流过程中
+### During the Discussion
 
-- 紧扣用户当次问题；必要时引用已有记录中的结论
-- 回答问题和交流过程中要多进行网络搜索，验证用户论点的可靠性，并及时提出用户未发现的问题
-- **若新想法与 `summaries/` 或 `discussions/` 中的既有结论冲突**，明确列出：
-  - 冲突点（旧观点 vs 新观点）
-  - 可能影响的论文段落或设计决策
-  - 请用户裁定以哪一方为准
+- Stay focused on the user's current question; reference conclusions from existing records when necessary
+- Conduct web searches during the discussion to verify the reliability of the user's arguments and proactively raise issues the user may not have considered
+- **If a new idea conflicts with existing conclusions in `summaries/` or `discussions/`**, explicitly list:
+  - The point of conflict (old view vs. new view)
+  - Potential impact on paper sections or design decisions
+  - Ask the user to decide which view should take precedence
 
-### 交流结束后（必须）
+### After the Discussion (Mandatory)
 
-1. 在 `discussions/` 新增或追加一条会话记录，包含：
-   - 日期、主题标签
-   - 用户核心问题/想法
-   - 讨论要点与达成的共识
-   - 未决问题、待验证假设
-   - 与旧记录的关系（延续 / 修正 / 冲突待裁定）
-2. 若用户确认**旧观点有误**，更新 `summaries/` 中对应主题文件，并在讨论记录中注明「已取代某条旧结论」
-3. 若出现可沉淀的稳定结论，更新或新建 `summaries/` 下的主题文件
-4. 在进行记录时，要使用英文，专业术语，参考网上的专业blog和research paper
+1. Add or append a session record in `discussions/`, including:
+   - Date and topic tags
+   - Core user questions/ideas
+   - Discussion points and reached consensus
+   - Open questions and assumptions to be verified
+   - Relation to prior records (continuation / revision / conflict pending decision)
+2. If the user confirms that an **old view was incorrect**, update the corresponding topic file in `summaries/` and note in the discussion record that "a previous conclusion has been superseded"
+3. If stable conclusions emerge, update or create new topic files under `summaries/`
+4. All records should be written in English, using professional terminology and referencing professional blogs and research papers
 
-## 归纳总结（周期性）
+## Periodic Synthesis
 
-在以下时机主动或应用户要求进行主题归纳：
+Actively perform topic-level synthesis at the following times or upon user request:
 
-- 讨论记录累积到一定量
-- 用户明确要求整理
-- 某主题在多次讨论中出现且观点已趋于稳定
+- When discussion records accumulate to a certain volume
+- When the user explicitly requests synthesis
+- When a topic appears across multiple discussions and views have stabilized
 
-归纳原则：
+Synthesis principles:
 
-- 按**主题**拆分文件（如 `tail-latency.md`、`index-structure.md`），而非按日期
-- 每个主题文件建议结构：概述 → 核心论点 → 设计/实验含义 → 开放问题 → 来源讨论（链接到 `discussions/` 文件名）
-- 不删除历史讨论；修正通过更新 summary + 讨论记录中的勘误说明完成
+- Split files by **topic** (e.g., `tail-latency.md`, `index-structure.md`), not by date
+- Recommended structure for each topic file: Overview → Core Arguments → Design/Experiment Implications → Open Questions → Source Discussions (linking to filenames in `discussions/`)
+- Do not delete historical discussions; corrections are made by updating the summary and adding an erratum note in the discussion record
 
-## 文件命名约定
+## File Naming Conventions
 
-- **讨论**：`discussions/YYYY-MM-DD-<简短主题>.md`
-- **主题总结**：`summaries/<主题英文或拼音短名>.md`
-- **相关文献**：`related-work/<系统或论文简称>-<会议或年份>.md`
+- **Discussion**: `discussions/YYYY-MM-DD-<short-topic>.md`
+- **Topic Summary**: `summaries/<short-english-topic-name>.md`
+- **Related Work**: `related-work/<system-or-paper-abbreviation>-<conference-year>.md`
 
-## 冲突处理流程
+## Conflict Handling Process
 
 ```
-新想法 ──► 与 summaries / discussions 比对
+New Idea ──► Compare with summaries / discussions
               │
-              ├─ 一致 → 记录为强化/补充
-              ├─ 补充 → 并入对应 summary
-              └─ 冲突 → 在回复中显式告警 → 用户裁定
+              ├─ Consistent → Record as reinforcement/supplement
+              ├─ Supplementary → Merge into corresponding summary
+              └─ Conflict → Explicitly alert in response → User decides
                                     │
-                                    ├─ 新想法正确 → 更新 summary，旧讨论标注「已被取代」
-                                    └─ 旧想法正确 → 新讨论标注「已否决/暂缓」
+                                    ├─ New idea correct → Update summary, mark old discussion as "superseded"
+                                    └─ Old idea correct → Mark new discussion as "rejected/deferred"
 ```
 
-## 语言
+## Language
 
-- 用户以中文交流时，记录与回复默认使用中文
-- 技术术语、系统名、论文标题可保留英文
+- All records and responses should be written in English
+- Technical terms, system names, and paper titles may remain in English

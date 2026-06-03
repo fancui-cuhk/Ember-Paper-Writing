@@ -1,16 +1,16 @@
 # Ember-Paper-Writing
 
-云原生向量数据库（侧重 **tail latency**）论文写作 — 想法记录与协作仓库。
+Cloud-native vector database (with emphasis on **tail latency**) paper writing — idea logging and collaboration repository.
 
-## 目录
+## Directory
 
-| 路径 | 说明 |
-|------|------|
-| [`discussions/`](discussions/) | 每次与 Agent 交流的原始记录 |
-| [`summaries/`](summaries/) | 按主题归纳后的稳定结论 |
-| [`related-work/`](related-work/) | 相关论文与系统的阅读笔记 |
-| [`WORKFLOW.md`](WORKFLOW.md) | 人机协作规范（Agent 行为准则） |
+| Path | Description |
+|------|-------------|
+| [`discussions/`](discussions/) | Raw records of each discussion with the Agent |
+| [`summaries/`](summaries/) | Synthesized conclusions organized by topic |
+| [`related-work/`](related-work/) | Reading notes on related papers and systems |
+| [`WORKFLOW.md`](WORKFLOW.md) | Human–agent collaboration guidelines (Agent behavior rules) |
 
-## 使用方式
+## Usage
 
-有想法时在本仓库与 Cursor Agent 交流；Agent 会在交流前阅读历史记录，交流后写入 `discussions/`，并适时更新 `summaries/`。详见 [WORKFLOW.md](WORKFLOW.md)。
+Discuss ideas with the Cursor Agent in this repository. The Agent will review historical records before each session and write to `discussions/` afterward, updating `summaries/` as appropriate. See [WORKFLOW.md](WORKFLOW.md) for details.

@@ -1,7 +1,7 @@
-# 主题归纳（Summaries）
+# Topic Summaries
 
-本目录存放按主题整理后的稳定结论与论点，供写论文时快速查阅。
+This directory stores synthesized conclusions and arguments organized by topic, for quick reference during paper writing.
 
-每个文件建议包含：概述、核心论点、对设计/实验的含义、开放问题、来源讨论（指向 `discussions/` 中的文件名）。
+Each file is recommended to include: Overview, Core Arguments, Implications for Design/Experiments, Open Questions, and Source Discussions (pointing to filenames in `discussions/`).
 
-当讨论积累到一定量后，Agent 会在此创建或更新主题文件。当前尚无主题文件，待首次技术讨论后填充。
+When discussions accumulate to a sufficient volume, the Agent will create or update topic files here. Currently there are no topic files; they will be populated after the first technical discussion.
