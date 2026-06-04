@@ -167,63 +167,62 @@ Cloud-native vector databases suffer from unacceptable cold start query latency 
 
 ## 7. Ember: Design Overview
 
-### Core Idea: cold start Query Pushdown
+> Key message: Our core idea is to discard S3, and push the execution of cold start queries down to our customized storage layer - EmberStore. But, this does not solve the problem, there are still challenges, and we have solved them all.
 
-- Ember introduces a **custom distributed storage layer** built on commodity hardware (HDD-class media).
-- Unlike S3, this layer is co-designed with the query engine. Storage nodes run ANN search directly on the data they hold.
-- cold start queries are **pushed down to the storage tier** — executed entirely where the data resides, with no index data transferred to the compute tier.
-- This preserves the full disaggregation architecture for hot queries:
-  - **Hot queries** (index cached at compute tier): served at the compute tier as in any cloud-native system. TCO, elasticity, and multi-tenancy advantages are fully preserved.
-  - **cold start queries** (index not in compute cache): pushed down and executed locally at the storage tier. Network is eliminated from the cold start query critical path. Latency is now bounded by local disk access (~10ms on HDD), not S3 round-trip (~100–200ms).
-- The concept of pushing computation to storage nodes is well-established in disaggregated database systems [computation pushdown: Redshift Spectrum, S3 Select, VLDB 2025 disaggregation survey]. **However, applying this idea to vector index search on commodity HDD storage introduces a set of challenges not addressed by prior work.** Ember's primary technical contribution is solving these challenges.
+In response to the above high tail latency problem, we propose Ember, a new-generation cloud-native vector database.
 
-### Why cold start Query Pushdown Is Non-Trivial for Vector Search
+### Core Idea: cold start query pushdown
+
+- Ember introduces a **custom block-based distributed storage layer** built on commodity hardware (HDD): **EmberStore**.
+- cold start queries are **pushed down to EmberStore** — executed entirely where the data resides, with no network data transfer on the critical path.
+  - The index is loaded to the compute layer in the background, to serve subsequent queries.
+- This **to some extent** solves the above three root causes:
+  - **RC1**: Network is eliminated from the critical path of cold start queries, since storage (local HDDs) is attached to compute (EmberStore storage nodes).
+    - Latency is now bounded by local disk access (~10ms on HDD), not S3 round-trip (~100–200ms).
+  - **RC2** and **RC3**: Now the storage layer is completely transient to us, we can design it to suit the access patterns of vector search and we are free to perform workload-aware optimizations.
+- Also, this preserves the disaggregation architecture for hot queries:
+  - Hot queries are still served at the compute layer as in any cloud-native system.
+  - TCO, elasticity advantages are fully preserved.
+- The concept of pushing computation to storage nodes is well-established in disaggregated database systems [computation pushdown: Redshift Spectrum, S3 Select, VLDB 2025 disaggregation survey].
+- **However, applying this idea to vector index search on commodity HDD storage introduces a set of challenges not addressed by prior work.**
+
+### But, cold start query pushdown is non-trivial for vector search
 
 **Challenge 1 — HDD Random I/O Bottleneck.**
-- HDDs deliver ~100–200 MB/s sequential throughput but only ~100–200 random IOPS (~10ms per random seek).
-- A naively laid-out IVF index on HDD — where each cluster's posting list is stored at an arbitrary disk location — requires one random seek per probed cluster.
-- At nprobe = 100 and 10ms per seek, disk I/O alone costs ~1 second — already violating the sub-second target before any ANN computation.
-- Achieving sub-second cold start query performance on HDDs requires co-designing index layout and I/O access patterns to maximize sequential access.
+- HDDs are notorious for the poor random I/O performance.
+- A naively laid-out IVF index on HDD might require one random seek per probed cluster.
 
 **Challenge 2 — Load Imbalance and Hotspot Formation.**
-- Query load is highly skewed: some tenants generate continuous traffic; most are cold archives.
-- Within a single index, popular vector neighborhoods attract disproportionately more queries.
-- A static data layout will concentrate I/O and compute load on a small number of storage nodes, forming hotspots that inflate cold start query tail latency under concurrent load.
+- Vector search query load is highly skewed, on both the inter-index and the intra-index level.
+- A static data layout will concentrate I/O and compute load on a small number of storage nodes.
 
-**Challenge 3 — Fault Tolerance on Commodity Hardware.**
-- HDDs have significantly higher annual failure rates than NVMe SSDs or cloud object storage (which provides 11-nines durability).
-- A storage layer built on HDDs must provide replication and failure-recovery mechanisms to ensure data durability without sacrificing query latency.
+**Challenge 3 — Fault Tolerance.**
+- EmberStore must employ replication to ensure data durability without sacrificing query latency.
 - Replication decisions interact directly with placement and hotspot mitigation, requiring joint design.
 
-**Challenge 4 — Distributed Index Maintenance.**
-- Vector indexes must be updated incrementally as data is inserted or deleted.
-- Maintaining a distributed, block-structured IVF index across storage nodes — while preserving the layout properties that enable efficient cold start queries — requires careful coordination.
-- Naive strategies (e.g., full index rebuild on write) are too slow for interactive workloads; incremental update strategies must not degrade the sequential-access layout that makes HDD performance acceptable.
+**Challenge 4 — Multi-Tenant Interference.**
+- Multiple tenants share the storage layer. A burst of cold start queries from one tenant must not significantly degrade cold start query latency for other tenants.
 
-**Challenge 5 — Multi-Tenant Interference.**
-- Multiple tenants share the storage tier. A burst of cold start queries from one tenant must not significantly degrade cold start query latency for other tenants.
-- Resource isolation at the storage tier — for both disk I/O bandwidth and ANN compute — is necessary but adds design complexity.
+**Challenge 5 — Data Consistency**
+- There are two vector engines in Ember, both might handle update queries: one in compute layer, one in storage layer.
+- Maintaining data consistency is not trivial in the case.
 
 ### Ember's Solutions
 
 **Solution 1 — Access-Aligned Block Index.**
-- Ember organizes the IVF index into fixed-size blocks (10–100 MB), where block boundaries are aligned to IVF cluster boundaries: each block contains one or more complete posting lists.
-- A cold start query probing k clusters maps directly to fetching the corresponding blocks — no wasted data, no read amplification.
-- Each block is stored contiguously on disk, so fetching it is a single large sequential read, exploiting HDD sequential bandwidth rather than suffering its random IOPS limitation.
-- This directly addresses Challenge 1.
+- Ember organizes the IVF index into small fixed-size blocks (10–100 MB), where block boundaries are aligned to IVF cluster boundaries: each block contains one or more clusters.
+- A cold start query probing k clusters fetches the corresponding blocks — little or no read amplification.
+- Each block (MB scale) is stored contiguously on disk, so fetching it is a single HDD sequential read, exploiting HDD sequential bandwidth rather than suffering its random IOPS limitation.
 
 **Solution 2 — Distributed Scatter-Gather Execution.**
-- A cold start query is decomposed into sub-queries, each targeting the storage node(s) holding the relevant blocks.
-- A storage-tier coordinator scatters these sub-queries to responsible nodes in parallel; each node executes local ANN search; results are gathered and merged at the coordinator.
-- Distributes both I/O load and ANN compute evenly across storage nodes, preventing single-node bottlenecks under high cold start query volume.
-- Directly addresses Challenge 2 and Challenge 5.
+- A cold start query is decomposed into sub-queries, each targeting the storage node holding the relevant blocks.
+- A storage coordinator scatters these sub-queries to responsible nodes in parallel; each node loads blocks and executes local ANN search in parallel; results are gathered and re-ranked at the coordinator.
+- This distributes both index load and ANN compute *evenly* across storage nodes.
 
 **Solution 3 — Adaptive Block Placement and Replication.**
-- Ember tracks block-level access frequency across tenants and index regions.
-- Frequently co-accessed blocks are placed on the same or nearby nodes (reducing cross-node fetches within a single query).
-- Hot blocks — from high-QPS tenants or popular vector neighborhoods — are replicated to additional nodes for load distribution.
-- Replication across failure domains provides fault tolerance for HDD reliability (Challenge 3), with replication factor tuned to access frequency.
-- Directly addresses Challenge 2, Challenge 3.
+- EmberStore tracks block-level access frequency.
+- Each block is replicated to 3 storage nodes by default.
+- Hot blocks are replicated to more nodes for load distribution.
 
 ---
 
