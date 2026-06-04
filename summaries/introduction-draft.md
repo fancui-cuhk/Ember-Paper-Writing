@@ -55,22 +55,16 @@
 **Details:**
 
 **Cloud-Hosted (AWS OpenSearch, AWS RDS PG+pgvector):**
-- **Low TCO**: Compute is always-on and indexes reside on expensive RAM or local SSD, resulting in 10-100X higher storage cost and 2-10X higher compute cost compared to cloud-native alternatives.
-- **Low average latency**: Compute is always-on and indexes are kept "hot" in RAM/SSD, so queries complete in ~10ms.
-- **Low tail latency**: Performance is stable and bounded (~100ms) with no cold start query spikes, as reported by Uber OpenSearch (June 2026).
-- **High scalability**: Manual provisioning is required; compute and storage must scale together due to the monolithic architecture.
-- **High availability**: High availability is achievable but requires explicit multi-AZ provisioning, increasing operational cost and complexity.
+
+These systems run always-on compute with indexes kept hot in RAM or local SSD. The design guarantees good and stable performance [Uber OpenSearch, Jun 2026], but at high TCO. Scaling is manual and coupled -- compute and storage must scale together. High availability requires explicit multi-AZ provisioning, increasing operational burden.
 
 **Cloud-Native (Pinecone, Milvus 2.x, Turbopuffer):**
-- **Low TCO**: On-demand compute scaling and cheap object storage (AWS S3) deliver significantly lower total cost of ownership.
-- **Low average latency**: Most queries (except cold start queries) complete in ~15ms because indexes are cached on compute nodes or local SSD caches.
-- **Low tail latency**: Cold start queries cause tail latency to reach seconds to ~20s (system- and scale-dependent; see §5), which is unacceptable for interactive applications.
-- **High scalability**: Designed for automatic, elastic scaling; compute and storage scale independently.
-- **High availability**: High availability is provided by default through managed replication and failover.
+
+These systems decouple compute from storage, using on-demand compute instances, and cheap object storage (S3). Queries with cached indexes run fast. However, queries with uncached indexes must fetch from S3, inflating tail latency to seconds or ~20s. The architecture enables automatic, independent scaling of compute and storage, and provides high availability by default.
 
 **Key insight:**
 
-In the LLM era, cloud-hosted solutions are becoming obsolete due to its high TCO and limited scalability. Moving forward, we argue that the cloud-native architecture is the right path to follow, and we focus on the cloud-native architecture in the following discussions.
+High TCO and poor scalability make cloud-hosted systems less suitable for the scale and elasticity demands of LLM-era applications. We believe the cloud-native architecture offers a more promising direction, and therefore focus our discussion on it in the following sections.
 
 ---
 

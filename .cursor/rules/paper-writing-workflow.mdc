@@ -23,3 +23,7 @@ alwaysApply: true
 ## 语言
 
 用户用中文时，记录与回复默认中文；技术术语可保留英文。
+
+## Commit Policy
+
+**Never commit or push** unless the user explicitly instructs with commands such as "commit", "commit and push", or equivalent direct instructions. Do not automatically stage, commit, or push changes at the end of any task.
