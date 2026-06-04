@@ -12,11 +12,10 @@
 > 2. Workload patterns are heterogeneous: some have frequent queries, some are just cold archives.
 
 - **In the LLM era, vector database on the cloud has become a foundational infrastructure, but also faces new challenges.**
-    - Production vector volume is continuously growing, often reaching billion scale.
-    - Vector search workload patterns are increasingly heterogeneous:
-        - Some workloads involve frequent queries (e.g., real-time recommendation, active RAG sessions);
-        - others involve infrequent or archival access (e.g., historical compliance records, long-tail user content).
-        - As noted by Milvus, up to 80% of infrastructure resources can be spent on data that is rarely queried (Milvus Tiered Storage blog, Dec 2025).
+  - Production vector volume is continuously growing, often reaching billion scale.
+  - Vector search workloads are increasingly heterogeneous:
+    - Some workloads involve frequent queries (e.g., active RAG sessions);
+    - others involve infrequent or archival access (e.g., long-tail user vector collections).
 
 ---
 
@@ -26,9 +25,11 @@
 
 - **Low TCO**: Supports billion-scale workloads efficiently.
 - **Low average latency**: In most cases, queries should complete with low latency -- ms or tens of ms.
-- **Low tail latency**: Applications require sub-second cold start query latency to avoid user-observable stalls in interactive settings (Zilliz FAQ on RAG latency; LLM application latency optimization literature).
+- **Low tail latency**: Applications require sub-second tail latency to avoid user-observable stalls in interactive settings (Zilliz FAQ on RAG latency; LLM application latency optimization literature).
 - **High scalability**: System can handle growing data volume and bursty query load gracefully.
 - **High availability**: Fault tolerance and data durability.
+
+Other user expectations such as recall and consistency are baseline requirements and are satisfied by all systems.
 
 ---
 
