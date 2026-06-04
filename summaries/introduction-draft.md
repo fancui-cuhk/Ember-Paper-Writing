@@ -200,7 +200,7 @@ In response to the above high tail latency problem, we propose Ember, a new-gene
 - EmberStore must employ replication to ensure data durability without sacrificing query latency.
 - Replication decisions interact directly with placement and hotspot mitigation, requiring joint design.
 
-**Challenge 4 — Multi-Tenant Interference.**
+**Challenge 4 — Workload Shifts**
 - Multiple tenants share the storage layer. A burst of cold start queries from one tenant must not significantly degrade cold start query latency for other tenants.
 
 **Challenge 5 — Data Consistency**
@@ -210,19 +210,30 @@ In response to the above high tail latency problem, we propose Ember, a new-gene
 ### Ember's Solutions
 
 **Solution 1 — Access-Aligned Block Index.**
-- Ember organizes the IVF index into small fixed-size blocks (10–100 MB), where block boundaries are aligned to IVF cluster boundaries: each block contains one or more clusters.
-- A cold start query probing k clusters fetches the corresponding blocks — little or no read amplification.
-- Each block (MB scale) is stored contiguously on disk, so fetching it is a single HDD sequential read, exploiting HDD sequential bandwidth rather than suffering its random IOPS limitation.
+- Ember organizes the IVF index into small fixed-size blocks (10–100 MB), where block boundaries are aligned to IVF cluster boundaries.
+  - each block contains one or more clusters.
+- A cold start query probing k clusters fetches the corresponding blocks.
+  - little or no read amplification.
+- Each block (MB scale) is stored contiguously on disk.
+  - Fetching a block is a single HDD sequential read, exploiting HDD sequential bandwidth.
 
 **Solution 2 — Distributed Scatter-Gather Execution.**
-- A cold start query is decomposed into sub-queries, each targeting the storage node holding the relevant blocks.
-- A storage coordinator scatters these sub-queries to responsible nodes in parallel; each node loads blocks and executes local ANN search in parallel; results are gathered and re-ranked at the coordinator.
+- EmberStore employs a scatter-gather approach to execution ANNS queries.
+  - For a cold start query, a coordinator in EmberStore first selects the clusters to probe (the first half of IVF search).
+  - Then, the coordinator divides the query into sub-queries and send them to responsible storage nodes in parallel.
+  - Each storage node loads blocks and executes local ANN search in parallel.
+  - Results are gathered and re-ranked at the coordinator.
 - This distributes both index load and ANN compute *evenly* across storage nodes.
+- Besides, big indexes are never transferred via the network, only results are.
 
 **Solution 3 — Adaptive Block Placement and Replication.**
 - EmberStore tracks block-level access frequency.
 - Each block is replicated to 3 storage nodes by default.
 - Hot blocks are replicated to more nodes for load distribution.
+
+**Solution 4 — Workload-Aware Resource Scaling.**
+- The workload shifts from time to time. Concretely, at different times, there are different numbers of cold start queries.
+- We predict the cold start query load in a time window basis and automatically scale up/down resources in EmberStore.
 
 ---
 
