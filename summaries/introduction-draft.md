@@ -104,46 +104,126 @@ Cloud-native databases win on TCO, scalability, and availability. BUT, they suff
 
 This is directly due to **cold start queries**:
 
-- When a query arrives, and the required index is not resident in compute memory or SSD cache, the system must perform a **cold start query** — fetching data from the storage layer before query execution can begin.
-- *Note: Our use of **cold start query** differs from the serverless literature /cite{pinecone, milvus, turbopuffer}. Here, a query is cold-start if the data is not ready, whereas in the serverless context, a query/request is cold if the compute resources are not ready.*
+- When a query arrives, and the required index is not cached in compute memory or SSD, the system must perform a **cold start query** — fetching data from the storage layer before query execution can begin.
+- Queries with cached indexes are called **hot queries**.
+- *Note: Our use of **cold start query** differs from the serverless literature /cite{pinecone, milvus, turbopuffer}. Here, a query is cold start if the data is not ready, whereas in the serverless context, a query/request is cold if the compute resources are not ready.*
 
 **Real numbers reported at billion scale:**
 
-| System              | Cold Start Query Latency                        |
-| ------------------- | ----------------------------------------------- |
-| Pinecone Serverless | Up to ~20 seconds                               |
-| Milvus / Zilliz     | Multi-second segment loading                    |
-| Turbopuffer         | ~400–900ms at 1M scale, higher at billion scale |
+| System              | Cold Start Query Latency                         |
+| ------------------- | ------------------------------------------------ |
+| Pinecone Serverless | Up to ~20 seconds                                |
+| Milvus / Zilliz     | Multi-second segment loading                     |
+| Turbopuffer         | ~400–900ms at 1M scale, no billion scale results |
 
 For RAG, real-time search, and interactive LLM applications, tail latency at this scale is a **blocking problem**.
 
 ---
 
-## 6. Root Causes
+## 6. Root Causes Analysis
 
-> Key message: Analyze the root causes behind high tail latency / slow cold start queries.
+> Key message: Analyze the root causes behind the high tail latency problem.
 
-#### Root Cause 1: Storage disaggregation penalty
+Cloud-native vector databases suffer from unacceptable cold start query latency due to three structural root causes.
 
-Storage disaggregation is key to many cloud advantages: e.g., elastic scaling, etc. But, it is born with a cost: compute nodes must load data from remote storage frequently.
+**RC1 — Disaggregation places network data transfer on the critical path of cold start queries.**
 
-Disaggregation works well for workloads that can stream or process data in independent chunks, e.g., OLAP table scans. However, vector index search — especially HNSW — is data-dependent: each hop determines the next node to fetch. The entire index, or a substantial portion of it, must reside in memory or otherwise queries will be blocked. This data transfer via network is on the critical path of every cold query – expensive and slow!
+- A cold start query cannot begin execution until the required index (or a part of it) has been loaded over the network from object storage.
 
-#### Root Cause 2: Read amplification vs. Excessive unparallelizable IOs
+**RC2 — Vector index access patterns are fundamentally mismatched with object storage.**
 
-We either (1) load the index in its entirety before query execution, or (2) load index chunks on demand.
+- Object stores (S3-class) are optimized for high aggregate throughput on large, bulk reads.
+- Vector index access patterns are fine-grained, random, and query-dependent.
+  - IVF probes a small subset of clusters (nprobe << nlist).
+  - HNSW traverses a data-dependent sequence of graph nodes.
+- This mismatch forces any cloud-native vector database to choose between two strategies, each with some limitations:
 
-(1) leads to severe read amplification. Only a small portion of the index is actually required by a query.
+  - **Strategy A — Whole-Index Loading** (Pinecone, Milvus):
+    - Load the entire index before serving any query to enjoy aggregate bandwidth.
+    - Problem: **Read amplification** — only a small fraction of the index (the probed clusters / a small set of graph nodes) is needed per query, but 100% must be transferred over the network.
+      - At billion scale, this means transferring gigabytes to use a few megabytes.
+      - Although loading can be parallelized, this is still time-consuming — see cold start results reported by Pinecone and Milvus.
+    - *Side note: both Pinecone and Milvus would partition a large dataset into several segments (e.g., 1GB) and build one index for each one. During query execution, they would do a coarse-grained IVF-style selection and then only load indexes of some segments, but these segment indexes are still loaded in their entirety.*
 
-(2) leads to unparallelizable IOs, especially for HNSW. IVF can alleviate.
+  - **Strategy B — On-Demand Loading** (Turbopuffer):
+    - During query time, identify the relevant parts and load only those from object storage.
+    - This eliminates read amplification.
+      - For IVF, once we identified the clusters to probe, they can be loaded in parallel.
+      - Less suitable for HNSW, since this leads to many sequential S3 loads.
+        - If there are 20 hops, there would be at most 20 sequential S3 loads, each costing ~100 ms.
+    - Problems:
+      - **High GET latency** — even if we use IVF-style index, the latency is still dominated by S3 GET latency — averaging 100 ms, with tail latency potentially spiking to 500 ms.
 
-Milvus and Pinecone choose (1) – store a full index as one file and load it in its entirety before query.
+**RC3 — Object storage opacity forecloses workload-aware optimization.**
 
-#### Root Cause 3: Opacity of object storage vs. Heterogeneous and skewed access patterns
+- Object stores expose no interface for placement hints, co-location of frequently co-accessed clusters, access-frequency metadata, or prefetch directives.
+- Yet, access patterns in vector databases are highly skewed:
+  - Across tenants: some tenants generate continuous query traffic; many are cold archives rarely queried.
+  - Within an index: query load concentrates on popular vector neighborhoods; most clusters are rarely touched.
+- A system on top of S3 cannot express: *"this cluster is frequently accessed, replicate it on more servers for higher aggregate bandwidth."*
+- This opacity structurally forecloses the class of workload-aware optimizations.
 
-On one end, object storage is completely opaque. It exposes no interface for placement hints, co-location of frequently co-accessed clusters, or access-frequency metadata. E.g., it cannot express "these two clusters are always probed together, store them adjacent".
+---
 
-On the other end, access-aware optimization is important in vector DBs: In a multi-tenant system, tenants have vastly different query rates — some query continuously, many are cold archives. Within a single index, query load concentrates on popular vector neighborhoods; access is far from uniform. A single static storage layout cannot efficiently serve all access patterns simultaneously.
+## 7. Ember: Design Overview
+
+### Core Idea: cold start Query Pushdown
+
+- Ember introduces a **custom distributed storage layer** built on commodity hardware (HDD-class media).
+- Unlike S3, this layer is co-designed with the query engine. Storage nodes run ANN search directly on the data they hold.
+- cold start queries are **pushed down to the storage tier** — executed entirely where the data resides, with no index data transferred to the compute tier.
+- This preserves the full disaggregation architecture for hot queries:
+  - **Hot queries** (index cached at compute tier): served at the compute tier as in any cloud-native system. TCO, elasticity, and multi-tenancy advantages are fully preserved.
+  - **cold start queries** (index not in compute cache): pushed down and executed locally at the storage tier. Network is eliminated from the cold start query critical path. Latency is now bounded by local disk access (~10ms on HDD), not S3 round-trip (~100–200ms).
+- The concept of pushing computation to storage nodes is well-established in disaggregated database systems [computation pushdown: Redshift Spectrum, S3 Select, VLDB 2025 disaggregation survey]. **However, applying this idea to vector index search on commodity HDD storage introduces a set of challenges not addressed by prior work.** Ember's primary technical contribution is solving these challenges.
+
+### Why cold start Query Pushdown Is Non-Trivial for Vector Search
+
+**Challenge 1 — HDD Random I/O Bottleneck.**
+- HDDs deliver ~100–200 MB/s sequential throughput but only ~100–200 random IOPS (~10ms per random seek).
+- A naively laid-out IVF index on HDD — where each cluster's posting list is stored at an arbitrary disk location — requires one random seek per probed cluster.
+- At nprobe = 100 and 10ms per seek, disk I/O alone costs ~1 second — already violating the sub-second target before any ANN computation.
+- Achieving sub-second cold start query performance on HDDs requires co-designing index layout and I/O access patterns to maximize sequential access.
+
+**Challenge 2 — Load Imbalance and Hotspot Formation.**
+- Query load is highly skewed: some tenants generate continuous traffic; most are cold archives.
+- Within a single index, popular vector neighborhoods attract disproportionately more queries.
+- A static data layout will concentrate I/O and compute load on a small number of storage nodes, forming hotspots that inflate cold start query tail latency under concurrent load.
+
+**Challenge 3 — Fault Tolerance on Commodity Hardware.**
+- HDDs have significantly higher annual failure rates than NVMe SSDs or cloud object storage (which provides 11-nines durability).
+- A storage layer built on HDDs must provide replication and failure-recovery mechanisms to ensure data durability without sacrificing query latency.
+- Replication decisions interact directly with placement and hotspot mitigation, requiring joint design.
+
+**Challenge 4 — Distributed Index Maintenance.**
+- Vector indexes must be updated incrementally as data is inserted or deleted.
+- Maintaining a distributed, block-structured IVF index across storage nodes — while preserving the layout properties that enable efficient cold start queries — requires careful coordination.
+- Naive strategies (e.g., full index rebuild on write) are too slow for interactive workloads; incremental update strategies must not degrade the sequential-access layout that makes HDD performance acceptable.
+
+**Challenge 5 — Multi-Tenant Interference.**
+- Multiple tenants share the storage tier. A burst of cold start queries from one tenant must not significantly degrade cold start query latency for other tenants.
+- Resource isolation at the storage tier — for both disk I/O bandwidth and ANN compute — is necessary but adds design complexity.
+
+### Ember's Solutions
+
+**Solution 1 — Access-Aligned Block Index.**
+- Ember organizes the IVF index into fixed-size blocks (10–100 MB), where block boundaries are aligned to IVF cluster boundaries: each block contains one or more complete posting lists.
+- A cold start query probing k clusters maps directly to fetching the corresponding blocks — no wasted data, no read amplification.
+- Each block is stored contiguously on disk, so fetching it is a single large sequential read, exploiting HDD sequential bandwidth rather than suffering its random IOPS limitation.
+- This directly addresses Challenge 1.
+
+**Solution 2 — Distributed Scatter-Gather Execution.**
+- A cold start query is decomposed into sub-queries, each targeting the storage node(s) holding the relevant blocks.
+- A storage-tier coordinator scatters these sub-queries to responsible nodes in parallel; each node executes local ANN search; results are gathered and merged at the coordinator.
+- Distributes both I/O load and ANN compute evenly across storage nodes, preventing single-node bottlenecks under high cold start query volume.
+- Directly addresses Challenge 2 and Challenge 5.
+
+**Solution 3 — Adaptive Block Placement and Replication.**
+- Ember tracks block-level access frequency across tenants and index regions.
+- Frequently co-accessed blocks are placed on the same or nearby nodes (reducing cross-node fetches within a single query).
+- Hot blocks — from high-QPS tenants or popular vector neighborhoods — are replicated to additional nodes for load distribution.
+- Replication across failure domains provides fault tolerance for HDD reliability (Challenge 3), with replication factor tuned to access frequency.
+- Directly addresses Challenge 2, Challenge 3.
 
 ---
 
