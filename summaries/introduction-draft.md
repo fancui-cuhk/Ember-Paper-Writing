@@ -1,7 +1,5 @@
 # Introduction
 
-> **Status**: Motivation and problem statement only. Solution/Ember design omitted.
-
 ---
 
 ## 1. Background
@@ -47,7 +45,7 @@ Other user expectations such as recall and consistency are baseline requirements
 
 | Dimension | Cloud-Hosted (AWS Opensearch, AWS RDS PG+pgvector) | Cloud-Native (Pinecone, Milvus 2.x, Turbopuffer) | **Ember (our system)** |
 |-----------|-------------------------------------|--------------------------------------------------|-------|
-| **Low TCO** | ❌ compared to the other two options: 10-100X higher storage cost; 2-10X higher compute cost | ✅ | ✅ |
+| **Low TCO** | ❌ compared to the other two options: 10-100X higher storage cost; ~10X higher compute cost | ✅ | ✅ |
 | **Low average latency** | ✅ ~10ms | ✅ ~15ms | ✅ ~12ms |
 | **Low tail latency** | ✅ ~100ms | ❌ seconds to ~20 seconds | ✅ ~500 ms (target) |
 | **High scalability** | ❌ | ✅ | ✅ |
@@ -72,6 +70,8 @@ High TCO and poor scalability make cloud-hosted systems less suitable for the sc
 ## 4. Cloud-Native Vector Databases
 
 > Key message: Let readers understand what is the cloud-native architecture.
+
+![Cloud-Native Vector Database Architecture](../figures/architecture-diagram.png)
 
 ```
 Components:
@@ -123,9 +123,12 @@ For RAG, real-time search, and interactive LLM applications, tail latency at thi
 
 ## 6. Root Causes Analysis
 
-> Key message: Analyze the root causes behind the high tail latency problem.
+> Key messages:
+>
+> 1. Analyze the root causes behind the high tail latency problem.
+> 2. None existing cloud-native vector databases solve the tail latency problem.
 
-Cloud-native vector databases suffer from unacceptable cold start query latency due to three structural root causes.
+Cloud-native vector databases suffer from unacceptable cold start query latency due to three structural root causes. **None existing cloud-native vector databases solve the problem.**
 
 **RC1 — Disaggregation places network data transfer on the critical path of cold start queries.**
 
@@ -145,9 +148,8 @@ Cloud-native vector databases suffer from unacceptable cold start query latency 
       - At billion scale, this means transferring gigabytes to use a few megabytes.
       - Although loading can be parallelized, this is still time-consuming — see cold start results reported by Pinecone and Milvus.
     - *Note: both Pinecone and Milvus would partition a large dataset into several slabs/segments (e.g., 1GB each) and build one index for each. During query execution, they would do a coarse-grained IVF-style selection and then load indexes of selected slabs/segments, but these indexes are still loaded in their entirety while only a small portion is actually used.*
-
   - **Strategy B — On-Demand Loading** (Turbopuffer):
-    - During query time, identify the relevant parts and load only those from object storage.
+    - During query time, identify the relevant parts and load only those from object storage, step by step.
     - This eliminates read amplification.
       - For IVF, once we identified the clusters to probe, they can be loaded in parallel.
       - Not suitable for HNSW, since this leads to many sequential S3 loads.
@@ -170,13 +172,21 @@ These root causes do not invalidate the cloud-native architecture — they preci
 
 ## 7. Ember: Design Overview
 
-> Key message: Cold-start query pushdown directly addresses RC1 and enables solutions to RC2 and RC3, but introduces new engineering challenges that prior work does not address.
+> Key messages:
+>
+> 1. Clearly position Ember in the spectrum.
+> 2. Cold start query pushdown directly addresses RC1 and enables solutions to RC2 and RC3, but introduces new challenges.
+> 3. We solve all those challenges.
 
-In response to the above high tail latency problem, we propose Ember, a new-generation cloud-native vector database. Ember is cloud-native in the sense that compute remains fully stateless, elastic, and disaggregated. EmberStore is the storage tier — it replaces S3 but serves the same architectural role (durable, elastic storage), with the addition of compute co-location for cold-start query pushdown.
+<img src="../figures/map.pdf" alt="Positioning Ember in the cloud vector database design space" style="zoom:200%;" />
+
+In response to the above high tail latency problem, we propose Ember, a new-generation cloud-native vector database that features **low TCO, high scalability, low average latency and low tail latency**. Ember is cloud-native in the sense that compute remains fully stateless, elastic, and disaggregated.
 
 ### Core Idea: cold start query pushdown
 
 - Ember introduces a **custom block-based distributed storage layer** built on commodity hardware (HDD): **EmberStore**.
+  - EmberStore is the storage tier — it replaces S3 but serves the same architectural role (durable, elastic storage), with the addition of compute co-location for cold-start query pushdown.
+
 - Cold start queries are **pushed down to EmberStore** — executed entirely where the data resides, with no network data transfer on the critical path.
   - The index is loaded to the compute layer in the background, to serve subsequent queries.
 - This directly addresses RC1 and sets the stage for solutions to RC2 and RC3:
@@ -190,14 +200,15 @@ In response to the above high tail latency problem, we propose Ember, a new-gene
 - The concept of pushing computation to the storage layer is well-established in disaggregated database systems [computation pushdown: Redshift Spectrum, S3 Select, VLDB 2025 disaggregation survey].
 - **However, applying this idea to vector search on commodity storage introduces a set of challenges not addressed by prior work.**
 
-### Cold start query pushdown is challenging for vector search
+### Cold-Start Query Pushdown on Commodity Hardware: Challenges
 
 **Challenge 1 — HDD Random I/O Bottleneck.**
 - HDDs are notorious for the poor random I/O performance.
 - A poorly laid-out IVF index on HDD would require one random seek per probed cluster.
 - At nprobe = 100 and ~10ms per random seek, disk I/O alone costs ~1s — already violating the sub-second target before any ANN computation.
 
-**Challenge 2 — Load Imbalance and Hotspot Formation.**
+**Challenge 2 — Hotspots and Workload Imbalance.**
+
 - Vector search query load is highly skewed, on both the inter-index and the intra-index level (static spatial imbalance: hot blocks concentrated on a few nodes).
 - A static data layout will concentrate I/O and compute load on a small number of storage nodes.
 
@@ -212,7 +223,7 @@ In response to the above high tail latency problem, we propose Ember, a new-gene
 - There are two vector engines in Ember, both might handle update queries: one in compute layer, one in storage layer.
 - Cold-start query pushdown introduces a dual-write problem — updates may be applied to the compute-layer index and the EmberStore index at different times, creating a window of inconsistency. Reads during this window may return stale results.
 
-### Ember's Solutions
+### Ember's Solutions to Above Challenges
 
 **Solution 1 — Access-Aligned Block Index.**
 - Ember organizes the IVF index into small fixed-size blocks (10–100 MB), where block boundaries are aligned to IVF cluster boundaries.
@@ -223,6 +234,7 @@ In response to the above high tail latency problem, we propose Ember, a new-gene
   - Fetching a block is a single HDD sequential read, exploiting HDD sequential bandwidth.
 
 **Solution 2 — Distributed Scatter-Gather Execution.**
+
 - EmberStore employs a scatter-gather approach to execution ANNS queries.
   - For a cold start query, a coordinator in EmberStore first selects the clusters to probe (the first half of IVF search).
   - Then, the coordinator divides the query into sub-queries and send them to responsible storage nodes in parallel.
@@ -232,7 +244,8 @@ In response to the above high tail latency problem, we propose Ember, a new-gene
 - Besides, big indexes are never transferred via the network, only results are.
 
 **Solution 3 — Adaptive Block Placement and Replication.**
-- EmberStore tracks block-level access frequency.
+
+- EmberStore tracks block-level access frequency。
 - Each block is replicated to 3 storage nodes by default.
 - Hot blocks are replicated to more nodes for load distribution.
 - Replication serves dual purposes — load distribution for hot blocks and fault tolerance for HDD reliability; replicas are placed across failure domains to ensure both.
