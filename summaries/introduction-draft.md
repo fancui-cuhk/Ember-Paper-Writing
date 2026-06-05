@@ -164,13 +164,15 @@ Cloud-native vector databases suffer from unacceptable cold start query latency 
 - A system on top of S3 cannot express: *"These two clusters are always probed together, they should be stored contiguously on disk"* or *"this cluster is frequently accessed, replicate it on more servers for higher aggregate bandwidth."*
 - This opacity structurally forecloses the class of workload-aware optimizations.
 
+These root causes do not invalidate the cloud-native architecture — they precisely identify where it falls short. Ember addresses this gap by replacing the storage abstraction while fully preserving disaggregation for hot queries.
+
 ---
 
 ## 7. Ember: Design Overview
 
-> Key message: Our core idea is to discard S3, and push the execution of cold start queries down to our customized storage layer - EmberStore. But, this does not solve the problem, there are still challenges, and we have solved them all.
+> Key message: Cold-start query pushdown directly addresses RC1 and enables solutions to RC2 and RC3, but introduces new engineering challenges that prior work does not address.
 
-In response to the above high tail latency problem, we propose Ember, a new-generation cloud-native vector database.
+In response to the above high tail latency problem, we propose Ember, a new-generation cloud-native vector database. Ember is cloud-native in the sense that compute remains fully stateless, elastic, and disaggregated. EmberStore is the storage tier — it replaces S3 but serves the same architectural role (durable, elastic storage), with the addition of compute co-location for cold-start query pushdown.
 
 ### Core Idea: cold start query pushdown
 
@@ -193,9 +195,10 @@ In response to the above high tail latency problem, we propose Ember, a new-gene
 **Challenge 1 — HDD Random I/O Bottleneck.**
 - HDDs are notorious for the poor random I/O performance.
 - A poorly laid-out IVF index on HDD would require one random seek per probed cluster.
+- At nprobe = 100 and ~10ms per random seek, disk I/O alone costs ~1s — already violating the sub-second target before any ANN computation.
 
 **Challenge 2 — Load Imbalance and Hotspot Formation.**
-- Vector search query load is highly skewed, on both the inter-index and the intra-index level.
+- Vector search query load is highly skewed, on both the inter-index and the intra-index level (static spatial imbalance: hot blocks concentrated on a few nodes).
 - A static data layout will concentrate I/O and compute load on a small number of storage nodes.
 
 **Challenge 3 — Fault Tolerance.**
@@ -203,11 +206,11 @@ In response to the above high tail latency problem, we propose Ember, a new-gene
 - Replication decisions interact directly with placement and hotspot mitigation, requiring joint design.
 
 **Challenge 4 — Workload Shifts**
-- Multiple tenants share the storage layer. A burst of cold start queries from one tenant must not significantly degrade cold start query latency for other tenants.
+- Multiple tenants share the storage layer. A burst of cold start queries from one tenant must not significantly degrade cold start query latency for other tenants (dynamic temporal imbalance: burst of cold-start queries arriving simultaneously).
 
 **Challenge 5 — Data Consistency**
 - There are two vector engines in Ember, both might handle update queries: one in compute layer, one in storage layer.
-- Maintaining data consistency is not trivial in the case.
+- Cold-start query pushdown introduces a dual-write problem — updates may be applied to the compute-layer index and the EmberStore index at different times, creating a window of inconsistency. Reads during this window may return stale results.
 
 ### Ember's Solutions
 
@@ -232,10 +235,11 @@ In response to the above high tail latency problem, we propose Ember, a new-gene
 - EmberStore tracks block-level access frequency.
 - Each block is replicated to 3 storage nodes by default.
 - Hot blocks are replicated to more nodes for load distribution.
+- Replication serves dual purposes — load distribution for hot blocks and fault tolerance for HDD reliability; replicas are placed across failure domains to ensure both.
 
 **Solution 4 — Workload-Aware Resource Scaling.**
 - The workload shifts from time to time. Concretely, at different times, there are different numbers of cold start queries.
-- We predict the cold start query load in a time window basis and automatically scale up/down resources in EmberStore.
+- We use reactive auto-scaling triggered by observed queue depth (not predictive) and automatically scale up/down resources in EmberStore. This helps steady-state throughput, not burst spikes; scaling latency is acknowledged as a limitation for sudden cold-start bursts.
 
 ---
 
