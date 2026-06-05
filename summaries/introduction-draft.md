@@ -4,34 +4,29 @@
 
 ## 1. Background
 
-> Key message: Vector database faces new challenges in the LLM era.
+> Key message: Vector database faces scale challenges in the LLM era.
 >
-> 1. Vector volume is continuously growing, often billion-scale.
-> 2. Workload patterns are heterogeneous: some have frequent queries, some are just cold archives.
 
-- **In the LLM era, vector database on the cloud has become a foundational infrastructure, but also faces new challenges.**
+- In the LLM era, vector database on the cloud has become a foundational infrastructure, but also faces new challenges.
   - Production vector volume is continuously growing, often reaching billion scale.
-  - Vector search workloads are increasingly heterogeneous:
-    - Some workloads involve frequent queries (e.g., active RAG sessions);
-    - others involve infrequent or archival access (e.g., long-tail user vector collections).
 
 ---
 
-## 2. What users expect?
+## 2. What Users Expect?
 
 > Key message: In the LLM era, cloud vector database users have new expectations. Peformance is still important, but users tend to focus on new aspects such as cost and scalability.
 
 - **Low TCO**: Supports billion-scale workloads efficiently.
 - **Low average latency**: In most cases, queries should complete with low latency -- ms or tens of ms.
-- **Low tail latency**: Applications require sub-second tail latency to avoid user-observable stalls in interactive settings (Zilliz FAQ on RAG latency; LLM application latency optimization literature).
-- **High scalability**: System can handle growing data volume and bursty query load gracefully.
+- **Low tail latency**: Applications require low tail latency to avoid user-observable stalls in interactive settings /cite{Zilliz FAQ on RAG latency; LLM application latency optimization literature}.
+- **High scalability**: System can handle growing data volume and bursty query load efficiently.
 - **High availability**: Fault tolerance and data durability.
 
-Other user expectations such as recall and consistency are baseline requirements and are satisfied by all systems.
+Other user expectations such as high recall and data consistency are baseline requirements and are satisfied by all systems.
 
 ---
 
-## 3. What options do users have?
+## 3. What Options Do Users Have?
 
 > Key mesasge: Existing cloud vector database options cannot satisfy user expectations.
 
@@ -39,31 +34,26 @@ Other user expectations such as recall and consistency are baseline requirements
 
 - **Cloud-native**: Systems designed from the ground up for cloud infrastructure (Milvus 2.x, Pinecone, Turbopuffer).
 
-- We put our system Ember here as well.
+- We put our system Ember here just for reference.
 
 > Numbers are estimated under billion-scale workloads.
+>
+> Cost unit: USD per GB-month.
 
-| Dimension | Cloud-Hosted (AWS Opensearch, AWS RDS PG+pgvector) | Cloud-Native (Pinecone, Milvus 2.x, Turbopuffer) | **Ember (our system)** |
+|  | Cloud-Hosted | Cloud-Native Baslines | **Ember (our system)** |
 |-----------|-------------------------------------|--------------------------------------------------|-------|
-| **Low TCO** | ❌ compared to the other two options: 10-100X higher storage cost; ~10X higher compute cost | ✅ | ✅ |
-| **Low average latency** | ✅ ~10ms | ✅ ~15ms | ✅ ~12ms |
-| **Low tail latency** | ✅ ~100ms | ❌ seconds to ~20 seconds | ✅ ~500 ms (target) |
+| **Examples** | AWS Opensearch, AWS RDS PG+pgvector | Pinecone, Milvus 2.x, Turbopuffer |  |
+| **Low TCO** | ❌ ~10X higher cost for provisioned compute; EC2 RAM: ~5 USD; EBS SSD: ~0.10 USD | ✅ S3: ~0.023 USD | ✅ EC2 instance local HDD: ~0.007 USD |
+| **Low average latency** | ✅ ~10ms | ✅ ~15ms | ✅ ~13ms |
+| **Low tail latency** | ✅ ~100ms | ❌ seconds to ~20 seconds | ✅ ~200 ms |
 | **High scalability** | ❌ | ✅ | ✅ |
 | **High availability** | ✅️ | ✅ | ✅ |
 
-**Details:**
+**Cloud-Hosted:** These systems run always-on compute with indexes kept hot in RAM or local SSD. The design guarantees good and stable performance, but at high TCO. Scaling is manual and coupled -- compute and storage must scale together. High availability requires explicit multi-AZ provisioning.
 
-**Cloud-Hosted (AWS OpenSearch, AWS RDS PG+pgvector):**
+**Cloud-Native baselines:** Details elaborated below.
 
-These systems run always-on compute with indexes kept hot in RAM or local SSD. The design guarantees good and stable performance [Uber OpenSearch, Jun 2026], but at high TCO. Scaling is manual and coupled -- compute and storage must scale together. High availability requires explicit multi-AZ provisioning.
-
-**Cloud-Native (Pinecone, Milvus 2.x, Turbopuffer):**
-
-These systems decouple compute from storage, using on-demand compute instances, and cheap object storage (S3). Queries with cached indexes run fast. However, queries with uncached indexes must fetch from S3, inflating tail latency to seconds or ~20s. The architecture enables automatic, independent scaling of compute and storage, and provides high availability by default.
-
-**Key insight:**
-
-High TCO and poor scalability make cloud-hosted systems less suitable for the scale and elasticity demands of LLM-era applications. We believe the cloud-native architecture offers a more promising direction, and therefore focus our discussion on it in the following sections.
+**Key insight:** High TCO and poor scalability make cloud-hosted systems less suitable for the scale and elasticity demands of LLM-era applications. **We believe the cloud-native architecture represents a more promising direction, and therefore focus our discussion on it in the following.**
 
 ---
 
@@ -71,27 +61,13 @@ High TCO and poor scalability make cloud-hosted systems less suitable for the sc
 
 > Key message: Let readers understand what is the cloud-native architecture.
 
-![Cloud-Native Vector Database Architecture](../figures/architecture-diagram.png)
+![Cloud-Native Vector Database Architecture](../figures/architecture-diagram.pdf)
 
-```
-Components:
-- Compute Layer: Stateless query nodes with SSD cache
-- Storage Layer: Durable, elastic storage (object storage)
-- Metadata Service: Coordinator (etcd/ZooKeeper) for index metadata, cluster state
-
-Data Flow:
-- Index segments stored in storage layer; compute nodes load segments on demand
-
-Query path:
-- Hot query (cache hit): Data in compute cache → low latency
-- Cold query (cache miss): Compute fetches from storage → high latency
-
-Key properties:
-- Compute and storage scale independently
-- Compute nodes are stateless and can be added/removed elastically
-- Storage guarantees data durability and availability
-- Multiple tenants share the compute and storage pools
-```
+- Cloud-native systems systems decouple compute from storage, using on-demand compute instances, and cheap object storage (S3).
+- Queries with cached indexes (**hot queries**) run fast.
+- Queries with uncached indexes (**cold start queries**) must fetch index from S3, inflating tail latency to seconds or ~20s /cite{pinecone}.
+- The architecture enables automatic, independent scaling of compute and storage, and provides high availability by default.
+- Some systems employ the serverless mode: some compute nodes are shut down after a while of silence (TTL-based).
 
 ---
 
@@ -99,23 +75,17 @@ Key properties:
 
 > Key message: Elaborate on the tail latency problem in cloud-native databases.
 
-**The "but":**
-
 Cloud-native databases win on TCO, scalability, and availability. BUT, they suffer from a critical failure mode that blocks its adoption for latency-sensitive applications: **Tail latency is unacceptable.**
 
-This is directly due to **cold start queries**:
-
-- When a query arrives, and the required index is not cached in compute memory or SSD, the system must perform a **cold start query** — fetching data from the storage layer before query execution can begin.
-- Queries with cached indexes are called **hot queries**.
-- *Note: Our use of **cold start query** differs from the serverless literature /cite{pinecone, milvus, turbopuffer}. Here, a query is cold start if the data is not ready, whereas in the serverless context, a query/request is cold if the compute resources are not ready.*
+Although the high tail latency problem is well-acknowledged, none existing cloud-native databases aim to solve it.
 
 **Real numbers reported at billion scale:**
 
-| System                | Cold Start Query Latency                         |
-| --------------------- | ------------------------------------------------ |
-| Pinecone Serverless   | Up to ~20 seconds                                |
-| Milvus 2.6+           | Multi-second segment loading                     |
-| Turbopuffer           | ~400–900ms at 1M scale, no billion scale results |
+| System              | Cold Start Query Latency                       |
+| ------------------- | ---------------------------------------------- |
+| Pinecone Serverless | Up to ~20 seconds                              |
+| Milvus 2.6+         | Multi-second segment loading                   |
+| Turbopuffer         | *~900ms at 1M scale, no billion scale results* |
 
 For RAG, real-time search, and interactive LLM applications, tail latency at this scale is a **blocking problem**.
 
@@ -125,10 +95,15 @@ For RAG, real-time search, and interactive LLM applications, tail latency at thi
 
 > Key messages:
 >
-> 1. Analyze the root causes behind the high tail latency problem.
-> 2. None existing cloud-native vector databases solve the tail latency problem.
+> 1. High tail latency was due to cold start queries.
+> 2. Analyze root causes behind slow cold queries.
 
-Cloud-native vector databases suffer from unacceptable cold start query latency due to three structural root causes. **None existing cloud-native vector databases solve the problem.**
+This is directly due to **cold start queries**:
+
+- When a query arrives, and the required index is not cached in compute memory or SSD, the system must perform a **cold start query** — fetching data from the storage layer before query execution can begin.
+- *Note: Our use of **cold start query** differs from the serverless literature /cite{pinecone, milvus, turbopuffer}. Here, a query is cold start if the data is not cached, whereas in the serverless context, a query/request is cold if the compute resources are not ready.*
+
+#### Cold start queries are slow due to three structural root causes:
 
 **RC1 — Disaggregation places network data transfer on the critical path of cold start queries.**
 
@@ -146,25 +121,22 @@ Cloud-native vector databases suffer from unacceptable cold start query latency 
     - Load the entire index before serving any query to enjoy aggregate bandwidth.
     - Problem: **Read amplification** — only a small fraction of the index (the probed clusters / a small set of graph nodes) is needed per query, but 100% must be transferred over the network.
       - At billion scale, this means transferring gigabytes to use a few megabytes.
-      - Although loading can be parallelized, this is still time-consuming — see cold start results reported by Pinecone and Milvus.
-    - *Note: both Pinecone and Milvus would partition a large dataset into several slabs/segments (e.g., 1GB each) and build one index for each. During query execution, they would do a coarse-grained IVF-style selection and then load indexes of selected slabs/segments, but these indexes are still loaded in their entirety while only a small portion is actually used.*
+    - *Note: Pinecone and Milvus would partition a large dataset into several slabs/segments (e.g., 1GB each) and build one index for each. During query execution, they would do a coarse-grained IVF-style selection and then load indexes of selected slabs/segments, but these indexes are still loaded in their entirety while only a small portion is actually used.*
   - **Strategy B — On-Demand Loading** (Turbopuffer):
-    - During query time, identify the relevant parts and load only those from object storage, step by step.
-    - This eliminates read amplification.
-      - For IVF, once we identified the clusters to probe, they can be loaded in parallel.
-      - Not suitable for HNSW, since this leads to many sequential S3 loads.
+    - During query time, load relevant parts of the index from object storage on demand — the OS page loading approach.
+    - This eliminates read amplification - only relevant parts are loaded.
+      - Suitable for IVF, once we identified the clusters to probe, they can be loaded in parallel.
+      - Not suitable for HNSW, since this leads to excessive sequential S3 loads.
         - If there are 100 hops, there would be at most 100 sequential S3 loads, each costing ~100 ms, constituting a more than 10 seconds latency.
-    - Problems:
-      - **Access Pattern Mismatch** — small, random S3 loads cannot enjoy the high aggregate bandwidth of S3; load latency is dominated by network round trips.
+    - Problem: **Poor random I/O performance of object storage** — small, random S3 loads cannot enjoy the high aggregate bandwidth of S3; load latency is dominated by network round trips.
 
 **RC3 — Object storage opacity forecloses workload-aware optimization.**
 
 - Object stores expose no interface for placement hints, co-location of frequently co-accessed clusters, or access-frequency metadata.
-- Yet, access patterns in vector databases are highly skewed:
-  - Across tenants: some tenants generate continuous query traffic; many are cold archives rarely queried.
-  - Within an index: query load concentrates on popular vector neighborhoods; most clusters are rarely touched.
+- Yet, workload patterns in vector databases are highly skewed and can enjoy workload-aware optimizations:
+  - Inter-index: some indexes have continuous query traffic; some are cold archives rarely queried.
+  - Intra-index: query load concentrates on popular vector neighborhoods; most vectors are rarely touched.
 - A system on top of S3 cannot express: *"These two clusters are always probed together, they should be stored contiguously on disk"* or *"this cluster is frequently accessed, replicate it on more servers for higher aggregate bandwidth."*
-- This opacity structurally forecloses the class of workload-aware optimizations.
 
 These root causes do not invalidate the cloud-native architecture — they precisely identify where it falls short. Ember addresses this gap by replacing the storage abstraction while fully preserving disaggregation for hot queries.
 
@@ -174,18 +146,19 @@ These root causes do not invalidate the cloud-native architecture — they preci
 
 > Key messages:
 >
-> 1. Clearly position Ember in the spectrum.
+> 1. Clearly position Ember.
 > 2. Cold start query pushdown directly addresses RC1 and enables solutions to RC2 and RC3, but introduces new challenges.
 > 3. We solve all those challenges.
 
-<img src="../figures/map.pdf" alt="Positioning Ember in the cloud vector database design space" style="zoom:200%;" />
+- In response to the above high tail latency problem, we propose Ember, a new-generation cloud-native vector database that features **low TCO, high scalability, low average latency and low tail latency**. 
+- Ember is cloud-native in the sense that compute remains fully stateless, elastic, and disaggregated.
 
-In response to the above high tail latency problem, we propose Ember, a new-generation cloud-native vector database that features **low TCO, high scalability, low average latency and low tail latency**. Ember is cloud-native in the sense that compute remains fully stateless, elastic, and disaggregated.
+<img src="../figures/map.pdf" alt="Positioning Ember in the cloud vector database design space" style="zoom:200%;" />
 
 ### Core Idea: cold start query pushdown
 
 - Ember introduces a **custom block-based distributed storage layer** built on commodity hardware (HDD): **EmberStore**.
-  - EmberStore is the storage tier — it replaces S3 but serves the same architectural role (durable, elastic storage), with the addition of compute co-location for cold-start query pushdown.
+  - EmberStore is the storage layer — it replaces S3 but serves the same architectural role (durable, elastic storage), with the addition of compute co-location for cold-start query pushdown.
 
 - Cold start queries are **pushed down to EmberStore** — executed entirely where the data resides, with no network data transfer on the critical path.
   - The index is loaded to the compute layer in the background, to serve subsequent queries.
@@ -197,12 +170,13 @@ In response to the above high tail latency problem, we propose Ember, a new-gene
   - TCO, elasticity advantages are fully preserved.
   - *Note: Cold start queries should only account for the minority of the system. /cite{}*
 
-- The concept of pushing computation to the storage layer is well-established in disaggregated database systems [computation pushdown: Redshift Spectrum, S3 Select, VLDB 2025 disaggregation survey].
+- The concept of pushing computation to the storage layer is well-established in disaggregated database systems /cite{computation pushdown: Redshift Spectrum, S3 Select, VLDB 2025 disaggregation survey}.
 - **However, applying this idea to vector search on commodity storage introduces a set of challenges not addressed by prior work.**
 
 ### Cold-Start Query Pushdown on Commodity Hardware: Challenges
 
 **Challenge 1 — HDD Random I/O Bottleneck.**
+
 - HDDs are notorious for the poor random I/O performance.
 - A poorly laid-out IVF index on HDD would require one random seek per probed cluster.
 - At nprobe = 100 and ~10ms per random seek, disk I/O alone costs ~1s — already violating the sub-second target before any ANN computation.
