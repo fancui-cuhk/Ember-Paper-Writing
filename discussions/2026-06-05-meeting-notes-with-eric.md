@@ -67,9 +67,19 @@
         - diskann/spann on hdd? so slow! due to *xxx reasons*.
 - so what do we do?
     - we design something new -- emberann (our contribution).
+    - emberann features *xxx techniques*, solves *yyy challenges*.
+    - emberann optimizes for the cold start workload in *zzz approaches*.
 
 #### Problems
 
+- why pushdown is an obvious solution to the cache miss problem?
+    - Eric said so, but why? we simply state this?
+- **after we give the pushdown setting, we talk about challenges first or we directly talk about diskann/spann?**
+- after we give the pushdown setting, what are the challenges? and missing opportunities?
+- diskann and spann sucks for what reasons?
+- and, what does emberann do?
+- **how does the cold start workload affect our system design?**
+    - this is crucial, it means that we are building emberann as a component in the system, not a standalone ann algorithm.
 - disaggregation implies insufficient compute on the storage layer.
     - but now we are pushing query execution down to the storage layer.
     - we need to defense against this!
