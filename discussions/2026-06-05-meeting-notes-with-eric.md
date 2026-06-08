@@ -40,7 +40,7 @@
 #### New storyline
 
 - vector database上云，有两种：cloud-hosted和cloud-native，推崇后者。
-- 那么，什么是cloud-native？
+- 什么是cloud-native？
 - cloud-native SOTA是什么？有什么问题？
 - 问题就是high tail latency!
     - 没有必要quote pinecone和milvus的结果，那是他们实验的结果，放在一起不好比较。
@@ -51,7 +51,7 @@
 - But, when solving the cache miss problem, what are the challenges?
     - 现有系统在解这个问题的时候，有哪些approach？各个approach有什么问题？他们有没有漏哪些opportunities？
     - 总之，要回答的问题是：前人做了什么？为啥没做好？
-    - **actually, previous systems live with it.** -- is this correct?
+    - **actually, previous systems live with cache miss.**
 - our position: in this good cloud-native architecture, we solve the tail latency problem!
     - but, we better inform readers: we are not magicians, we cannot achieve better tail latency than cloud-hosted ones.
 - go to our core solution: **cold start pushdown**.
