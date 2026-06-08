@@ -22,6 +22,8 @@
             - index cannot fit in single-node?
             - or this is a requirement of running fast queries on HDDs?
 
+
+
 this is a new flow:
 
 - challenges of pushdown:
