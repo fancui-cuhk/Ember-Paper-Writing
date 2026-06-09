@@ -26,7 +26,7 @@
 
 this is a new flow:
 
-- challenges of pushdown:
+- challenges of disk-based vector search under compute pushdown:
     - insufficient compute.
     - we want to use cheap HDD.
 - old SOTA? diskann and spann
