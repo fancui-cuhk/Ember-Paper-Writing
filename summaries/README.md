@@ -4,4 +4,9 @@ This directory stores synthesized conclusions and arguments organized by topic, 
 
 Each file is recommended to include: Overview, Core Arguments, Implications for Design/Experiments, Open Questions, and Source Discussions (pointing to filenames in `discussions/`).
 
-When discussions accumulate to a sufficient volume, the Agent will create or update topic files here. Currently there are no topic files; they will be populated after the first technical discussion.
+| File | Topic |
+|------|--------|
+| [read-amplification-disk-vector-search-survey.md](read-amplification-disk-vector-search-survey.md) | Read amplification in disk / disaggregated vector search |
+| [disk-based-ann-survey.md](disk-based-ann-survey.md) | Disk-based and distributed ANN literature |
+| [partition-sharding-vector-search-survey.md](partition-sharding-vector-search-survey.md) | Partition & sharding patterns |
+| [cloud-hosted-vs-cloud-native.md](cloud-hosted-vs-cloud-native.md) | Deployment models and cold-query root causes |

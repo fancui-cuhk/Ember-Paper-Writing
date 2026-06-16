@@ -1,5 +1,7 @@
 # Disk-Based ANN and Distributed ANN: A Survey of the Literature
 
+> **See also:** [read-amplification-disk-vector-search-survey.md](read-amplification-disk-vector-search-survey.md) — read amplification taxonomy, paper catalog, and RA vs request amplification on object storage.
+
 ---
 
 ## 1. Why Disk-Based ANN?
