@@ -14,7 +14,7 @@
 
 ---
 
-## Paper Summary（论文在做什么）
+## Paper Summary
 
 ### Problem & motivation
 
@@ -114,7 +114,7 @@ Other clouds (anonymized X, Y) show **lower** data latency (12–15 ms/MiB) in t
 
 ---
 
-## 与 Ember / 向量冷查询的关系
+## Relation to Ember / vector cold queries
 
 ### What this paper **does** support for Ember
 
@@ -141,19 +141,19 @@ Durner et al. show that **OLAP on S3 can saturate 100 Gbit/s** with **hundreds o
 
 ---
 
-## 与近期讨论的对照
+## Comparison with recent discussions
 
-| 我们讨论中的说法 | 论文支持？ |
-|------------------|------------|
-| S3 高带宽需要大量并行 GET | **Yes** — F2, F4, ~200–250 requests for 100 Gbit/s |
-| 单次 GET ~几十–几百 MB/s，不是网卡上限 | **Yes** — ~50 MiB/s single-request, HDD analogy |
-| 8–16 MiB range 是 best practice | **Yes** — F3, OLAP cost model |
-| Milvus blog ~200–330 MB/s 与 “S3 很快” 不矛盾 | **Consistent** — aggregate with limited concurrency vs paper’s **maximized** experiment |
-| 向量冷查询 = 论文的 OLAP scan | **No** — different access pattern and SLO |
+| Claim in our discussions | Supported by paper? |
+|--------------------------|---------------------|
+| High S3 bandwidth needs many parallel GETs | **Yes** — F2, F4, ~200–250 requests for 100 Gbit/s |
+| Single GET ~ tens–hundreds of MB/s, not NIC line rate | **Yes** — ~50 MiB/s single-request, HDD analogy |
+| 8–16 MiB range is best practice | **Yes** — F3, OLAP cost model |
+| Milvus blog ~200–330 MB/s vs. “S3 is fast” not contradictory | **Consistent** — limited concurrency vs. paper’s maximized experiment |
+| Vector cold query = this paper’s OLAP scan | **No** — different access pattern and SLO |
 
 ---
 
-## 论文写作用途
+## Use in the paper
 
 | Section | Suggested use |
 |---------|----------------|

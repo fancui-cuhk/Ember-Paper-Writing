@@ -2,29 +2,29 @@
 
 #### General comments
 
-- 主题是什么？东西太多了，没有环绕主题来写。
-    - 有两个主题：一个是表格，一个是后面的tail latency vs cost的图，到底是想要突出哪一个？围绕哪个来写的？
-- 现有的很多东西，比如architecture diagram，其实不需要放到introduction里面。
-    - 铺垫太多了，细节太多了。
-- 花了太多精神比较cloud-hosted和cloud-native，特别是cloud-hosted，没必要讲那么多。讲故事来带过就行了。
-- 快快进入重点：tail latency问题，分析，前人做了什么，哪里没做好？他们怎么做的？有没有什么漏掉的地方？
-- 我们说前人不好只是简单说它们tail latency不好，简单的分析：cache miss就是慢！不要深入分析，把深入分析放到后面！
-    - 就坚持这个方向！cache miss是最关键的，其他的放旁边。
-- 大概这样的思路：pushdown概念上可以变快，但是！大家不要以为这个这么简单，还是有很多challenges。
+- What is the **central theme**? Too much material; the draft does not orbit one theme.
+    - Two competing focal points: the opening table vs. the tail latency vs. cost figure—which one is primary?
+- Many elements (e.g., architecture diagram) do **not** belong in the introduction.
+    - Too much setup; too much detail upfront.
+- Spent too much effort comparing cloud-hosted vs. cloud-native—especially cloud-hosted. **Brief narrative pass** is enough.
+- Get to the point quickly: **tail latency**—analysis, what prior work did, what they missed, how they did it, what opportunities remain.
+- When criticizing prior work, keep it simple: **tail latency is bad because cache miss is slow**. Save deep analysis for later sections.
+    - Stay on this line: **cache miss is the root cause**; everything else is secondary.
+- Overall arc: pushdown can help in principle, but it is **not trivial**—there are real challenges.
 
 #### Detailed comments
 
 - whole index loading is NOT a good naming!
-- 可能不需要最开始的table？
-- 简单化architecture diagram: current diagram tells one thing -- disaggregation, and that is well-known already.
-- be clear: our architecture is based on hard disk drive (HDD).
-- 目前的想法：保留系统的布局。走到核心的道理之后：开宗明义要讲diskann。
-    - diskann designed for ssd. bad on hdd. so we design sth new.
-    - we get information from the upper compute layer, how to use this information?
-        - runtime下层看着上层调节？额外的信息，偷看
-        - runtime上层通知下层调节？额外的信息，主动给
-        - 不需要runtime偷看或主动给，我们直接设计好了，二者可以高效协作。
-    - 这里的重点是：不要让别人攻击为什么不卖成单独的hddann？
+- Maybe drop the opening table?
+- Simplify architecture diagram: current version only says disaggregation, which is already well known.
+- Be clear: our architecture targets **hard disk drive (HDD)**.
+- Current plan: keep the system layout. Once the core argument is set, **open with DiskANN**:
+    - DiskANN was designed for SSD; it is bad on HDD → we need something new.
+    - We receive information from the upper compute layer—how to use it?
+        - Runtime: lower layer observes upper layer and adapts? (extra info, “peeking”)
+        - Runtime: upper layer notifies lower layer? (extra info, explicit signal)
+        - **Preferred:** no peeking or explicit runtime signaling—co-design so layers collaborate efficiently by construction.
+    - Key defense: avoid the attack “why not publish standalone HDD-ANN?”
 
 #### Sell a system or an ann algorithm?
 - since our main contribution is hddann, we can name our paper as: "hddann" e.g., "emberann".
@@ -32,25 +32,25 @@
     - system as a whole i like it, but nothing special, only contribution is hddann.
 - things we need to consider:
     - do we have other optimizations apart from hddann? on system level, beyond hddann?
-    - 不要挂羊头卖狗肉！
-    - 这个hddann有没有利用整个系统的信息？即，系统给我们送下来的workload有没有给我们的hddann一些信息？
-- 如果我们卖系统，big picture上和system斗，ablation和diskann斗。
+    - Do not bait-and-switch (system paper that is really only an ANN algorithm, or the reverse).
+    - Does HDD-ANN use **whole-system information**—i.e., does workload context from the system inform the index?
+- If we sell a **system**, compete at the system level; use ablations to compete against DiskANN.
 - or, on a FAST angle: vector search performance on HDD vs. SSD.
 
 #### New storyline
 
-- vector database上云，有两种：cloud-hosted和cloud-native，推崇后者。
-- 什么是cloud-native？
-- cloud-native SOTA是什么？有什么问题？
-- 问题就是high tail latency!
-    - 没有必要quote pinecone和milvus的结果，那是他们实验的结果，放在一起不好比较。
+- Vector DB on cloud: two models—**cloud-hosted** vs. **cloud-native**; we advocate the latter.
+- What is cloud-native?
+- What is cloud-native SOTA? What is wrong with it?
+- The problem is **high tail latency**.
+    - No need to quote Pinecone/Milvus numbers side by side—they are from different experimental setups.
 - So, why high tail latency?
     - **cold start query == cache miss**!
     - cache miss is definitely slow, everyone knows about that. so RC1 is actually cache miss.
-    - cache miss是核心的problem -- root cause.
-- But, when solving the cache miss problem, what are the challenges?
-    - 现有系统在解这个问题的时候，有哪些approach？各个approach有什么问题？他们有没有漏哪些opportunities？
-    - 总之，要回答的问题是：前人做了什么？为啥没做好？
+    - **Cache miss is the root cause.**
+- But, when solving cache miss, what are the challenges?
+    - What approaches do existing systems take? What is wrong with each? What opportunities did they miss?
+    - Core question: **what did prior work do, and why was it not enough?**
     - **actually, previous systems live with cache miss.**
 - our position: in this good cloud-native architecture, we solve the tail latency problem!
     - but, we better inform readers: we are not magicians, we cannot achieve better tail latency than cloud-hosted ones.
@@ -88,5 +88,5 @@
 
 #### Personal advice
 
-- 我想的太多，不要考虑那么多，就顺着一个思路写，稳住思路，不要被问题distract，写完再说。
+- Overthinking is the enemy: pick one storyline, stay on it, do not get distracted by side questions—finish the draft first.
 - make up experimental figures! don't be blocked on anything.

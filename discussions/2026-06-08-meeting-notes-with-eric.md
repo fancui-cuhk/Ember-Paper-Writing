@@ -42,7 +42,7 @@ this is a new flow:
     - replication?
 - at last, briefly talk about Ember, very brief.
 
-不是讲做了什么，是里面有什么research question，我们怎么解决的？
-不要只讲how，讲why，how。
+Do not lead with *what we built*—lead with **what research questions** the paper contains and **how we answer them**.
+Do not only explain *how*; explain **why**, then *how*.
 
 Fri: Intro + detailed experiment plan ready.

@@ -1,5 +1,7 @@
 # Distributed Vector Search Related Work and Commercial Systems
 
+> **See also:** [partition-sharding-vector-search-survey.md](partition-sharding-vector-search-survey.md) — partition/sharding survey organized by architectural pattern; each entry includes venue, PDF, abstract, understanding, hardware, and partitioning strategy.
+
 ## Scope
 
 This note organizes representative **distributed vector search** work into two lines: **distributed graph-based** systems and **distributed IVF / partition-based** systems. For each paper, it includes a PDF link, the abstract when available from the source accessed, and a technical summary focused on **hardware**, **target problem**, and **core techniques**.[cite:53][cite:59][cite:191][cite:75][cite:269]

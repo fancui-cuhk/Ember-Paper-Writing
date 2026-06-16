@@ -14,7 +14,7 @@
 
 ---
 
-## Paper Summary（论文在做什么）
+## Paper Summary
 
 ### Stated problem & positioning
 
@@ -135,22 +135,22 @@ From reader conclusion — **aligned with repo summaries**:
 
 ---
 
-## 作者阅读笔记（你的思考）
+## Author reading notes
 
-> 以下保留你的原始判断，并略作结构化，便于日后改写 Related Work。
+> Original judgments preserved below, lightly structured for Related Work drafting.
 
-1. **架构相似**：与我们一样采用 compute–storage disaggregation；上层 LDServer 存 IVFPQ，centroid 上建 HNSW 加速，这部分**常驻 LDServer**；压缩后的 posting list **主要在 LindormDFS**，LDServer 内存作 cache。  
-2. **同样存在冷启动与 tail 问题**：posting list 不在 LDServer 上则要拉 DFS → 高延迟；除非 LindormDFS 背后是**很便宜的高速介质**（SSD + RDMA），否则与 S3 类系统同族。  
-3. **IVF 路线一致，问题不同**：IVF 选型与我们相同，但**没有解决我们要解决的问题**（cold query / tail under disaggregation），而是把精力放在多模一体化、混合检索优化上。  
-4. **写作策略**：Related Work 中应作为 **“同架构、不同优化目标”** 的工业界代表，避免审稿人认为“阿里云已经做了 cloud-native vector”；同时诚实写出 **存储介质假设** 可能削弱其冷路径问题的程度。
+1. **Similar architecture:** Same compute–storage disaggregation as us; LDServer holds IVFPQ + HNSW on centroids (**always resident**); compressed posting lists live primarily on **LindormDFS**, with LDServer memory as cache.
+2. **Same cold-start / tail vulnerability:** If posting lists are not on LDServer, fetch from DFS → high latency—unless LindormDFS is backed by **cheap fast media** (SSD + RDMA), in which case it is less like S3-class systems.
+3. **Same IVF family, different problem:** IVF choice aligns with us, but the paper does **not** solve our target problem (cold query / tail under disaggregation); focus is multi-model integration and hybrid retrieval optimization.
+4. **Writing strategy:** Cite as **“same architecture, different optimization target”** among industrial systems—avoid implying Alibaba already solved cloud-native vector cold paths; state **storage media assumptions** honestly.
 
-### 已验证（2026-06-01 读全文后更新）
+### Verified (2026-06-01, full paper read)
 
-- [x] 论文是否报告 **cache miss** 下的延迟分位数？ → **❌ 否**，假设 quantized vectors always in memory  
-- [x] LindormDFS 在论文实验中的 **具体介质** → **ESSD PL1** (50K IOPS, 350MB/s)，**非 S3**  
-- [x] Posting list 的 **粒度** → per-cluster posting lists，但 **assumed memory-resident**  
-- [x] 与 **scale-to-zero / 多租户冷 tenant** 相关的讨论？ → **❌ 无**，multi-tenant 优化针对 memory footprint  
-- [x] VectorDBBench 成绩条件 → **warm cache + ESSD**，未测试 cold start
+- [x] Does the paper report latency percentiles under **cache miss**? → **No** — assumes quantized vectors always in memory
+- [x] **Storage medium** in experiments → **ESSD PL1** (50K IOPS, 350 MB/s), **not S3**
+- [x] Posting list **granularity** → per-cluster lists, but **assumed memory-resident**
+- [x] **Scale-to-zero / cold multi-tenant** discussion? → **No** — multi-tenant work targets memory footprint
+- [x] VectorDBBench conditions → **warm cache + ESSD**, no cold-start test
 
 ---
 

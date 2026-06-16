@@ -13,7 +13,7 @@
 
 ---
 
-## Discussion要点
+## Discussion highlights
 
 ### A. Milvus blog terminology (load vs query)
 
