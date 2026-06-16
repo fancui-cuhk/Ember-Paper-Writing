@@ -1,0 +1,436 @@
+
+<html>
+<head>
+        <meta http-equiv="content-type" content="text/html; charset=unicode" />
+		<!--<meta name="robots" content="noindex, nofollow">-->
+		<title>Publications</title>
+        <link href="https://fonts.googleapis.com/css?family=Anton|Archivo+Black|Coda+Caption:800|Gothic+A1|Gruppo|Mandali|Montserrat|Nunito|Oxygen|Raleway&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Alatsi|Alfa+Slab+One|Archivo+Black|Bowlby+One+SC|Chonburi|Didact+Gothic|Fahkwang|Gruppo|Hind+Vadodara|Julius+Sans+One|Lalezar|Mandali|Manjari|Marmelad|Montserrat|Nunito|Open+Sans|Palanquin|Pavanam|Philosopher|Pontano+Sans|Prompt|Quattrocento+Sans|Questrial|Quicksand|Raleway|Roboto|Sarabun|Tajawal&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="../css/jianguo.css" type="text/css" media="screen" />
+</head>
+
+<body>
+
+<div>
+<center>
+	<table width = 900>
+	<tr>
+		<td>
+			<div id="pubs"><h1>Publications  of <a href = "https://www.cs.purdue.edu/homes/csjgwang/">Jianguo</a></h1></div>
+			
+			<br>
+			<hr width = 900>
+			<br>
+			<h2> 2026 </h2>
+			<ul>
+					<li id = "CIDR26_PostgreSQLV">
+						Jiayi Liu, Yunan Zhang, Chenzhe Jin, Aditya Gupta, Shige Liu, <b>Jianguo Wang</b>.<br>
+						<a href="https://cs.purdue.edu/homes/csjgwang/pubs/CIDR26_PostgreSQLVector.pdf">Fast Vector Search in PostgreSQL: A Decoupled Approach</a>.<br>
+						<i>Conference on Innovative Data Systems Research (<b>CIDR</b>)</i>, pages 2:1-8, 2026.
+					</li>
+					<br>
+					<li id="SIGMOD26_VecIdx">
+						Chenzhe Jin, Yunan Zhang, Jiayi Liu, <b>Jianguo Wang</b>.<br>
+						<a href="https://cs.purdue.edu/homes/csjgwang/pubs/SIGMOD26_HNSWMerger.pdf">Efficient Vector Index Merging in Vector Databases</a>.<br>
+						<i>Proceedings of ACM Conference on Management of Data (<b>SIGMOD</b>)</i>, pages 31:1-26, 2026.
+					</li>
+					<br>
+					
+					<li id="SIGMOD26_StorageDisaggregation">
+						Xi Pang, <b>Jianguo Wang</b>.<br>
+						<a href="https://cs.purdue.edu/homes/csjgwang/pubs/SIGMOD26_RaaS.pdf">Reducing Tail Latency in Storage-Disaggregated Database Systems</a>.<br>
+						<i>Proceedings of ACM Conference on Management of Data (<b>SIGMOD</b>)</i>, pages 74:1-26, 2026.
+					</li>
+					<br>
+					<li id="SIGMOD26_DisaggregatedART">
+						Bowen Zhang, Shengan Zheng, Shi Shu, Jingxiang Li, Zhenlin Qi, Weiquan Huang, <b>Jianguo Wang</b>, Linpeng Huang, Hong Mei.<br>
+						<a href="https://cs.purdue.edu/homes/csjgwang/pubs/SIGMOD26_DART.pdf">DART: A Lock-free Two-layer Hashed ART Index for Disaggregated Memory</a>.<br>
+						<i>Proceedings of ACM Conference on Management of Data (<b>SIGMOD</b>)</i>, pages 22:1-25, 2026.
+					</li>
+					<br>
+					<li id="SIGMOD26_O3LSM">
+						Qi Lin, Gangqi Huang, Te Guo, Chang Guo, Viraj Thakkar, Zichen Zhu, <b>Jianguo Wang</b>, Zhichao Cao.<br>
+						<a href="https://cs.purdue.edu/homes/csjgwang/pubs/SIGMOD26_O3LSM.pdf">O3-LSM: Maximizing Disaggregated LSM Write Performance via Three-Layer Offloading</a>.<br>
+						<i>Proceedings of ACM Conference on Management of Data (<b>SIGMOD</b>)</i>, pages 216:1-27, 2026.
+					</li>
+					<br>
+					<li>
+						Sikang Sun, Chuqing Gao, Shreya Ballijepalli, <b>Jianguo Wang</b>.<br>
+						<a href="https://cs.purdue.edu/homes/csjgwang/pubs/VLDBJ26_BtreeCompression.pdf">An Evaluation of B-tree Compression Techniques</a>.<br>
+						<i>Very Large Data Base Journal (<b>VLDBJ</b>)</i>, 35(1), 2026.
+					</li>
+					<br>
+					<li>
+						Shige Liu, Songting Chen, Chengjie Qin, Mingxi Wu, <b>Jianguo Wang</b>.<br>
+						<a href="https://arxiv.org/abs/2603.03705">GraphLake: A Purpose-Built Graph Compute Engine for Lakehouse</a>.<br>
+						<i><b>Arxiv</b></i>, 2026.
+					</li>
+
+			</ul>
+			
+			<h2> 2025 </h2>
+			<ul>
+					<li id = "VLDB25_SELCC">
+						Ruihong Wang, <b>Jianguo Wang</b>, Walid G. Aref.<br>
+						<a href="./VLDB25_SELCC.pdf">Cache Coherence Over Disaggregated Memory</a>.<br>
+						<i>Proceedings of Very Large Data Bases Conference (<b>VLDB</b>)</i>, pages 2978-2991, 2025.<br>
+						Winner of "<b>Best of VLDB 2025</b>".
+					</li>
+					<br>
+					<li id="TigerVector">
+						Shige Liu, Zhifang Zeng, Li Chen, Adil Ainihaer, Arun Ramasami, Songting Chen, Yu Xu, Mingxi Wu, <b>Jianguo Wang</b>.<br>
+						<a href="./SIGMOD25_TigerVector.pdf">TigerVector: Supporting Vector Search in Graph Databases for Advanced RAGs</a>.<br>
+						<i>Proceedings of ACM Conference on Management of Data (<b>SIGMOD</b>)</i>, pages 553-565, 2025.
+					</li>
+					<br>
+					<li>
+						Abdullah Al-Mamun, <b>Jianguo Wang</b>, Walid G. Aref.<br>
+						<a href="./SIGMOD25_LearntIndex.pdf">Learned Indexes From the One-dimensional to the Multi-dimensional Spaces: Challenges, Techniques, and Opportunities</a>.<br>
+						<i>Proceedings of ACM Conference on Management of Data (<b>SIGMOD</b>)</i>, Tutorial Track, pages 788-796, 2025.
+					</li>
+					<br>
+					<li>
+						Jiale Lao, Yibo Wang, Yufei Li, Jianping Wang, Yunjia Zhang, Zhiyuan Cheng, Wanghu Chen, Mingjie Tang, <b>Jianguo Wang</b>.<br>
+						<a href="https://sigmodrecord.org/publications/sigmodRecord/2503/pdfs/22_gptuner-lao.pdf">GPTuner: An LLM-Based Database Tuning System</a>.<br>
+						<i><b>SIGMOD Record</b></i>, 54(1), pages 101-110, 2025.
+					</li>
+					<br>
+					<li>
+						Jaewoo Shin, Libin Zhou, <b>Jianguo Wang</b>, Walid G. Aref.<br>
+						<a href="https://link.springer.com/article/10.1007/s00778-024-00876-7">An Update-intensive LSM-based R-tree Index</a>.<br>
+						<i>Very Large Data Base Journal (<b>VLDBJ</b>)</i>, 34(1), 2025.
+					</li>
+					<br>
+					<li>
+						Abdullah Al-Mamun, Hao Wu, Qiyang He, <b>Jianguo Wang</b>, Walid G. Aref.<br>
+						<a href="https://arxiv.org/abs/2403.06456">A Survey of Learned Indexes for the Multi-dimensional Space</a>.<br>
+						<i><b>ACM Computing Surveys (CSUR)</b></i>, 58(4), pages 96:1-37, 2025.
+					</li>
+					<br>
+					<li>
+						Abdullah Al-Mamun, Ch. Md. Rakin Haider, Jianguo Wang, Walid G. Aref.<br>
+						<a href="https://arxiv.org/abs/2502.09937">Tradeoffs in Processing Queries and Supporting Updates over an ML-Enhanced R-tree</a>.<br>
+						<i><b>Arxiv</b></i>, 2025.
+					</li>
+					
+			</ul>
+
+			<h2> 2024 </h2>
+			<ul>
+					<li id = "VLDB24_VecDB_Panel">
+						<b>Jianguo Wang</b>, Eric Hanson, Guoliang Li, Yannis Papakonstantinou, Harsha Simhadri, Charles Xie.<br>
+						<a href="https://cs.purdue.edu/homes/csjgwang/pubs/VLDB2024_Panel.pdf">Vector Databases: What's Really New and What's Next?</a>.<br>
+						<i>Proceedings of Very Large Data Bases Conference (<b>VLDB</b>)</i>, pages 4505-4506, 2024.
+					</li>
+					<br>
+					<li id="ICDE24_VecDB">
+						Yunan Zhang, Shige Liu, <b>Jianguo Wang</b>.<br>
+						<a href="./ICDE24_VecDB.pdf">Are There Fundamental Limitations in Supporting Vector Data Management in Relational Databases? A Case Study of PostgreSQL</a>.<br>
+						<i>Proceedings of International Conference on Data Engineering (<b>ICDE</b>)</i>, pages 3640-3653, 2024.
+					</li>
+					<br>
+					<li id = "Aurora_Forwarding_Patent">
+						Dhruva Chakrabarti, Atrayee Mullick, Damien Katz, Saraswathy Narayan, <b>Jianguo Wang</b>, Huawei Wang, Alexandre Verbitski, Tengiz Kharatishvili, Yingjie He, Gopi Attaluri.<br>
+						<a href="https://patents.google.com/patent/US12007954B1">Selective Forwarding for Multi-statement Database Transactions</a>.<br>
+						<i><b>United States Patent</b></i>, US12007954B1, 2024.
+					</li>
+					<br>
+					<li id="SIGMOD24_OpenAurora">
+						Xi Pang, <b>Jianguo Wang</b>.<br>
+						<a href="./SIGMOD24_OpenAurora.pdf">Understanding the Performance Implications of the Design Principles in Storage-Disaggregated Databases</a>.<br>
+						<i>Proceedings of ACM Conference on Management of Data (<b>SIGMOD</b>)</i>, pages 180:1-26, 2024.
+					</li>
+					<br>
+					<li id="SIGMOD24_CaaSLSM">
+						Qiaolin Yu, Chang Guo, Jay Zhuang, Viraj Thakkar, <b>Jianguo Wang</b>, Zhichao Cao.<br>
+						<a href="./SIGMOD24_CaaSLSM.pdf">CaaS-LSM: Compaction-as-a-Service for LSM-based Key-Value Stores in Storage-Disaggregated Infrastructure</a>.<br>
+						<i>Proceedings of ACM Conference on Management of Data (<b>SIGMOD</b>)</i>, pages 124:1-28, 2024.
+					</li>
+					<br>
+					<li id = "SIGMOD24_Vexless">
+						Yongye Su, Yinqi Sun, Minjia Zhang, <b>Jianguo Wang</b>.<br>
+						<a href="./SIGMOD24_Vexless.pdf">Vexless: A Serverless Vector Data Management System Using Cloud Functions</a>.<br>
+						<i>Proceedings of ACM Conference on Management of Data (<b>SIGMOD</b>)</i>, pages 187:1-26, 2024.
+					</li>
+					<br>
+					<li id = "SIGMOD24_BtreeCompression">
+						Chuqing Gao, Shreya Ballijepalli, <b>Jianguo Wang</b>.<br>
+						<a href="./SIGMOD24_BtreeCompression.pdf">Revisiting B-tree Compression: An Experimental Study</a>.<br>
+						<i>Proceedings of ACM Conference on Management of Data (<b>SIGMOD</b>)</i>, pages 169:1-25, 2024.
+					</li>
+					<br>
+					<li id = "SIGMOD24_VecDB_Tutorial">
+						James Pan, <b>Jianguo Wang</b>, Guoliang Li.<br>
+						<a href="./SIGMOD24_VecDB_Tutorial.pdf">Vector Database Management Techniques and Systems</a>.<br>
+						<i>Proceedings of ACM Conference on Management of Data (<b>SIGMOD</b>)</i>, Tutorial Track, pages 597-604, 2024.
+					</li>
+					<br>
+					<li id = "SIGMOD24_Demo">
+						Jiale Lao, Yibo Wang, Yufei Li, Jianping Wang, Yunjia Zhang, Zhiyuan Cheng, Wanghu Chen, Yuanchun Zhou, Mingjie Tang, <b>Jianguo Wang</b>.<br>
+						<a href="./SIGMOD24_GPTuner_Demo.pdf">A Demonstration of GPTuner: A GPT-Based Manual-Reading Database Tuning System</a>.<br>
+						<i>Proceedings of ACM Conference on Management of Data (<b>SIGMOD</b>)</i>, Demo Track, pages 504-507, 2024.
+					</li>
+					<br>
+					<li id = "VLDB24_SingleStoreV">
+						Cheng Chen, Chenzhe Jin, Yunan Zhang, Sasha Podolsky, Chun Wu, Szu-Po Wang, Eric Hanson, Zhou Sun, Robert Walzer, <b>Jianguo Wang</b>.<br>
+						<a href="https://cs.purdue.edu/homes/csjgwang/pubs/VLDB24_SingleStoreVec.pdf">SingleStore-V: An Integrated Vector Database System in SingleStore</a>.<br>
+						<i>Proceedings of Very Large Data Bases Conference (<b>VLDB</b>)</i>,  pages 3772-3785, 2024.
+					</li>
+					<br>
+					<li>
+						Xinyu Chen, Jiannan Tian, Ian Beaver, Cynthia Freeman, Yan Yan, <b>Jianguo Wang</b>, Dingwen Tao.<br>
+						<a href="https://www.vldb.org/pvldb/vol17/p1418-tao.pdf">FCBench: Cross-Domain Benchmarking of Lossless Compression for Floating-point Data</a>.<br>
+						<i>Proceedings of Very Large Data Bases Conference (<b>VLDB</b>)</i>, pages 1418-1431, 2024.
+					</li>
+					<br>
+					<li>
+						Jiale Lao, Yibo Wang, Yufei Li, Jianping Wang, Yunjia Zhang, Zhiyuan Cheng, Wanghu Chen, Mingjie Tang, <b>Jianguo Wang</b>.<br>
+						<a href="https://vldb.org/pvldb/vol17/p1939-tang.pdf">GPTuner: A Manual-Reading Database Tuning System via GPT-Guided Bayesian Optimization</a>.<br>
+						<i>Proceedings of Very Large Data Bases Conference (<b>VLDB</b>)</i>, pages 1939-1952, 2024.<br>
+						Winner of <b><a href="https://sigmodrecord.org/publications/sigmodRecord/2503/pdfs/02_editor_notes.pdf">2024 ACM SIGMOD Research Highlight Award</a></b>.
+					</li>
+					<br>
+					<li id = "VLDBJ24_dLSM">
+						Ruihong Wang, Chuqing Gao, <b>Jianguo Wang</b>, Prishita Kadam, M. Tamer Ozsu, Walid G. Aref.<br>
+						<a href="./VLDBJ24_dLSM.pdf">Optimizing LSM-based Indexes for Disaggregated Memory</a>.<br>
+						<i>Very Large Data Base Journal (<b>VLDBJ</b>)</i>, 33(6), pages 1813–1836, 2024.
+					</li>
+					<br>
+					<li>
+						James Jie Pan, <b>Jianguo Wang</b>, Guoliang Li.<br>
+						<a href="https://arxiv.org/pdf/2310.14021.pdf">Survey of Vector Database Management Systems</a>.<br>
+						<i>Very Large Data Base Journal (<b>VLDBJ</b>)</i>, 33(5), pages 1591–1615, 2024.
+					</li>
+					
+
+					<!--<br>
+					<li>
+						Yao Lu, Song Bian, Lequn Chen, Yongjun He, Yulong Hui, Matthew Lentz, Beibin Li, Fei Liu, Jialin Li, Qi Liu, Rui Liu, Xiaoxuan Liu, Lin Ma, Kexin Rong, <b>Jianguo Wang</b>, Yingjun Wu, Yongji Wu, Huanchen Zhang, Minjia Zhang, Qizhen Zhang, Tianyi Zhou, Danyang Zhuo.<br>
+						<a href="https://arxiv.org/abs/2401.12230">Computing in the Era of Large Generative Models: From Cloud-Native to AI-Native</a>.<br>
+						<i><b>Arxiv</b></i>, 2024.
+					</li>-->
+			</ul>
+			
+			<h2> 2023 </h2>
+				<ul>
+					<li>
+						Ruihong Wang, <b>Jianguo Wang</b>, Stratos Idreos, M. Tamer Ozsu, Walid G. Aref.<br>
+						<a href="https://www.vldb.org/pvldb/vol16/p15-wang.pdf">The Case for Distributed Shared-Memory Databases with RDMA-Enabled Memory Disaggregation</a>.<br>
+						<i>Proceedings of Very Large Data Bases Conference (<b>VLDB</b>)</i>, pages 15-22, 2023.
+					</li>
+					<br>
+					<li>
+						<b>Jianguo Wang</b>, Qizhen Zhang.<br>
+						<a href="./SIGMOD23_Tutorial_DisaggregatedDB.pdf">Disaggregated Database Systems</a>.<br>
+						<i>Proceedings of ACM Conference on Management of Data (<b>SIGMOD</b>)</i>, <a href="https://2023.sigmod.org/sigmod_tutorials.shtml">Tutorial Track</a> (<a href="./SIGMOD23_DisaggregatedDB_Slides.pdf">slides</a>), pages 37-44, 2023.
+					</li>
+					<br>
+					<li>
+						Ruihong Wang, <b>Jianguo Wang</b>, Prishita Kadam, M. Tamer Ozsu, Walid G. Aref.<br>
+						<a href = "./ICDE23_dLSM.pdf">dLSM: An LSM-Based Index for Memory Disaggregation</a>.<br>
+						<i>Proceedings of International Conference on Data Engineering (<b>ICDE</b>)</i>, pages 2835-2849, 2023.
+					</li>
+					<br>
+					<li>
+						Haoteng Yin, Muhan Zhang, <b>Jianguo Wang</b>, Pan Li.<br>
+						<a href = "https://arxiv.org/pdf/2303.03379.pdf">SUREL+: Moving from Walks to Sets for Scalable Subgraph-based Graph Representation Learning</a>.<br>
+						<i>Proceedings of Very Large Data Bases Conference (<b>VLDB</b>)</i>, 2023.
+					</li>
+					<br>
+					<li>
+						Jaewoo Shin, <b>Jianguo Wang</b>, Walid G. Aref.<br>
+						<a href="https://arxiv.org/abs/2305.01087">An Update-intensive LSM-based R-tree Index</a>.<br>
+						<i><b>Arxiv</b></i>, 2023.
+					</li>
+				</ul>
+			
+			<h2> 2022 </h2>
+				<ul>				
+					<li>
+						Walid G. Aref, Ahmed M. Aly, Anas Daghistani, Yeasir Rayhan, <b>Jianguo Wang</b>, Libin Zhou.<br>
+						<a href="https://arxiv.org/pdf/2206.09520.pdf">ILX: Intelligent "Location+X" Data Systems</a>.<br>
+						<i><b>Arxiv</b></i>, 2022.
+					</li>
+					<br>
+					
+					<li>
+						Haoteng Yin, Muhan Zhang, Yanbang Wang, <b>Jianguo Wang</b>, Pan Li.<br>
+						<a href="https://www.vldb.org/pvldb/vol15/p2788-yin.pdf">Algorithm and System Co-design for Efficient Subgraph-based Graph Representation Learning</a>.<br>
+						<i>Proceedings of Very Large Data Bases Conference (<b>VLDB</b>)</i>, pages 2788-2796, 2022.
+					</li>
+					<br>
+					<li>
+						Lu Xing, Eric Lee, Tong An, Bo-Cheng Chu, Ahmed Mahmood, Ahmed M. Aly, <b>Jianguo Wang</b>, Walid G. Aref.<br>
+						<a href="./VLDB22_Rtree.pdf">An Experimental Evaluation and Investigation of Waves of Misery in R-trees</a>.<br>
+						<i>Proceedings of Very Large Data Bases Conference (<b>VLDB</b>)</i>, pages 478-490, 2022.
+					</li>
+					<br>
+					<li>
+						Abdullah Al Mamun, Chowdhury Mohammad Rakin Haider, <b>Jianguo Wang</b>, Walid G. Aref.<br>
+						<a href="./MDM22_AITree.pdf">The AI+R Tree: An Instance-Optimized R-tree</a>.<br>
+						<i>Proceedings of International Conference on Mobile Data Management (<b>MDM</b>)</i>, pages 9-18, 2022.
+					</li>
+				</ul>
+
+			<h2> 2021 </h2>
+				<ul>
+					<li>
+						<b>Jianguo Wang</b>, Xiaomeng Yi, Rentong Guo, Hai Jin, Peng Xu, Shengjun Li, Xiangyu Wang, Xiangzhou Guo, Chengming Li, Xiaohai Xu, Kun Yu, Yuxing Yuan, Yinghao Zou, Jiquan Long, Yudong Cai, Zhenxiang Li, Zhifeng Zhang, Yihua Mo, Jun Gu, Ruiyi Jiang, Yi Wei, Charles Xie.<br>
+						<a href="./SIGMOD21_Milvus.pdf">Milvus: A Purpose-Built Vector Data Management System</a>.<br>
+						<i>Proceedings of ACM Conference on Management of Data (<b>SIGMOD</b>)</i>, pages 2614-2627, 2021.
+					</li>
+					
+					<br>
+					
+					<li>
+						Jaewoo Shin, <b>Jianguo Wang</b>, Walid G. Aref.<br>
+						<a href="./ICDE21_LSM.pdf">The LSM RUM-Tree: A Log Structured Merge R-Tree for Update-intensive Spatial Workloads</a>.<br>
+						<i>Proceedings of International Conference on Data Engineering (<b>ICDE</b>)</i>, pages 2285-2290, 2021.
+					</li>
+					
+					<br>
+					
+					<li>
+						<b>Jianguo Wang</b>, Chunbin Lin, Yannis Papakonstantinou, Steven Swanson.<br>
+						<a href="./ICDE21_SSD.pdf">Evaluating List Intersection on SSDs for Parallel I/O Skipping</a>.<br>
+						<i>Proceedings of International Conference on Data Engineering (<b>ICDE</b>)</i>, pages 1823-1828, 2021.
+					</li>
+					<br>
+					<li>
+						Yuliang Li, <b>Jianguo Wang</b>, Benjamin Pullman, Nuno Bandeira, Yannis Papakonstantinou.<br>
+						<a href = "./TOCS20_Index.pdf">Index-based High-dimensional Cosine Threshold Querying with Optimality Guarantees</a>.<br>
+						<i>Theory of Computing Systems (<b>ToCS</b>)</i>, 65(1): 42-83, 2021.<br>
+						<b><a href="https://link.springer.com/article/10.1007/s00224-020-10006-9">Special issue on database theory</a>, collecting the bests of ICDT 2019</b>.
+					</li>
+			</ul>
+
+		<h2> 2020 and before </h2>
+
+				<ul>
+					
+					<li>
+						Yuliang Li, <b>Jianguo Wang</b>, Benjamin Pullman, Nuno Bandeira, Yannis Papakonstantinou.<br>
+						<a href = "./ICDT19_Vector.pdf">Index-based High-dimensional Cosine Threshold Querying with Optimality Guarantees</a>.<br>
+						<i>Proceedings of International Conference on Database Theory (<b>ICDT</b>)</i>, pages 11:1-11:20, 2019.<br>
+						<b>Bests of ICDT 2019, invited to ToCS special issue on database theory</b>.
+					</li>
+
+					<br>
+					
+					<li>
+						Yang Liu, <b>Jianguo Wang</b>, Steven Swanson.<br>
+						<a href = "./PPoPP18_Search.pdf">Griffin: Uniting CPU and GPU in Information Retrieval Systems for Intra-Query Parallelism</a>.<br>
+						<i>Proceedings of ACM Symposium on Principles and Practice of Parallel Programming (<b>PPoPP</b>)</i>, pages 327-337, 2018.
+					</li>
+
+					<br>
+					
+					<li>
+						Chunbin Lin, Jiaheng Lu, Zhewei Wei, <b>Jianguo Wang</b>, Xiaokui Xiao.<br>
+						<a href = "./VLDBJ18_TopK.pdf">Optimal Algorithms for Selecting Top-k Combinations of Attributes: Theory and Applications</a>.<br>
+						<i>Very Large Data Base Journal (<b>VLDBJ</b>)</i>, 27(1): 27-52, 2018.
+					</li>
+					
+					<br>
+					
+					<li>
+						<b>Jianguo Wang</b>, Chunbin Lin, Yannis Papakonstantinou, Steven Swanson.<br>
+						<a href = "./SIGMOD17-Bitmap.pdf">An Experimental Study of Bitmap Compression vs. Inverted List Compression</a>.<br>
+						<i>Proceedings of ACM Conference on Management of Data (<b>SIGMOD</b>)</i>, pages 993-1008, 2017.
+					</li>
+
+					<br>
+					
+					<li>
+						<b>Jianguo Wang</b>, Chunbin Lin, Ruining He, Moojin Chae, Yannis Papakonstantinou, Steven Swanson.<br>
+						<a href = "http://www.vldb.org/pvldb/vol10/p853-wang.pdf">MILC: Inverted List Compression in Memory</a>.<br>
+						<i>Proceedings of Very Large Data Bases Conference (<b>VLDB</b>)</i>, pages 853-864, 2017.
+					</li>
+					
+					
+					<br>
+					
+                    <li>
+						Chuitian Rong, Chunbin Lin, Yasin Silva, <b>Jianguo Wang</b>, Wei Lu, Xiaoyong Du.<br>
+						<a href = "./ICDE17_SimJoin.pdf">Fast and Scalable Distributed Set Similarity Joins for Big Data Analytics</a>.<br>
+						<i>Proceedings of International Conference on Data Engineering (<b>ICDE</b>)</i>, pages 1059-1070, 2017.
+					</li>
+                    
+					
+					<br>
+	
+					<li>
+						Chunbin Lin, <b>Jianguo Wang</b>, Yannis Papakonstantinou.<br>
+						<a href = "https://ieeexplore.ieee.org/document/7930086">GQFast: Fast Graph Exploration with Context-aware Autocompletion</a>.<br>
+						<i>Proceedings of International Conference on Data Engineering (<b>ICDE</b>)</i>, pages 1389-1390, 2017.
+					</li>
+					
+					<!--
+					<br>
+					
+					
+					<li>
+						Chunbin Lin, <b>Jianguo Wang</b>.<br>
+						SpiderX: Fast XML Exploration System.<br>
+						<i>Proceedings of International World Wide Web Conference (WWW)</i>, 2017.
+					</li>
+					-->
+					<br>
+					
+					<li>
+						Chunbin Lin, <b>Jianguo Wang</b>, Jiaheng Lu.<br>
+						<a href = "./WWW17_AutoComplete.pdf">Location-sensitive Query Auto-completion</a>.<br>
+						<i>Proceedings of International World Wide Web Conference (<b>WWW</b>)</i>, pages 819-820, 2017.
+					</li>
+                    					
+					<br>
+
+					<li>
+						<b>Jianguo Wang</b>, Dongchul Park, Yang-Suk Kee, Yannis Papakonstantinou, Steven Swanson.<br>
+						<a href = "./DaMoN16_SmartSSD.pdf">SSD In-Storage Computing for List Intersection</a>.<br>
+						<i>Proceedings of International Workshop on Data Management on New Hardware (<b>DaMoN@SIGMOD</b>), affiliated with SIGMOD</i>, pages 4:1-4:7, 2016.
+					</li>
+					
+					<br>
+					
+					<li>
+						Ruining He, Chunbin Lin, <b>Jianguo Wang</b>, Julian McAuley.<br>
+						<a href = "./IJCAI16_Sherlock.pdf">Sherlock: Sparse Hierarchical Embeddings for Visually-aware One-class Collaborative Filtering</a>.<br>
+						<i>Proceedings of International Joint Conference on Artificial Intelligence (<b>IJCAI</b>)</i>, pages 3740-3746, 2016.
+					</li>
+					
+					<br>
+					
+					<li>
+						<b>Jianguo Wang</b>, Eric Lo, Man Lung Yiu, Jiancong Tong, Gang Wang, Xiaoguang Liu.<br>
+						<a href = "./TOIS14_SSDWebCache.pdf">Cache Design of SSD-Based Search Engine Architectures: An Experimental Study</a>.<br>
+						<i>ACM Transactions on Information Systems (<b>TOIS</b>)</i>, 32(4): 1-26, 2014.
+					</li>
+					
+					<br>
+		
+		
+					<li>
+						<b>Jianguo Wang</b>, Eric Lo, Man Lung Yiu, Jiancong Tong, Gang Wang, Xiaoguang Liu.<br>
+						<a href = "./SIGIR13_SSDWebCache.pdf">The Impact of Solid State Drive on Search Engine Cache Management</a>.<br>
+						<i>Proceedings of ACM Conference on Research and Development in Information Retrieval (<b>SIGIR</b>)</i>, pages 693-702, 2013.
+					</li>
+					
+					<br>
+					
+					<li>
+						<b>Jianguo Wang</b>, Eric Lo, Man Lung Yiu. <br>
+						<a href = "./TKDE13_KMCV.pdf">Identifying the Most Connected Vertices in Hidden Bipartite Graphs using Group Testing</a>.<br>
+						<i>IEEE Transactions on Knowledge and Data Engineering (<b>TKDE</b>)</i>, 25(10): 2245-2256, 2013.<br>
+						<!--<a href="http://www.computer.org/cms/Computer.org/dl/trans/tk/5555/01/extras/ttk2012990116s.pdf">Online appendix</a><br/>-->
+					</li>
+					
+				</ul>
+		</td>
+	</tr>
+	</table>
+</center>
+</div>
+</body>
+</html>
+

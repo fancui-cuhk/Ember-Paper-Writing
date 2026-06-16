@@ -11,13 +11,17 @@ User requested:
 2. **All English**
 3. Per paper: **title, PDF link, abstract, understanding (problem + technique)**, plus hardware / partitioning / rationale
 
-Survey restructured into sections by **architectural pattern**:
-- A. Partition-first (IVF / LSH / geometric / block)
-- B. Graph-first with shard-local indexes
-- C. Global / logical graph across machines
-- D. Adaptive / dynamic partitioning
-- E. Foundational (IVF-PQ)
-- F. Industry systems
+Survey restructured into **three partitioning layers** (see summary overview):
+
+1. Data partition → independent index per shard
+2. Single logical index, externally sharded across nodes
+3. Partition-intrinsic indexes (IVF / LSH / tree)
+
+Plus **§4** cross-cutting analysis on IVF centroid spatial proximity for external sharding.
+
+**Superseded:** prior four-way split (partition-first / graph-first+shard-local / global graph / adaptive).
+
+See `discussions/2026-06-16-partition-survey-taxonomy-abstract-fix.md` for details.
 
 ## Open
 
