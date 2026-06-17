@@ -53,4 +53,6 @@
 ## 2026-06-17 (sec4 PDF folder)
 
 - Moved §4 paper PDFs to `related-work/pdfs/sec4/`; updated survey + manifest links.
+
+**Superseded (2026-06-17):** folder is now `spatial-related/`; see `2026-06-17-harmony-sec4-removal-pdf-folders.md`.
 - Deleted corrupted HTML masquerading as `andrade-sabes-sbac-pad-2020.pdf`.

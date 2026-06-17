@@ -8,6 +8,7 @@
 | **Authors** | Yan Wang, Jian Zhou, Sai Huang, Chao Dou, Hanwen Tian, Zhijie Jiang, Zongning Zhang, Xiaoqi Li, Zhencan Peng, Chunhui Shen, Wei Zhang, Feifei Li, Dong Deng (Alibaba Cloud / affiliations per SIGMOD listing) |
 | **Venue** | ACM SIGMOD 2026 — Industry Track (accepted) |
 | **DOI** | [10.1145/3788853](https://dl.acm.org/doi/10.1145/3788853) |
+| **PDF in repo** | [`pdfs/read-amp-related/lindormvector-sigmod2026.pdf`](pdfs/read-amp-related/lindormvector-sigmod2026.pdf) · also [`pdfs/spatial-related/lindormvector-sigmod2026.pdf`](pdfs/spatial-related/lindormvector-sigmod2026.pdf) |
 | **Read date** | 2026-05-28 |
 
 > **Update (2026-06-01)**: Full PDF has been parsed. Key correction: paper's experiments use **ESSD PL1 block storage** (350MB/s, 50K IOPS), not S3/object storage. Cold query / tail latency under cache miss is **not evaluated** — quantized vectors are assumed memory-resident.

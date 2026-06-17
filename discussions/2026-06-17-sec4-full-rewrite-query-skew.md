@@ -45,3 +45,7 @@ All §4 downloaded PDFs moved to `related-work/pdfs/sec4/` (11 files). SABES, Di
 ## Relation to prior discussions
 
 - Supersedes §4 structure in `2026-06-17-partition-survey-sec4-sabes-table-fix.md` for content (PDF folder move retained)
+
+## 2026-06-17 (follow-up)
+
+- Folder renamed `sec4/` → `spatial-related/`; HARMONY removed from §4 (see `2026-06-17-harmony-sec4-removal-pdf-folders.md`).
