@@ -20,7 +20,7 @@
 
 **Existing (7):** SABES, SABBS/SABBSR, Distributed LSH, ADBV, GaussDB-Vector, CoTra, Vexless
 
-**Added (7):** SPIRE, VStream, Unleashing Graph Partitioning, RED-ANNS, HARMONY, Quake (single-node NUMA — access-skew reference), LindormVector (industry, PDF N/A)
+**Added (6):** SPIRE, VStream, Unleashing Graph Partitioning, RED-ANNS, HARMONY, LindormVector (industry, PDF N/A). Quake was initially included as §4 access-skew reference — **removed 2026-06-17** (NUMA affinity ≠ spatial colocation; see `2026-06-17-quake-removed-from-sec4-numa-not-spatial.md`).
 
 ## Key finding — query-load / hot-region handling
 

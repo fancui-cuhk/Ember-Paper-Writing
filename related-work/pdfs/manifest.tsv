@@ -46,7 +46,7 @@ NaviX: A Native Vector Index Design for Graph DBMSs With Robust Predicate-Agnost
 OctopusANN: I/O Optimizations for Graph-Based Disk-Resident ANN (Design Space Exploration)	https://www.vldb.org/pvldb/vol19/p1484-li.pdf	related-work/pdfs/octopusann.pdf	ok (1476904 bytes)
 PageANN: Scalable Disk-Based ANN with Page-Aligned Graph	https://arxiv.org/pdf/2509.25487.pdf	related-work/pdfs/pageann.pdf	ok (1622930 bytes)
 DiskANN: Fast Accurate Billion-point Nearest Neighbor Search on a Single Node	https://proceedings.neurips.cc/paper/2019/file/09853c7fb1d3f8ee67a61b6bf4a7f8e6-Paper.pdf	related-work/pdfs/diskann.pdf	ok (1972220 bytes)
-Quake: Adaptive Indexing for Vector Search	https://www.usenix.org/system/files/osdi25-mohoney.pdf	related-work/pdfs/spatial-related/quake.pdf	ok (1449125 bytes)
+Quake: Adaptive Indexing for Vector Search	https://www.usenix.org/system/files/osdi25-mohoney.pdf	related-work/pdfs/quake.pdf	ok (1449125 bytes)
 Ada-IVF: Incremental IVF Index Maintenance for Streaming Vector Search	https://arxiv.org/pdf/2411.00970.pdf	related-work/pdfs/ada-ivf.pdf	ok (2288355 bytes)
 FreshDiskANN: A Fast and Accurate Graph-Based ANN Index for Streaming Similarity Search	https://arxiv.org/pdf/2105.09613.pdf	related-work/pdfs/freshdiskann.pdf	ok (1300909 bytes)
 Product Quantization for Nearest Neighbor Search (IVF-PQ)	https://inria.hal.science/inria-00514462/document	related-work/pdfs/product-quantization-for-nearest-neighbor-search.pdf	ok (12534 bytes)

@@ -850,14 +850,13 @@ Partitioning here is **inside the index**, not an external systems-layer shard. 
 
 - **Category:** 3
 - **Deployment scope:** Single-node (NUMA)
-- **Local PDF:** [`spatial-related/quake.pdf`](../related-work/pdfs/spatial-related/quake.pdf)
-- **§4 centroid-locality:** covered in §4 (single-node access-skew; see §4.3)
+- **Local PDF:** [`quake.pdf`](../related-work/pdfs/quake.pdf)
 - **Venue:** OSDI 2025
 - **PDF:** [USENIX](https://www.usenix.org/system/files/osdi25-mohoney.pdf)
 - **Abstract:** Existing ANNS indexes struggle under dynamic, skewed workloads. Quake uses multi-level partitioning adapted via a latency cost model and recall-estimation model to set execution parameters, plus NUMA-aware intra-query parallelism. On dynamic workloads it cuts query latency 1.5–38× and update latency 4.5–126× vs. SVS, DiskANN, HNSW, and ScaNN.
 - **Understanding**
   - **Problem:** Static k-means IVF partitions become imbalanced under skewed access; fixed nprobe fails as partitions change.
-  - **Technique:** **Adaptive hierarchical k-means** with cost-model-driven split/merge; **Adaptive Partition Scanning (APS)** sets nprobe online from recall estimates; NUMA-aware parallel scan.
+  - **Technique:** **Adaptive hierarchical k-means** with cost-model-driven split/merge; **Adaptive Partition Scanning (APS)** sets nprobe online from recall estimates; **NUMA-aware** partition-to-socket placement + affinity scheduling (not spatial cluster colocation — see §4.6).
 - **Hardware:** Single-node NUMA multi-core
 - **Partitioning / Sharding:** **Dynamic k-means IVF** hierarchy
 - **Rationale:** Partitions track workload skew; APS avoids offline nprobe tuning
@@ -963,7 +962,6 @@ It answers one systems question:
 | **VStream** | PVLDB 2025 | Multi tiered | Memory + local + remote disk | **LSH hash → space-filling curve (Z/Hilbert)** | Neighboring vectors same partition; query hits **limited nearby partitions** only | Range filter on 1D curve encoding | **Explicit:** streaming **distribution shift** causes load imbalance → **Dynamic Partitioning Templates** rebalance partition boundaries on workload |
 | **Unleashing Graph Partitioning** | PVLDB 2025 | Multi shard HNSW | In-memory | **Graph partition** + **k-means centers (kRt)** or **LSH (hRt)** for routing | Graph METIS cut preserves neighbor locality; modular routing sends query to **few near shards** | kRt: nearest k-means centers; hRt: LSH buckets | **Not addressed** — balanced **graph** partition; routing reduces shards touched but hot query regions still hit same centers |
 | **RED-ANNS** | PVLDB 2026 | Multi RDMA | Disaggregated memory graph | **Locality-aware vector placement** preserving GPS graph | Keep graph edges local; affinity scheduling | **Affinity-based** query assignment to node owning query-near vectors | **Explicit:** **work-stealing** when query assignment imbalanced; eval includes **OOD** workloads; trade-off: stealing vs. locality loss |
-| **Quake** | OSDI 2025 | **Single-node** NUMA | In-memory hierarchical IVF | **Multi-level k-means centroids** | Co-locate partitions on **local NUMA node** to cut remote memory access | Top-down nearest-centroid scan + **APS** adaptive nprobe | **Explicit:** **dynamic skewed access patterns** (popular items get more queries) → **split/merge partitions** by cost model; closest analog to **shifting hot regions** on one machine |
 | **LindormVector** | SIGMOD 2026 Industry | Multi | Memory + SSD KV | **k-means IVFPQ** lists aligned to Lindorm **shard/range** | Posting lists co-located with KV shard boundaries | Shard/range routing from Lindorm | **Not discussed** in available materials |
 
 ---
@@ -976,7 +974,7 @@ It answers one systems question:
    - **DES / hash all-shard probe:** every node runs local search **in parallel**, then the coordinator **merges** partial top-k. Latency is roughly **max(straggler node) + merge**, not zero — and **cluster work per query scales with P** (all nodes burn CPU/network even if wall-clock is parallel). SABES reports **14.5× vs DES @ 160 nodes** partly because touching all nodes is wasteful at scale.
    - **Subset routing (BES, SABES, ADBV):** only **some** nodes participate. **BES** spreads buckets evenly → probing **w** nearest buckets often means **up to w different nodes**. **SABES** colocates spatially neighboring buckets on the same node → the same **w** probes often hit **1–2 nodes**. Fan-out is still parallel, but you wait for **fewer** remote responses and merge **fewer** partial results. The win is **fewer nodes contacted + less merge/network**, not “sequential latency × w.”
 2. **Graph traversal locality:** DiskANN/HNSW hops land on **similar vectors**. Random sharding makes most hops remote (CoTra, RED-ANNS, SPIRE).
-3. **Economic argument:** Fewer nodes touched → less network bandwidth, less scatter-gather merge, better cache/NUMA behavior (Quake on single node).
+3. **Economic argument:** Fewer nodes touched → less network bandwidth, less scatter-gather merge, better cache behavior on multi-node paths.
 
 **The caveat (your concern — query skew / hot spatial regions):**
 
@@ -996,15 +994,15 @@ This is **different from partition-size balance** (equal vector count per k-mean
 | **Cap spatial colocation** | SABBS | Limit buckets/descriptors per node even if centroids want to group | **Partial** — static data cap, not query-rate |
 | **Weight by query frequency** | **SABBSR** | Bucket relevance = size × **how often bucket is probed** | **Yes, explicitly** — only §4 paper with probe-frequency in placement objective |
 | **Dynamic repartition on drift** | **VStream** | Dynamic Partitioning Templates when stream distribution shifts | **Partial** — data drift, not necessarily query hotspot drift |
-| **Adaptive partition split/merge on access** | **Quake** | APS + split/merge when partitions skewed by **access patterns** | **Yes** — but single-node NUMA, not cluster |
+| **Adaptive partition split/merge on access** | **Quake** (§3, not §4) | APS + split/merge when partitions skewed by **access patterns** | **Yes** — but single-node NUMA hardware locality, not centroid colocation |
 | **Work-stealing / elastic compute** | **RED-ANNS**, SPIRE (elastic QE) | Steal queries or scale stateless query engines | **Partial** — mitigates overload after assignment, does not reshuffle data |
 | **Replication at boundaries** | SPIRE, Distributed LSH | Replicate boundary vectors / hot Chord ranges | **Partial** — helps recall + read spread, duplicates storage |
 | **Route-only (no colocation of neighbors)** | ADBV, Vexless | Touch fewer nodes via centroid distance; neighbors may still scatter | **Does not solve** hot-node problem — may **reduce** blast radius (fewer nodes) but hot centroid region still hots those nodes |
 
 **Open research questions (barely touched in §4 literature):**
 
-1. **Query-trace-aware placement:** Only SABBSR and Quake incorporate access frequency into layout decisions. No cluster-scale system jointly optimizes **centroid colocation + query QPS caps + online reshuffle**.
-2. **Temporal hot spots:** Recommender-style **moving hot regions** — only VStream (data drift) and Quake (access skew) partially address; no §4 paper evaluates **query distribution shift** with spatial colocation held fixed.
+1. **Query-trace-aware placement:** Only **SABBSR** (§4) incorporates probe frequency into **spatial** placement; **Quake** (§3) splits/merges on access patterns but without cross-partition centroid colocation. No cluster-scale system jointly optimizes **centroid colocation + query QPS caps + online reshuffle**.
+2. **Temporal hot spots:** Recommender-style **moving hot regions** — **VStream** (data drift, §4) partially addresses; **Quake** (§3, access skew on one NUMA machine) is the closest single-node analog; no §4 paper evaluates **query distribution shift** with spatial colocation held fixed.
 3. **Colocation vs. replication trade-off:** When a region becomes hot, should we **split** the partition (lose colocation), **replicate** it (cost storage), or **elastic compute** only (RED-ANNS/SPIRE)?
 4. **Defense under colocation:** Why colocate despite skew? Papers argue **mean latency** and **network cost** dominate when probes are wide; they accept tail risk or add **secondary** balancing (SABBSR, work-stealing) rather than abandoning geometry.
 
@@ -1107,15 +1105,6 @@ This is **different from partition-size balance** (equal vector count per k-mean
 - **Why colocate:** Avoid MapReduce-style graph cuts; RDMA makes remote hops cheap but locality still wins vs random placement.
 - **Hot regions / imbalance:** **Explicit** — affinity can **imbalance query assignment** across nodes. **Work-stealing** module steals queries when load imbalance detected, trading **locality for balance**. Eval includes **in-distribution and OOD** query workloads. Closest cluster-graph analog to query-load rebalancing.
 
-#### Quake (OSDI 2025)
-
-- **PDF:** [USENIX](https://www.usenix.org/system/files/osdi25-mohoney.pdf) · **Local:** [`spatial-related/quake.pdf`](../related-work/pdfs/spatial-related/quake.pdf)
-- **Scope note:** **Single-node NUMA**, not multi-node cluster — included because it is the clearest treatment of **access-pattern skew vs spatial partitions**.
-- **Hardware:** Single server, **multi-level k-means IVF** in memory; **NUMA-aware** partition placement and scheduling.
-- **Geometry signal:** Partitions assigned to **NUMA nodes** by affinity; search prefers **local partitions** to cut remote memory latency.
-- **Why colocate:** Remote NUMA access dominates tail latency when partitions scatter randomly across sockets.
-- **Hot regions:** **Central problem** — Wikipedia-like **popular pages get disproportionate queries**; inserts also skew over time. **Adaptive split/merge** of partitions using cost + recall models; **APS** adapts nprobe online. **Directly addresses shifting hot regions** — but on **one machine**, not distributed shard migration.
-
 #### LindormVector (SIGMOD 2026 Industry)
 
 - **PDF:** [ACM](https://dl.acm.org/doi/pdf/10.1145/3788853.3803088) · **Local:** [`spatial-related/lindormvector-sigmod2026.pdf`](../related-work/pdfs/spatial-related/lindormvector-sigmod2026.pdf)
@@ -1144,6 +1133,7 @@ This is **different from partition-size balance** (equal vector count per k-mean
 | Auncel (NSDI 2023) | **Random uniform** shard placement; geometry only inside local ELP |
 | HAKES (PVLDB 2025) | Optional IVF-list/refine colocation — pipeline optimization, not cluster sharding |
 | HARMONY (SIGMOD 2025) | **Query-aware hybrid** vector vs. dimension partitioning per query (cost model); not placement-time centroid/bucket colocation — see §2 |
+| Quake (OSDI 2025) | **NUMA partition affinity** + access-skew split/merge (§3); top-down centroid scan is **search routing**, not colocating neighboring clusters for multi-probe — see §3 |
 | LEQAT (VLDBJ 2023) | Per-query nprobe knapsack on fixed partitions |
 | DistributedANN | Graph/KV **storage layout** for one global graph — not centroid/bucket colocation for probe locality |
 | Milvus / Weaviate / Qdrant | Hash sharding |
@@ -1281,6 +1271,7 @@ Industry entries use official docs/blogs instead of PDFs where no paper exists.
 | 2026-06-16 | Removed Faiss 1T wiki (not a Faiss feature). SPANN → category #3, single-node paper only. DistributedANN: added "When #2 beats #1" Bing-scale table |
 | 2026-06-17 | §4: split SABES vs SABBS/SABBSR with correct PDFs; removed hash/block baseline row; replaced vague colocation column with placement/routing table |
 | 2026-06-17 | §4 PDFs moved to `related-work/pdfs/spatial-related/`; in-doc links updated |
-| 2026-06-17 | §4 full rewrite: 13 papers, master table, query-skew subsection (§4.3), self-contained per-paper entries; added SPIRE, VStream, Unleashing GP, RED-ANNS, Quake, LindormVector |
+| 2026-06-17 | §4 full rewrite: 12 papers, master table, query-skew subsection (§4.3), self-contained per-paper entries; added SPIRE, VStream, Unleashing GP, RED-ANNS, LindormVector |
+| 2026-06-17 | Removed Quake from §4 (NUMA hardware affinity ≠ embedding-space cluster colocation); PDF in root `pdfs/` for §3 entry |
 | 2026-06-17 | Removed HARMONY from §4 (query-aware hybrid partitioning, not geometry-driven placement); PDF stays in root `pdfs/` for §2 entry |
 | 2026-06-17 | LindormVector PDF relocated (manual download) to `spatial-related/` and `read-amp-related/` |
