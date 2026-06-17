@@ -181,15 +181,6 @@ Commercial systems use three recurring patterns.
 
 These are not mutually exclusive. In practice, many systems support both HNSW and IVF, but their **distribution mechanism** is often still partition-first.[cite:116][cite:119][cite:113]
 
-### Faiss / distributed Faiss
-
-| Aspect | Findings |
-|---|---|
-| Distribution model | Faiss supports multi-node distribution by sharding the database across several indexes on different servers; the client aggregates results from different servers.[cite:278][cite:281] |
-| IVF vs HNSW | Faiss provides IVF and HNSW methods, but the multi-node examples and wiki pages strongly emphasize **sharded IVF** and merging indexes or querying shard-local indexes.[cite:278][cite:284][cite:37] |
-| Classification | **Distributed IVF** and **partition-then-build-index**.[cite:278][cite:281] |
-| Notes | Faiss can also merge sharded IVF indexes into an on-disk index with `OnDisk.merge_from`, which reinforces its shard-and-merge design.[cite:278] |
-
 ### Milvus
 
 | Aspect | Findings |
@@ -224,7 +215,7 @@ These are not mutually exclusive. In practice, many systems support both HNSW an
 | Distribution model | OpenSearch distributes data using standard **search shards** and allows vector fields to choose **HNSW** or **IVF** methods.[cite:119][cite:116] |
 | IVF vs HNSW | Both are supported in OpenSearch generally; AWS guidance even recommends different shard counts for HNSW and IVFPQ at billion scale.[cite:116][cite:109] |
 | Classification | Supports both **distributed HNSW** and **distributed IVF**, but operationally still follows **partition-then-build-index** on shards.[cite:119][cite:109][cite:116] |
-| Notes | OpenSearch Serverless vector collections support only **HNSW** with Faiss, not IVF.[cite:294][cite:301] |
+| Notes | OpenSearch Serverless vector collections support only **HNSW**, not IVF.[cite:294][cite:301] |
 
 ### Pinecone
 

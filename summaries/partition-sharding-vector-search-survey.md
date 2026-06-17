@@ -9,7 +9,7 @@ This note catalogs research papers and industry systems where **partitioning or 
 | Layer | What is partitioned | Why partition | Representative work |
 |-------|---------------------|---------------|---------------------|
 | **1. Data partition → independent index** | The **dataset** is split into shards/segments/slabs first; each shard gets its **own complete ANN index** (IVF, HNSW, DiskANN, …). | Scale beyond one node, write parallelism, tenant isolation, compaction units — **not** because the index algorithm requires it. | Milvus, Pinecone, Weaviate, Qdrant, VEARCH, Cosmos DB sharded DiskANN |
-| **2. Single logical index, externally sharded** | There is **one index** (one IVF inverted file, one graph, …) whose **internal structure is split across machines** for efficiency. | The index is too large for one node, but merging many independent indexes would hurt recall or routing quality. | DistributedANN, HARMONY, Faiss distributed IVF, SPANN (distributed posting dispatch), RED-ANNS |
+| **2. Single logical index, externally sharded** | There is **one index** (one IVF inverted file, one graph, …) whose **internal structure is split across machines** for efficiency. | The index is too large for one node; at extreme scale, **N independent indexes** have worse search-cost scaling and (for graphs) recall than one logical index. | DistributedANN, HARMONY, RED-ANNS, BatANN, CoTra |
 | **3. Partition-intrinsic index** | **Partitioning is part of the index algorithm** — IVF Voronoi cells, LSH buckets, k-means tree leaves. Required for search even on a single machine. | Algorithm design: prune search space by visiting only nearby partitions (nprobe buckets, tree branches). | IVF-PQ, SPANN/SPFresh (single-node IVF), LSH (SK-LSH, Multi-probe), ScaNN, CrackIVF, Quake |
 
 **Two families of "partition":**
@@ -19,7 +19,7 @@ This note catalogs research papers and industry systems where **partitioning or 
 | **Systems partition** (load distribution) | **#1 + #2** | Hash/range **sharding** in distributed OLTP | Spread **storage and compute** across nodes. Not required by the ANN algorithm. |
 | **Index partition** (search pruning) | **#3** | Inverted-list / B-tree **ranges inside an index** | **Algorithm requirement** (IVF nprobe, LSH buckets). Needed even on one machine. |
 
-**#1 vs #2** (both systems partition): **#1** builds **N independent indexes** (Milvus segment HNSW; scatter-gather). **#2** keeps **one logical index** split across nodes (DistributedANN; Faiss shared centroids + sharded lists). Same motivation (scale load); different recall/merge trade-offs.
+**#1 vs #2** (both systems partition): **#1** builds **N independent indexes** (Milvus segment HNSW; scatter-gather). **#2** keeps **one logical index** split across nodes (DistributedANN global graph on KV). Same motivation (scale load); different search-cost and recall trade-offs — see DistributedANN entry for when #2 wins at extreme scale.
 
 **#1/#2 vs #3:** Removing cluster sharding in #1/#2 still leaves valid indexes (possibly on one node). Removing coarse partitions in #3 breaks search.
 
@@ -34,7 +34,7 @@ This note catalogs research papers and industry systems where **partitioning or 
 | **Scale-out-ready layout** | Same unit becomes a cluster shard later | Weaviate/Milvus architecture |
 | **Build-time partition only** | Parallel index construction, not query routing | DiskANN k-means for parallel graph build |
 
-**Local PDFs:** Downloaded copies live in [`related-work/pdfs/`](../related-work/pdfs/) (see [`manifest.tsv`](../related-work/pdfs/manifest.tsv)). Entries mark **Local PDF** path or `NOT_DOWNLOADED` if fetch failed.
+**Local PDFs:** Downloaded copies live in [`related-work/pdfs/`](../related-work/pdfs/) (see [`manifest.tsv`](../related-work/pdfs/manifest.tsv)). **§4 papers** are under [`related-work/pdfs/sec4/`](../related-work/pdfs/sec4/). Entries mark **Local PDF** path or `NOT_DOWNLOADED` if fetch failed.
 
 **Abstract policy:** Abstracts marked *(from docs)* or *(from wiki)* are from product documentation. Paper abstracts from arXiv are verbatim via API. Remaining PVLDB/SIGMOD/USENIX entries may still need manual publisher-page verification.
 
@@ -67,7 +67,7 @@ Production vector DBs most often follow this pattern: hash/range/semantic **data
 
 - **Category:** 1
 - **Deployment scope:** Multi-node (serverless functions)
-- **Local PDF:** [`vexless.pdf`](../related-work/pdfs/vexless.pdf)
+- **Local PDF:** [`sec4/vexless.pdf`](../related-work/pdfs/sec4/vexless.pdf)
 - **§4 centroid-locality:** covered in §4 deep dive
 - **Venue:** SIGMOD 2024 (PACMMOD)
 - **PDF:** [NSF PAR](https://par.nsf.gov/servlets/purl/10570270)
@@ -102,7 +102,8 @@ Production vector DBs most often follow this pattern: hash/range/semantic **data
 
 - **Category:** 1
 - **Deployment scope:** Multi-node (distributed tiered storage)
-- **Local PDF:** [`vstream.pdf`](../related-work/pdfs/vstream.pdf)
+- **Local PDF:** [`sec4/vstream.pdf`](../related-work/pdfs/sec4/vstream.pdf)
+- **§4 centroid-locality:** covered in §4
 - **Venue:** PVLDB 2025
 - **PDF:** [PVLDB](https://www.vldb.org/pvldb/vol18/p1593-gao.pdf)
 - **Abstract:** Batch-oriented vector DBs fit poorly with streaming workloads. VStream provides a dynamic partitioner for shifting vector streams, hierarchical four-level storage with streaming state management, and hot–cold separation using access patterns. It improves query efficiency 251–373×, cuts CPU 2.2–2.5×, and memory 1.5–2.0× vs. existing systems.
@@ -153,7 +154,8 @@ Production vector DBs most often follow this pattern: hash/range/semantic **data
 
 - **Category:** 1
 - **Deployment scope:** Multi-node (shard-local HNSW)
-- **Local PDF:** [`unleashing-graph-partitioning-for-large-scale-near.pdf`](../related-work/pdfs/unleashing-graph-partitioning-for-large-scale-near.pdf)
+- **Local PDF:** [`sec4/unleashing-graph-partitioning-for-large-scale-near.pdf`](../related-work/pdfs/sec4/unleashing-graph-partitioning-for-large-scale-near.pdf)
+- **§4 centroid-locality:** covered in §4
 - **Venue:** PVLDB 2025
 - **PDF:** [PVLDB](https://www.vldb.org/pvldb/vol18/p1649-gottesbueren.pdf)
 - **Abstract:** Large-scale ANNS must partition points into neighborhood-preserving shards and route queries to few shards. This paper designs modular routing (clustering + LSH) usable with any partitioner, enabling balanced graph partitioning without a native routing algorithm. On billion-scale data the pipeline reaches up to 2.14× QPS at 90% recall@10 vs. best competitor.
@@ -210,7 +212,8 @@ These systems keep **one index abstraction** (one IVF posting namespace, one nav
 
 - **Category:** 2
 - **Deployment scope:** Multi-node (4-node eval)
-- **Local PDF:** [`harmony.pdf`](../related-work/pdfs/harmony.pdf)
+- **Local PDF:** [`sec4/harmony.pdf`](../related-work/pdfs/sec4/harmony.pdf)
+- **§4 centroid-locality:** covered in §4
 - **Venue:** SIGMOD 2025 (PACMMOD)
 - **PDF:** [MIT DSpace](https://dspace.mit.edu/bitstream/handle/1721.1/164256/3749167.pdf)
 - **Abstract:** Distributed ANNS suffers load imbalance and high communication from traditional partitioning. HARMONY combines vector-based and dimension-based multi-granularity partitioning to balance compute and cut communication, plus early-stop pruning exploiting monotonicity in dimension-based partitions. On real datasets it reaches 4.63× average throughput on four nodes and 58% gains on skewed workloads vs. leading distributed vector DBs.
@@ -244,7 +247,7 @@ These systems keep **one index abstraction** (one IVF posting namespace, one nav
 
 - **Category:** 2
 - **Deployment scope:** Multi-node (16-node eval); optional k-means data sharding
-- **Local PDF:** [`analyticdb-v.pdf`](../related-work/pdfs/analyticdb-v.pdf)
+- **Local PDF:** [`sec4/analyticdb-v.pdf`](../related-work/pdfs/sec4/analyticdb-v.pdf)
 - **§4 centroid-locality:** covered in §4 deep dive
 - **Venue:** PVLDB 2020
 - **PDF:** [PVLDB](http://www.vldb.org/pvldb/vol13/p3152-wei.pdf)
@@ -262,7 +265,7 @@ These systems keep **one index abstraction** (one IVF posting namespace, one nav
 
 - **Category:** 2
 - **Deployment scope:** Multi-node (distance-based DN sharding)
-- **Local PDF:** [`gaussdb-vector.pdf`](../related-work/pdfs/gaussdb-vector.pdf)
+- **Local PDF:** [`sec4/gaussdb-vector.pdf`](../related-work/pdfs/sec4/gaussdb-vector.pdf)
 - **§4 centroid-locality:** covered in §4 deep dive
 - **Venue:** PVLDB 2025
 - **PDF:** [PVLDB](https://www.vldb.org/pvldb/vol18/p4951-sun.pdf)
@@ -281,34 +284,32 @@ These systems keep **one index abstraction** (one IVF posting namespace, one nav
 - **Category:** 2
 - **Deployment scope:** Multi-node (IndexWorker + RefineWorker)
 - **Local PDF:** [`hakes.pdf`](../related-work/pdfs/hakes.pdf)
-- **§4 centroid-locality:** covered in §4 deep dive
 - **Venue:** PVLDB 2025
 - **PDF:** [PVLDB](https://www.vldb.org/pvldb/vol18/p3049-ooi.pdf)
 - **Abstract:** Graph indexes give low latency/high recall but build slowly, contend under concurrent reads/writes, and scale poorly. HAKES uses a two-stage filter (compressed vectors) + refine index with lightweight ML tuning and early termination, decouples learned-parameter management for writes, and serves it in a disaggregated distributed DB. It beats 12 index baselines and 3 distributed vector DBs, with up to 16× higher throughput.
 - **Understanding**
   - **Problem:** Pure graph indexes do not scale under concurrent updates; monolithic indexes cannot disaggregate filter vs. refine resources.
-  - **Technique:** **k-means IVF + PQ filter stage** on IndexWorkers; full vectors on RefineWorkers; sharding by vector ID or **by IVF assignment** to co-locate refine with probed lists.
+  - **Technique:** **k-means IVF + PQ filter stage** on IndexWorkers; full vectors on RefineWorkers; default sharding by vector ID (disaggregated filter/refine architecture).
 - **Hardware:** Distributed memory (IndexWorker / RefineWorker disaggregation)
-- **Partitioning / Sharding:** **k-means IVF + PQ** two-stage; optional **IVF-assignment sharding** for refine stage
-- **Rationale:** IVF filter is small and replicable; co-locating refine with IVF lists cuts network traffic
+- **Partitioning / Sharding:** **k-means IVF + PQ** two-stage; RefineWorker sharding by vector ID
+- **Rationale:** IVF filter is small and replicable; disaggregates filter vs. refine resources
 
 ---
 
 ### SPANN: Highly-efficient Billion-scale Approximate Nearest Neighbor Search
 
-- **Category:** 2, 3
-- **Deployment scope:** Single-node primary; multi-node Bing extension (§2 for dispatch, §3 for IVF)
+- **Category:** 3 only *(partition-intrinsic IVF — not a multi-node systems paper)*
+- **Deployment scope:** **Single-node only** in the NeurIPS 2021 paper (workstation + NVMe SSD). Distributed posting dispatch appears in Microsoft production write-ups but is **not evaluated in the paper** — do not cite SPANN as a distributed-systems result.
 - **Local PDF:** [`spann.pdf`](../related-work/pdfs/spann.pdf)
-- **§4 centroid-locality:** covered in §4 deep dive
 - **Venue:** NeurIPS 2021
 - **PDF:** [NeurIPS](https://papers.nips.cc/paper_files/paper/2021/file/299dc35e747eb77177d9cea10a802da2-Paper.pdf)
 - **Abstract:** Pure in-memory ANNS is expensive at billion scale; hybrid memory–SSD ANNS is needed. SPANN keeps centroids in memory and posting lists on disk, using hierarchical balanced clustering and query-aware posting pruning to cut disk accesses while keeping recall. It is 2× faster than DiskANN at 90% recall with same memory on three billion-scale datasets.
 - **Understanding**
-  - **Problem:** Disk-resident graph search (DiskANN) has sequential hop chains; billion-scale needs cheaper memory footprint with parallel I/O.
-  - **Technique:** **Hierarchical Balanced Clustering (HBC)** with bounded posting sizes, closure assignment (boundary duplication), query-aware dynamic nprobe; **M-way machine partition** of posting lists in Bing production (32→6.3 machines avg. per query).
-- **Hardware:** Single-node or 32-machine Bing cluster
-- **Partitioning / Sharding:** **HBC k-means clusters**; posting lists **sharded across machines**
-- **Rationale:** IVF postings fetch in parallel with no cross-machine hop dependencies—natural fit for distributed search
+  - **Problem:** Disk-resident graph search (DiskANN) has sequential hop chains; billion-scale needs cheaper memory footprint with parallel I/O on **one machine**.
+  - **Technique:** **Hierarchical Balanced Clustering (HBC)** with bounded posting sizes, **closure assignment** (boundary duplication), and **query-aware dynamic pruning** of which posting lists to read (IVF-style nprobe at posting granularity).
+- **Hardware:** Single-node workstation (~64–128 GB DRAM + NVMe SSD) — all paper benchmarks
+- **Partitioning / Sharding:** **HBC k-means clusters** + disk **posting lists**; pruning selects a subset of lists per query
+- **Rationale:** IVF postings enable parallel SSD reads without graph hop chains; category **#3** algorithm — systems sharding of postings across machines is a **separate engineering step**, not part of this paper's evaluation
 
 ---
 
@@ -316,15 +317,15 @@ These systems keep **one index abstraction** (one IVF posting namespace, one nav
 
 - **Category:** 2
 - **Deployment scope:** Multi-node (peer overlay)
-- **Local PDF:** NOT_DOWNLOADED (ACM 403)
+- **Local PDF:** `NOT_DOWNLOADED` → [`sec4/haghani-distributed-lsh-edbt-2009.pdf`](../related-work/pdfs/sec4/haghani-distributed-lsh-edbt-2009.pdf) (openproceedings mirror; use online PDF)
 - **§4 centroid-locality:** covered in §4 deep dive
 - **Venue:** EDBT 2009 (extends WebDB 2008 work; often cited in distributed LSH lineage)
-- **PDF:** [ACM](https://dl.acm.org/doi/pdf/10.1145/1516360.1516446)
+- **PDF:** [OpenProceedings](https://openproceedings.org/2009/conf/edbt/HaghaniMA09.pdf) · [ACM](https://dl.acm.org/doi/pdf/10.1145/1516360.1516446)
 - **Abstract:** We consider distributed KNN/range search in high dimensions using LSH. We map LSH buckets to a structured peer overlay with locality-preserving, load-balanced properties, enabling efficient incremental top-K KNN and range queries with fewer network hops. Real-world evaluations show major gains vs. state-of-the-art distributed similarity search.
 - **Understanding**
   - **Problem:** Centralized LSH does not scale; naive bucket-to-peer mapping causes hot spots and excessive hops.
-  - **Technique:** **LSH bucket → peer overlay mapping** that is locality-preserving (nearby buckets on neighboring peers) and load-balanced.
-- **Hardware:** Distributed peer cluster
+  - **Technique:** **ξ mapping** of LSH bucket labels to a linear peer ID space — nearby labels on adjacent Chord peers; **predicted label distribution** spreads buckets across peers; incremental ring forwarding or multi-probe bucket jumps at query time.
+- **Hardware:** **Multi-node P2P** cluster; bucket indexes **in memory** on peers (eval up to 1M global peers, 1k peers per local DHT)
 - **Partitioning / Sharding:** **LSH buckets** mapped to peers
 - **Rationale:** Colocating nearby buckets reduces peers visited per query vs. random assignment
 
@@ -334,7 +335,8 @@ These systems keep **one index abstraction** (one IVF posting namespace, one nav
 
 - **Category:** 2
 - **Deployment scope:** Multi-node (46 nodes)
-- **Local PDF:** [`spire.pdf`](../related-work/pdfs/spire.pdf)
+- **Local PDF:** [`sec4/spire.pdf`](../related-work/pdfs/sec4/spire.pdf)
+- **§4 centroid-locality:** covered in §4
 - **Venue:** arXiv (VecDB @ ICML 2025 workshop)
 - **PDF:** [arXiv](https://arxiv.org/pdf/2512.17264.pdf)
 - **Abstract:** Scaling Approximate Nearest Neighbor Search (ANNS) to billions of vectors requires distributed indexes that balance accuracy, latency, and throughput. Yet existing index designs struggle with this tradeoff. This paper presents SPIRE, a scalable vector index based on two design decisions. First, it identifies a balanced partition granularity that avoids read-cost explosion. Second, it introduces an accuracy-preserving recursive construction that builds a multi-level index with predictable search cost and stable accuracy. In experiments with up to 8 billion vectors across 46 nodes, SPIRE achieves high scalability and up to 9.64X higher throughput than state-of-the-art systems.
@@ -356,11 +358,24 @@ These systems keep **one index abstraction** (one IVF posting namespace, one nav
 - **PDF:** [arXiv](https://arxiv.org/pdf/2509.06046.pdf)
 - **Abstract:** We present DISTRIBUTEDANN, a distributed vector search service that makes it possible to search over a single 50 billion vector graph index spread across over a thousand machines that offers 26ms median query latency and processes over 100,000 queries per second. This is 6x more efficient than existing partitioning and routing strategies that route the vector query to a subset of partitions in a scale out vector search system. DISTRIBUTEDANN is built using two well-understood components: a distributed key-value store and an in-memory ANN index. DISTRIBUTEDANN has replaced conventional scale-out architectures for serving the Bing search engine, and we share our experience from making this transition.
 - **Understanding**
-  - **Problem:** Partition-and-route (IVF or hash shard + local graph) wastes work and loses recall vs. a true global graph at Bing scale.
-  - **Technique:** **Spatial/graph-aware partition** of vectors in KV storage + **single logical DiskANN graph** searched globally; in-memory head index on hot nodes.
+  - **Problem:** Partition-and-route (clustered shards + independent indexes) wastes work at **hundreds of billions** of vectors: empirically ~**P·log(|X|/P)** search cost vs. **log |X|** for one graph index, plus recall loss vs. their previous Bing production system.
+  - **Technique:** **Spatial/graph-aware partition** of vectors in KV storage + **single logical DiskANN graph** searched globally; in-memory **head index**; near-data scoring on KV hosts.
 - **Hardware:** 1000+ nodes; distributed KV + in-memory head index
-- **Partitioning / Sharding:** **Graph-aware storage partition** (not independent shard-local indexes)
-- **Rationale:** Keeps one navigable graph while spreading vectors across machines
+- **Partitioning / Sharding:** **Graph-aware storage layout** (not N independent shard-local graphs)
+- **Rationale:** One navigable graph at 50B+ scale; see **When #2 beats #1** below
+
+**When category #2 (one logical graph) beats category #1 (independent indexes) — Bing-scale characteristics:**
+
+| Factor | Why it pushes toward one global graph (DistributedANN) |
+|--------|--------------------------------------------------------|
+| **Corpus scale** | **50B–100B+** vectors on one unified retrieval index; fixed small partitions ⇒ **P is huge** ⇒ P·log(N/P) dominates |
+| **Single retrieval universe** | Web-scale **one index over all documents**, not per-tenant isolated shards; global kNN quality matters |
+| **Graph index family** | DiskANN beam search needs **cross-partition graph connectivity**; naive cut ⇒ recall drop (paper: +7.8 / +4.5 pp recall@5/@200 vs prior production) |
+| **Fixed partition size for failover** | Online systems use partitions **smaller than machine capacity** for fast replica bring-up ⇒ many partitions even if one machine could hold more |
+| **Throughput SLO** | Prior clustered partition-and-route left **6× headroom** on same footprint when switching to single logical graph |
+| **Storage substrate** | KV store as **shared logical disk** + near-data compute — architecture fits **one index layout**, not scatter-gather merge |
+
+**When #1 remains rational:** multi-tenant products (Milvus/Pinecone), **IVF with route-to-subset-of-shards** (not probe-all), smaller corpora, ingest/compaction isolation, HNSW-per-shard where global graph is impractical.
 
 ---
 
@@ -368,15 +383,15 @@ These systems keep **one index abstraction** (one IVF posting namespace, one nav
 
 - **Category:** 2
 - **Deployment scope:** Multi-node (8–16 machines)
-- **Local PDF:** [`cotra.pdf`](../related-work/pdfs/cotra.pdf)
+- **Local PDF:** [`sec4/cotra.pdf`](../related-work/pdfs/sec4/cotra.pdf)
 - **§4 centroid-locality:** covered in §4 deep dive
 - **Venue:** arXiv (SIGMOD 2026 listed on some mirrors)
 - **PDF:** [arXiv](https://arxiv.org/pdf/2507.06653.pdf)
 - **Abstract:** Similarity-based vector search facilitates many important applications such as search and recommendation but is limited by the memory capacity and bandwidth of a single machine due to large datasets and intensive data read. In this paper, we present CoTra, a system that scales up vector search for distributed execution. We observe a tension between computation and communication efficiency, which is the main challenge for good scalability, i.e., handling the local vectors on each machine independently blows up computation as the pruning power of vector index is not fully utilized, while running a global index over all machines introduces rich data dependencies and thus extensive communication. To resolve such tension, we leverage the fact that vector search is approximate in nature and robust to asynchronous execution. In particular, we run collaborative vector search over the machines with algorithm-system co-designs including clustering-based data partitioning to reduce communication, asynchronous execution to avoid communication stall, and task push to reduce network traffic. To make collaborative search efficient, we introduce a suite of system optimizations including task scheduling, communication batching, and storage format. We evaluate CoTra on real datasets and compare with four baselines. The results show that when using 16 machines, the query throughput of CoTra scales to 9.8-13.4x over a single machine and is 2.12-3.58x of the best-performing baseline at 0.95 recall@10.
 - **Understanding**
-  - **Problem:** Scatter-gather over many shard-local graphs adds communication; naive graph cuts hurt quality.
-  - **Technique:** **Balanced k-means** assigns vectors to machines + **holistic proximity graph** spanning partitions; RDMA for remote access; query focuses on near partitions.
-- **Hardware:** RDMA cluster
+  - **Problem:** Scatter-gather over shard-local graphs wastes work; a single global graph needs remote hops when vectors are randomly sharded.
+  - **Technique:** **Balanced k-means** colocates similar vectors on the same machine so **graph traversal** touches mostly local neighbors; **one global proximity graph** spans machines; **Co-Search + Pull-Push** over RDMA when hops cross partitions (no vector replication).
+- **Hardware:** **Multi-node RDMA cluster** (8–16 machines); vectors and graph adjacency **in memory**
 - **Partitioning / Sharding:** **Balanced k-means machine assignment** + global graph
 - **Rationale:** k-means placement concentrates query traffic; global graph avoids per-shard recall loss
 
@@ -386,7 +401,8 @@ These systems keep **one index abstraction** (one IVF posting namespace, one nav
 
 - **Category:** 2
 - **Deployment scope:** Multi-node (RDMA cluster)
-- **Local PDF:** [`red-anns.pdf`](../related-work/pdfs/red-anns.pdf)
+- **Local PDF:** [`sec4/red-anns.pdf`](../related-work/pdfs/sec4/red-anns.pdf)
+- **§4 centroid-locality:** covered in §4
 - **Venue:** PVLDB 2026
 - **PDF:** [Author copy](https://kay21s.github.io/RED-ANNS-VLDB2026.pdf)
 - **Abstract:** MapReduce-style graph sharding cuts indexing efficiency and adds overhead. RED-ANNS keeps a logically full graph in shared memory and searches via RDMA, using locality-aware placement, affinity scheduling, and dependency-relaxed best-first search to hide remote access cost. It is up to 2.5× faster than MapReduce-style approaches and 5.3× vs. open-source vector DBs.
@@ -481,25 +497,6 @@ These systems keep **one index abstraction** (one IVF posting namespace, one nav
 - **Hardware:** CXL memory pool + host DRAM cache
 - **Partitioning / Sharding:** **Column-wise embedding sharding** across expanders; graph node caching (not query routing shards)
 - **Rationale:** Dimension sharding uses all expander bandwidth; caching cuts far-memory graph hops
-
----
-
-### Faiss (distributed IVF)
-
-- **Category:** 2
-- **Deployment scope:** Multi-node (vertical slices + shared centroids)
-- **Local PDF:** [`faiss.pdf`](../related-work/pdfs/faiss.pdf)
-- **§4 centroid-locality:** covered in §4 deep dive
-- **Venue:** Open-source library / wiki
-- **PDF / Source:** [Indexing 1T vectors](https://github.com/facebookresearch/faiss/wiki/Indexing-1T-vectors) · [distributed_ondisk](https://github.com/facebookresearch/faiss/blob/main/benchs/distributed_ondisk/README.md)
-- **Abstract (from wiki):** Faiss shards billion-scale datasets by vertical slices, trains global IVF centroids, builds per-shard inverted lists on disk, and assigns nprobe list reads to worker nodes for merged search.
-- **Understanding**
-  - **Problem:** IVF index exceeds single-machine RAM/disk.
-  - **Technique:** **Vertical data slice per machine** + **shared k-means centroids** + on-disk inverted lists + client-side nprobe dispatch.
-- **Hardware:** Multi-node CPU + OnDiskInvertedLists
-- **Partitioning / Sharding:** **Vertical slice sharding** + **IVF lists** per shard
-- **Rationale:** De facto industrial pattern for distributed IVF
-
 
 ---
 
@@ -634,7 +631,6 @@ Partitioning here is **inside the index**, not an external systems-layer shard. 
 - **Category:** 3
 - **Deployment scope:** Single-node query optimization (not sharding)
 - **Local PDF:** [`leqat.pdf`](../related-work/pdfs/leqat.pdf)
-- **§4 centroid-locality:** covered in §4 deep dive
 - **Venue:** VLDB Journal 2023
 - **PDF:** [Springer](https://link.springer.com/article/10.1007/s00778-022-00762-0)
 - **Abstract:** Multi-probe ANNS often uses fixed per-query partition/search configs, yielding suboptimal accuracy–efficiency trade-offs. LEQAT formalizes per-query optimization as 0–1 knapsack using estimated kNN distribution over partitions, with an ML model plus efficient optimizers to pick partitions and per-partition search depth. Applied to IVF/HNSW/SSG under clustering-based partitioning, it cuts latency up to 58% and improves throughput up to 3.9×.
@@ -855,7 +851,8 @@ Partitioning here is **inside the index**, not an external systems-layer shard. 
 
 - **Category:** 3
 - **Deployment scope:** Single-node (NUMA)
-- **Local PDF:** [`quake.pdf`](../related-work/pdfs/quake.pdf)
+- **Local PDF:** [`sec4/quake.pdf`](../related-work/pdfs/sec4/quake.pdf)
+- **§4 centroid-locality:** covered in §4 (single-node access-skew; see §4.3)
 - **Venue:** OSDI 2025
 - **PDF:** [USENIX](https://www.usenix.org/system/files/osdi25-mohoney.pdf)
 - **Abstract:** Existing ANNS indexes struggle under dynamic, skewed workloads. Quake uses multi-level partitioning adapted via a latency cost model and recall-estimation model to set execution parameters, plus NUMA-aware intra-query parallelism. On dynamic workloads it cuts query latency 1.5–38× and update latency 4.5–126× vs. SVS, DiskANN, HNSW, and ScaNN.
@@ -915,142 +912,254 @@ Partitioning here is **inside the index**, not an external systems-layer shard. 
   - **Technique:** **k-means coarse quantizer (IVF)** partitions the space; **PQ** compresses vectors within partitions—inverted file lists per cluster.
 - **Hardware:** Single-node memory
 - **Partitioning / Sharding:** **k-means IVF** + PQ codes per partition
-- **Rationale:** Foundational partition primitive reused by SPANN, HAKES, C-SPANN, Faiss sharding, etc.
+- **Rationale:** Foundational partition primitive reused by SPANN, HAKES, C-SPANN, etc.
+
+---
+## 4. Centroid / Bucket / Vector Spatial Locality for Systems Partitioning
+
+**Local PDFs:** [`related-work/pdfs/sec4/`](../related-work/pdfs/sec4/) · [`sec4/README.md`](../related-work/pdfs/sec4/README.md)
+
+### 4.1 What this section is
+
+This section is a **self-contained catalog** of systems that use **geometry in embedding space** — cluster centroids, LSH bucket labels, k-means Voronoi cells, space-filling-curve order, or graph-neighborhood structure — to decide **where vectors/index state live** and/or **which nodes a query touches**.
+
+It answers one systems question:
+
+> *If ANN search naturally visits spatially nearby partitions (IVF nprobe, LSH multi-probe, graph hops to similar vectors), can we colocate those partitions on the same machine / nearby peer / same NUMA node to cut network hops?*
+
+**Included (§4):**
+
+- **Placement-time colocation** — assign buckets/clusters/vectors to nodes using spatial proximity (SABES, SPIRE, CoTra k-means, VStream curve encoding).
+- **Query-time centroid routing** — route each query only to partitions whose centroids/representatives are near the query (ADBV, GaussDB-Vector, Vexless, Unleashing kRt/hRt).
+- **Both** (most production-flavored designs).
+
+**Excluded (covered elsewhere in this survey):**
+
+| Pattern | Example | Why not §4 |
+|---------|---------|------------|
+| Hash / ID / block sharding | Milvus, Weaviate, serverless block paper | No embedding geometry |
+| Random uniform sharding | Auncel map-reduce workers | Geometry used inside local IVF, not for shard placement |
+| Filter/refine stage colocation only | HAKES RefineWorker IVF-assignment | Optimizes disaggregated pipeline, not cluster spatial sharding |
+| Query budget optimizers | LEQAT | Tunes nprobe on fixed partitions; no placement |
+| Pure graph-cut without routing geometry | Naive MapReduce graph shard | Partition cut ≠ centroid/bucket locality signal |
+
+**Not category #3:** Category #3 uses partitions to **prune search** on one machine. §4 uses geometry to **place or route across machines** (or NUMA domains).
+
+**Survey method:** All PDFs under `related-work/pdfs/` were text-scanned for spatial/locality/colocation/sharding keywords; seminal-venue candidates (SIGMOD, VLDB, OSDI, SOSP, NSDI, EDBT, SBAC-PAD, etc.) were cross-checked. Papers below passed manual abstract+method review for explicit geometry-driven placement or routing.
 
 ---
 
-## 4. Centroid / Bucket Spatial Proximity for Systems Partitioning
+### 4.2 Master table — all §4 papers
 
-**Core insight:** IVF clusters (and LSH buckets) have **centroids/representatives**. A query probes the **nprobe nearest** — those clusters tend to be **spatially adjacent** in vector space. That adjacency is a signal for **systems partition (#1/#2)**: colocate buckets/lists whose centroids are neighbors → fewer nodes touched per query.
-
-**This is not category #3:** #3 uses partitions to **prune search**. §4 uses partition **geometry** to decide **where data lives** on machines/disks.
-
-### Do all §4 papers use IVF?
-
-**No.** Three index backends appear:
-
-| Backend | Papers | Notes |
-|---------|--------|-------|
-| **IVF / IVFADC / k-means buckets** | SABES, ADBV, GaussDB-Vector, HAKES, SPANN (distributed), Vexless, Faiss distributed | Most common |
-| **LSH buckets** | Distributed LSH (EDBT 2009), SABES (also tested with IVFADC) | Bucket = hash region, not k-means centroid |
-| **Graph + k-means machine placement** | CoTra | k-means assigns **vectors to machines** for a **global graph** — not IVF routing |
-
-**LEQAT** uses IVF partition geometry for **query-time nprobe budgeting only** — no sharding/colocation.
-
-### Do all of them colocate spatially near clusters?
-
-**No.** Three placement policies:
-
-| Policy | Papers | Colocate adjacent centroids? |
-|--------|--------|---------------------------|
-| **Explicit spatial colocation** | SABES/SABBS, Distributed LSH | **Yes** — primary goal |
-| **Route query to near partitions only** | ADBV, GaussDB-Vector, Vexless, SPANN (query dispatch) | **Partial** — touch fewer nodes; data placement uses k-means/distances but not necessarily centroid-graph METIS |
-| **Colocate probed IVF lists with vectors** | HAKES (optional RefineWorker sharding) | **Yes**, for lists actually probed together |
-| **Similarity machine assignment (not centroid graph)** | CoTra | **Partial** — k-means on vectors; 73.8% accesses on hottest partition |
-| **No centroid colocation** | Faiss distributed IVF | **No** — vertical slice + shared centroids; nearby lists may sit on different nodes |
-| **Hash / block (baseline)** | Milvus, Weaviate, serverless block paper | **No** |
-
-### Per-paper deep dive (why they do it)
-
-#### SABES / SABBS / SABBSR (CBMR lineage; IVFADC buckets)
-
-- **Index:** IVFADC (IVF + product quantization) on billion-scale descriptors.
-- **Problem:** **DES** (split vectors evenly) forces all-node probes; **BES** (split buckets evenly) ignores that **nearby buckets are queried together**.
-- **Mechanism:** After indexing, assign buckets to nodes so **spatially close buckets** land on the **same node** (SABES). SABBS/SABBSR add **load caps** because pure spatial colocation skews bucket sizes.
-- **Why:** Queries probe multiple neighboring buckets → colocation cuts **inter-node traffic** (up to **14.5× vs DES** at 160 nodes in SBAC-PAD 2020 follow-on work).
-- **Colocate adjacent centroids?** **Yes**, explicitly.
-- **Local PDF:** PMC 2024 survey [`sabes-pmc-survey.pdf`](../related-work/pdfs/sabes-pmc-survey.pdf) ( cites original SABES SBAC-PAD 2020).
-
-#### AnalyticDB-V (ADBV)
-
-- **Index:** VGPQ / IVFPQ for ANNS; **sharding is separate** from index type.
-- **Mechanism (§3.3):** Optional **clustering-based partitioning** — k-means computes **256 centroids**; each vector assigned to nearest centroid → **data partition** on write nodes. Query optimizer dispatches to **N partitions with closest centroids** (Figure 5: partition pruning).
-- **Why:** Hash/range sharding fans out to **all nodes**; centroid routing reduces read nodes (512 partitions → **3** on Deep1B without recall loss in their eval).
-- **IVF?** Sharding uses **same k-means geometry as IVF**, but for **data placement**, not inverted lists. Index inside each partition is still VGPQ.
-- **Colocate adjacent centroids?** **Route-only** — partitions exist per cluster; paper does not METIS-colocate neighboring cluster partitions onto same node, but **query only hits near partitions**.
-
-#### GaussDB-Vector
-
-- **Index:** Two-layer k-means **IVF** + separate Vamana graph path.
-- **Mechanism:** **Distance-based data sharding** — split dataset into k clusters by distance; vectors assigned to DNs by centroid proximity. Query routing sends search to **clusters whose centroids are near the query**; extends selection to clusters within **max distance among already-selected centroids** (handles boundary queries).
-- **Why:** Avoid fan-out to all DNs; improve throughput when queries are local in embedding space.
-- **Colocate adjacent centroids?** **Yes for storage placement** by distance; routing reinforces locality.
-
-#### HAKES
-
-- **Index:** **IVF + PQ filter** (IndexWorker) + full vectors (RefineWorker).
-- **Mechanism:** Default RefineWorker sharding by **vector ID**. Optional **IVF-assignment sharding**: full vectors stored on the node that owns that **IVF list**.
-- **Why:** After filter stage identifies probed lists, refine fetches full vectors — colocation **avoids cross-network traffic** for those lists.
-- **Colocate adjacent centroids?** **Yes**, but only for **lists co-probed** on a query, not global centroid-graph partitioning.
-
-#### SPANN (distributed Bing production)
-
-- **Index:** Hierarchical balanced **IVF** postings + in-memory SPTAG over posting representatives.
-- **Mechanism:** (1) Many fine posting partitions → **bin-packed** into M machine bins using **query access history** (load balance). (2) **Query-aware dynamic pruning** dispatches query to **subset of machines** whose posting centroids are near query (32 machines → **6.3** avg in SPACEV1B).
-- **Why:** Cut **inter-machine CPU/IO** vs random partition or all-dispatch; bound tail latency via balanced postings.
-- **Colocate adjacent centroids?** **Partial** — pruning uses centroid distance at query time; offline packing optimizes **load + access frequency**, not pure spatial METIS on centroids.
-
-#### CoTra
-
-- **Index:** **Global proximity graph** (DiskANN-style), not IVF search.
-- **Mechanism:** **Balanced k-means** assigns vectors to machines. Query assigned to **primary partition** (most neighbor accesses); secondary partitions serve Pull-Push requests.
-- **Why:** 73.8% of accessed vectors on hottest partition — k-means improves **access locality** vs random shard; graph stays global for recall.
-- **IVF?** **No** for search. k-means is **vector-to-machine** assignment.
-- **Colocate adjacent centroids?** **No** — colocates **similar vectors**, not IVF centroid adjacency graph.
-
-#### Vexless
-
-- **Index:** Per-shard **IVF / LSH / HNSW** after **constrained k-means** data shard.
-- **Mechanism:** Orchestrator activates only **partitions whose centroids are within threshold** of query; constrained k-means ensures **memory-balanced** serverless functions.
-- **Why:** Serverless cost ∝ functions invoked; semantic shards + selective activation beat hash all-shard probe.
-- **Colocate adjacent centroids?** **Route-only** at query time; shards built by k-means similarity.
-
-#### Distributed LSH (EDBT 2009)
-
-- **Index:** LSH buckets (not IVF).
-- **Mechanism:** Map LSH buckets to **peer overlay** with **locality-preserving, load-balanced** properties — nearby buckets on neighboring peers.
-- **Why:** Incremental top-k KNN/range with **fewer network hops** than random bucket→peer mapping.
-- **Colocate adjacent centroids?** **Yes** (bucket locality in hash space).
-
-#### Faiss distributed IVF (1T vectors wiki)
-
-- **Index:** Global **shared k-means centroids**; inverted lists on disk per **vertical slice**.
-- **Mechanism:** Each machine holds a **subset of lists** from the global IVF — slice is by **machine assignment**, not centroid neighbor graph.
-- **Why:** Scale inverted files to disk/RAM limits; client dispatches nprobe list reads.
-- **Colocate adjacent centroids?** **No** — explicitly may scatter neighboring lists across nodes unless custom layout added.
-
-#### LEQAT (query optimization only)
-
-- **Uses IVF partition geometry** to estimate kNN distribution → **0–1 knapsack** for nprobe budget per partition.
-- **Not sharding** — optimizes **which existing partitions to search deeper** on a single deployment.
-
-### Summary for Ember
-
-| Question | Answer |
-|----------|--------|
-| All IVF? | **No** — LSH (Distributed LSH, SABES), graph+k-means (CoTra) also appear |
-| All colocate near centroids? | **No** — Faiss distributed and hash-sharded DBs do not; several **route-only** |
-| Strongest colocation signal | **SABES**, **Distributed LSH**, **HAKES IVF-assignment sharding** |
-| Production gap | Few systems **METIS-partition the nlist centroid k-NN graph** for shard placement; most use k-means assignment + query routing |
-
-### SABES / BES / DES: Spatial-Aware Distributed Bucket Partitioning (CBMR lineage)
-
-- **Category:** §4
-- **Deployment scope:** Multi-node (distributed memory CBMR)
-- **Local PDF:** [`sabes-pmc-survey.pdf`](../related-work/pdfs/sabes-pmc-survey.pdf) (PMC 2024 survey citing SABES SBAC-PAD 2020)
-- **§4 centroid-locality:** covered in §4 deep dive
-- **Venue:** Multimedia / CBMR literature (SABES extends BES; see e.g. PMC 2024 survey citing original SABES work)
-- **PDF:** [PMC survey (references SABES)](https://pmc.ncbi.nlm.nih.gov/articles/PMC11469379/)
-- **Abstract:** Distributed content-based multimedia retrieval compares **Data Equal Split (DES)**—even vector split across nodes requiring all-node probes—**Bucket Equal Split (BES)**—ANN algorithm buckets assigned to nodes—and **Spatial-Aware Bucket Equal Split (SABES)**, which colocates spatially nearby buckets on the same node so queries touch fewer nodes than BES.
-- **Understanding**
-  - **Problem:** DES probes every node; BES ignores spatial correlation between buckets on different nodes.
-  - **Technique:** After ANN indexing produces buckets (e.g., LSH/IVF buckets), **SABES** assigns buckets to nodes to maximize spatial locality while balancing load.
-- **Hardware:** Distributed memory cluster
-- **Partitioning / Sharding:** **ANN buckets → nodes** (BES); **spatially aware** bucket grouping (SABES)
-- **Rationale:** Queries probe nearby buckets; colocating those buckets on one node cuts inter-node traffic
+| Paper | Venue | Nodes | Storage | What geometry is used | Why colocate / route locally? | Query-time selection | **Query-load / hot-region handling** (not partition-size balance) |
+|-------|-------|-------|---------|----------------------|------------------------------|----------------------|---------------------------------------------------------------------|
+| **SABES** | SBAC-PAD 2020 | Multi (≤160) | In-memory IVFADC/LSH buckets | **Coarse centroid coordinates** | Co-probed IVF/LSH buckets tend to be spatial neighbors → same node cuts inter-node traffic | Probe **w** nearest bucket centroids → only those nodes | **Not addressed** — round-robin centroid groups; eval assumes uniform query load |
+| **SABBS / SABBSR** | Preprint 2024 | Multi (60) | In-memory IVFADC | Same + **bucket size**; SABBSR adds **probe frequency** | Same as SABES | Same as SABES | **SABBSR explicitly:** bucket **relevance = size × query frequency** when grouping centroids; caps per-node load. Closest §4 paper to **hot-bucket** skew |
+| **Distributed LSH** | EDBT 2009 | P2P (≤1M peers) | In-memory bucket indexes | **L1 distance between LSH bucket label vectors** | Nearby bucket labels hold similar points → adjacent Chord peers → fewer hops when probing neighbors | Ring neighbor forwarding or multi-probe bucket jumps | **Label-density** balancing across peers; dynamic local-DHT split; cites **hot-range replication** in Chord for access-hot arcs — not query-trace-driven |
+| **ADBV** | PVLDB 2020 | Multi (16 eval) | In-memory | **256 k-means sharding centroids** (separate from IVF nlist) | Hash sharding fans out to all nodes; nearest-centroid routing prunes partitions | Optimizer → **N partitions with closest centroids** | **Not addressed** — k-means balances **vector count**; no query-frequency rebalancing; hot queries still concentrate on same centroid-neighborhood partitions |
+| **GaussDB-Vector** | PVLDB 2025 | Multi prod | Memory + disk pages | **Two-layer k-means IVF centroids** | Avoid all-DN fan-out; locality in embedding space | Route to DNs for **nearby cluster centroids** + boundary expansion | **Not discussed** — production skew handling unclear from paper |
+| **CoTra** | SIGMOD 2026 / arXiv | Multi RDMA (8–16) | In-memory global graph | **Raw vector coordinates** (balanced k-means) | Graph traversal visits similar vectors → colocate to keep **~73.8%** of hops local | Query coordinator = partition with **most vectors this query will touch**; Pull-Push for remote hops | **Not addressed** — equal **vector count** per machine at build time; no query-rate-aware placement; hot query regions overload coordinator partition |
+| **Vexless** | SIGMOD 2024 | Serverless functions | ~1.5 GB RAM / function | **Constrained k-means shard centroids** | Semantic shards + activate only nearby centroids vs. all-shard probe | Orchestrator activates shards within **centroid distance threshold** | **Memory cap** per function, not query QPS skew; bursty/sparse eval, not shifting hot regions |
+| **SPIRE** | arXiv / VecDB 2025 | Multi (46, 8B vec) | Memory index + SSD vectors | **Hierarchical k-means** cluster centroids | Colocate neighboring clusters; hierarchical routing like IVF | Top-down **nearest centroid** descent level-by-level | **Mentions** mitigating **hot-spots under skewed workloads** via global partition IDs + boundary replication; **no query-trace rebalancer** in paper |
+| **VStream** | PVLDB 2025 | Multi tiered | Memory + local + remote disk | **LSH hash → space-filling curve (Z/Hilbert)** | Neighboring vectors same partition; query hits **limited nearby partitions** only | Range filter on 1D curve encoding | **Explicit:** streaming **distribution shift** causes load imbalance → **Dynamic Partitioning Templates** rebalance partition boundaries on workload |
+| **Unleashing Graph Partitioning** | PVLDB 2025 | Multi shard HNSW | In-memory | **Graph partition** + **k-means centers (kRt)** or **LSH (hRt)** for routing | Graph METIS cut preserves neighbor locality; modular routing sends query to **few near shards** | kRt: nearest k-means centers; hRt: LSH buckets | **Not addressed** — balanced **graph** partition; routing reduces shards touched but hot query regions still hit same centers |
+| **RED-ANNS** | PVLDB 2026 | Multi RDMA | Disaggregated memory graph | **Locality-aware vector placement** preserving GPS graph | Keep graph edges local; affinity scheduling | **Affinity-based** query assignment to node owning query-near vectors | **Explicit:** **work-stealing** when query assignment imbalanced; eval includes **OOD** workloads; trade-off: stealing vs. locality loss |
+| **HARMONY** | SIGMOD 2025 | Multi (4 eval) | In-memory | **k-means vector shards** + **dimension-based** shards | Vector shards preserve locality; dimension shards spread compute when vector shards hot | Cost model picks vector vs. dimension mode per query | **Explicit:** targets **skewed workloads** — hybrid mode when vector partitioning causes **hot shards**; 58% gain on skewed eval |
+| **Quake** | OSDI 2025 | **Single-node** NUMA | In-memory hierarchical IVF | **Multi-level k-means centroids** | Co-locate partitions on **local NUMA node** to cut remote memory access | Top-down nearest-centroid scan + **APS** adaptive nprobe | **Explicit:** **dynamic skewed access patterns** (popular items get more queries) → **split/merge partitions** by cost model; closest analog to **shifting hot regions** on one machine |
+| **LindormVector** | SIGMOD 2026 Industry | Multi | Memory + SSD KV | **k-means IVFPQ** lists aligned to Lindorm **shard/range** | Posting lists co-located with KV shard boundaries | Shard/range routing from Lindorm | **Not discussed** in available materials |
 
 ---
 
+### 4.3 Research question — why colocate if hot regions exist?
+
+**The benefit (why papers do it):**
+
+1. **Multi-probe structure:** IVF nprobe, LSH multi-probe, and hierarchical k-means routing visit **sets of nearby partitions/buckets**. Two different situations:
+   - **DES / hash all-shard probe:** every node runs local search **in parallel**, then the coordinator **merges** partial top-k. Latency is roughly **max(straggler node) + merge**, not zero — and **cluster work per query scales with P** (all nodes burn CPU/network even if wall-clock is parallel). SABES reports **14.5× vs DES @ 160 nodes** partly because touching all nodes is wasteful at scale.
+   - **Subset routing (BES, SABES, ADBV):** only **some** nodes participate. **BES** spreads buckets evenly → probing **w** nearest buckets often means **up to w different nodes**. **SABES** colocates spatially neighboring buckets on the same node → the same **w** probes often hit **1–2 nodes**. Fan-out is still parallel, but you wait for **fewer** remote responses and merge **fewer** partial results. The win is **fewer nodes contacted + less merge/network**, not “sequential latency × w.”
+2. **Graph traversal locality:** DiskANN/HNSW hops land on **similar vectors**. Random sharding makes most hops remote (CoTra, RED-ANNS, SPIRE).
+3. **Economic argument:** Fewer nodes touched → less network bandwidth, less scatter-gather merge, better cache/NUMA behavior (Quake on single node).
+
+**The caveat (your concern — query skew / hot spatial regions):**
+
+Colocation is a bet that **query-induced load correlates with partition geometry**:
+
+- Queries concentrated in a **popular embedding region** (recommender trends, viral content, seasonal catalog clusters) will hammer the **same centroids/shards** regardless of how evenly **vectors** were split.
+- **Shifting hot regions over time** (streaming drift, VStream) can obsolete a static spatial layout.
+- Colocation ** amplifies** this: the very nodes that should serve low-latency local probes become **tail-latency stragglers**.
+
+This is **different from partition-size balance** (equal vector count per k-means cluster). Most papers optimize **static data balance** or **storage balance**; fewer optimize **query-rate balance across space**.
+
+**How the literature responds (taxonomy):**
+
+| Strategy | Papers | Mechanism | Does it fix hot query regions? |
+|----------|--------|-----------|------------------------------|
+| **Ignore / assume uniform queries** | SABES, ADBV, CoTra, GaussDB, Unleashing | Eval on random/i.i.d. query sets | **No** — hot regions not modeled |
+| **Cap spatial colocation** | SABBS | Limit buckets/descriptors per node even if centroids want to group | **Partial** — static data cap, not query-rate |
+| **Weight by query frequency** | **SABBSR** | Bucket relevance = size × **how often bucket is probed** | **Yes, explicitly** — only §4 paper with probe-frequency in placement objective |
+| **Dynamic repartition on drift** | **VStream** | Dynamic Partitioning Templates when stream distribution shifts | **Partial** — data drift, not necessarily query hotspot drift |
+| **Adaptive partition split/merge on access** | **Quake** | APS + split/merge when partitions skewed by **access patterns** | **Yes** — but single-node NUMA, not cluster |
+| **Hybrid placement modes** | **HARMONY** | Switch to dimension-sharding when vector shards hot | **Partial** — compute rebalance, sacrifices pure spatial locality |
+| **Work-stealing / elastic compute** | **RED-ANNS**, SPIRE (elastic QE) | Steal queries or scale stateless query engines | **Partial** — mitigates overload after assignment, does not reshuffle data |
+| **Replication at boundaries** | SPIRE, Distributed LSH | Replicate boundary vectors / hot Chord ranges | **Partial** — helps recall + read spread, duplicates storage |
+| **Route-only (no colocation of neighbors)** | ADBV, Vexless | Touch fewer nodes via centroid distance; neighbors may still scatter | **Does not solve** hot-node problem — may **reduce** blast radius (fewer nodes) but hot centroid region still hots those nodes |
+
+**Open research questions (barely touched in §4 literature):**
+
+1. **Query-trace-aware placement:** Only SABBSR and Quake incorporate access frequency into layout decisions. No cluster-scale system jointly optimizes **centroid colocation + query QPS caps + online reshuffle**.
+2. **Temporal hot spots:** Recommender-style **moving hot regions** — only VStream (data drift) and Quake (access skew) partially address; no §4 paper evaluates **query distribution shift** with spatial colocation held fixed.
+3. **Colocation vs. replication trade-off:** When a region becomes hot, should we **split** the partition (lose colocation), **replicate** it (cost storage), or **elastic compute** only (RED-ANNS/SPIRE)?
+4. **Defense under colocation:** Why colocate despite skew? Papers argue **mean latency** and **network cost** dominate when probes are wide; they accept tail risk or add **secondary** balancing (SABBSR, HARMONY, work-stealing) rather than abandoning geometry.
+
+---
+
+### 4.4 Paper-by-paper detailed entries
+
+#### SABES — Spatial-Aware Bucket Equal Split (Andrade, Teodoro, Ferreira; SBAC-PAD 2020)
+
+- **PDF:** [DOI](https://doi.org/10.1109/SBAC-PAD49847.2020.00027) · **Local:** `NOT_DOWNLOADED` → [`sec4/andrade-sabes-sbac-pad-2020.pdf`](../related-work/pdfs/sec4/andrade-sabes-sbac-pad-2020.pdf)
+- **Hardware:** Multi-node distributed memory; up to **160 nodes**; buckets in **RAM**.
+- **Geometry signal:** After IVFADC/LSH indexing, **k-means on coarse centroids**; assign centroid groups to query-processing nodes so spatially close buckets colocate.
+- **Why colocate:** BES spreads buckets evenly across nodes but ignores that **multi-probe search visits neighboring buckets** — scattering neighbors → all-node traffic. SABES keeps co-probed buckets on one node (**2.4× vs DES @ 5 nodes**, **14.5× @ 160 nodes**).
+- **Query routing:** Same as BES — probe **w** nearest bucket centroids, visit only nodes holding those buckets.
+- **Load / hot regions:** Round-robin group assignment; **no query-frequency model**. Descriptor-count skew across nodes possible when bucket sizes differ (motivates SABBS/SABBSR). Eval does not stress hot spatial query regions.
+
+#### SABBS / SABBSR (Pereira, Barreiros Jr., Ferreira, Teodoro; Research Square 2024)
+
+- **PDF:** [Research Square](https://www.researchsquare.com/article/rs-4973077/v1) · **Local:** [`sec4/pereira-sabbs-sabbsr-2024.pdf`](../related-work/pdfs/sec4/pereira-sabbs-sabbsr-2024.pdf)
+- **Hardware:** Multi-node; weak scaling to **60 nodes**, **12B × 128-dim** descriptors; in-memory IVFADC.
+- **Geometry signal:** Same centroid-group colocation as SABES.
+- **Why colocate:** Same inter-node traffic argument as SABES.
+- **SABBS:** Caps **buckets and descriptors per node** when grouping — rejects spatial assignments that overload a node (**static data/load cap**).
+- **SABBSR:** Adds **bucket relevance = descriptor count × query frequency** (probe frequency) to grouping — explicitly anticipates **hot buckets** that are both large and often probed. **Up to 1.64×** vs prior best at billion scale.
+- **Hot-region stance:** **Only §4 paper that names probe frequency in placement.** Still offline/batch partitioning — not online reshuffle as queries drift.
+
+#### Distributed LSH (Haghani, Michel, Aberer; EDBT 2009)
+
+- **PDF:** [OpenProceedings](https://openproceedings.org/2009/conf/edbt/HaghaniMA09.pdf) · **Local:** `NOT_DOWNLOADED` → [`sec4/haghani-distributed-lsh-edbt-2009.pdf`](../related-work/pdfs/sec4/haghani-distributed-lsh-edbt-2009.pdf)
+- **Hardware:** P2P overlay; eval to **1M global peers**, **1000 peers/local DHT**; in-memory bucket scans.
+- **Geometry signal:** **ξ mapping** (sum or Cauchy LSH) from bucket label vectors to 1D peer IDs — small **L1 label distance** ⇒ similar data ⇒ same/adjacent Chord peers.
+- **Why colocate:** Multi-probe LSH jumps buckets; random peer mapping ⇒ **O(log n)** peer hops per jump. Linear ring forwarding visits **physically adjacent peers** for adjacent labels.
+- **Load balance vs locality:** Optimizes **expected bucket-label density** across peers (not point counts). `hash(l)` spreads hash tables. Overloaded peers expand local DHT; **hot-range replication** (Pitoura et al.) for access-heavy Chord arcs — **replicates routing responsibility**, not full vector duplication by default.
+- **Hot query regions:** **Not modeled explicitly** — balance is statistical over label distribution, not query trace.
+
+#### AnalyticDB-V — ADBV (Wei et al.; PVLDB 2020)
+
+- **PDF:** [PVLDB](http://www.vldb.org/pvldb/vol13/p3152-wei.pdf) · **Local:** [`sec4/analyticdb-v.pdf`](../related-work/pdfs/sec4/analyticdb-v.pdf)
+- **Hardware:** Multi-node Alibaba Cloud (**16 nodes** in eval); in-memory hybrid analytics.
+- **Geometry signal:** Optional **256 k-means sharding centroids** — each vector assigned to nearest centroid partition (**independent** of internal IVFPQ nlist).
+- **Why route (not full colocation):** Hash/range sharding requires all-node fan-out; **centroid-based partition pruning** sends query to **N nearest partitions** (512 partitions → **3 nodes** on Deep1B without recall loss).
+- **Placement-time colocation of neighbor centroids:** **No** — neighboring sharding centroids are not grouped onto same node.
+- **Hot regions:** **Not addressed.** Popular query neighborhoods hit the same 3 partitions repeatedly → those nodes become hot under skewed query traffic.
+
+#### GaussDB-Vector (Sun et al.; PVLDB 2025)
+
+- **PDF:** [PVLDB](https://www.vldb.org/pvldb/vol18/p4951-sun.pdf) · **Local:** [`sec4/gaussdb-vector.pdf`](../related-work/pdfs/sec4/gaussdb-vector.pdf)
+- **Hardware:** Multi-node production; **memory + page-based disk** persistence.
+- **Geometry signal:** **Two-layer k-means IVF** centroids for sharding; vectors on DN owning nearest cluster centroid.
+- **Why colocate/route:** Query routing to DNs whose centroids are near query; **boundary expansion** among selected centroids for recall at partition borders.
+- **Hot regions:** Paper focuses on persistence, hybrid filter, throughput — **no query-skew or hot-spot mitigation** discussed for distance-based sharding.
+
+#### CoTra (SIGMOD 2026 / arXiv 2025)
+
+- **PDF:** [arXiv](https://arxiv.org/pdf/2507.06653.pdf) · **Local:** [`sec4/cotra.pdf`](../related-work/pdfs/sec4/cotra.pdf)
+- **Hardware:** **8–16 machine RDMA cluster**; vectors + **holistic proximity graph** in memory.
+- **Geometry signal:** **Balanced k-means on raw vectors** — one partition per machine, **no replication**.
+- **Why colocate:** Global graph spans machines; random sharding makes most graph hops **remote**. k-means puts similar vectors together so **~73.8%** of accessed vectors (avg over queries) sit on one partition → fewer RDMA hops (**9.8–13.4×** throughput vs single machine @ 16 nodes).
+- **Query execution:** Per query, **coordinator partition** = machine that will touch the most vectors (**not** a replica role). **Co-Search** locally; **Pull-Push** RDMA for remote vectors (~25% of accesses still remote).
+- **Hot regions:** Build-time **equal vector count** only. Under query skew, **coordinator partitions for hot queries overload** — paper does not rebalance by query rate.
+
+#### Vexless (SIGMOD 2024)
+
+- **PDF:** [NSF PAR](https://par.nsf.gov/servlets/purl/10570270) · **Local:** [`sec4/vexless.pdf`](../related-work/pdfs/sec4/vexless.pdf)
+- **Hardware:** **Azure Functions**, ~**1.5 GB** RAM each; per-shard IVF/LSH/HNSW.
+- **Geometry signal:** **Constrained k-means** semantic shards; orchestrator activates shards whose **centroids within distance threshold** of query.
+- **Why colocate/route:** Serverless cost ∝ functions invoked; semantic routing beats hash all-shard probe under memory limits.
+- **Hot regions:** **Memory-balanced** shards, not QPS-balanced. Eval on bursty/sparse workloads — **no shifting hot query region** analysis.
+
+#### SPIRE (arXiv 2025 / VecDB ICML 2025)
+
+- **PDF:** [arXiv](https://arxiv.org/pdf/2512.17264.pdf) · **Local:** [`sec4/spire.pdf`](../related-work/pdfs/sec4/spire.pdf)
+- **Hardware:** **46 nodes**, up to **8B vectors**; disaggregated **memory index + SSD vectors**; stateless query engine tier.
+- **Geometry signal:** **Hierarchical k-means** — recursive clustering; upper levels route like IVF centroid trees; **spatial locality** reduces cross-node links vs naive graph shard.
+- **Why colocate:** Partition-based hierarchy: query descends **nearest centroids** level-by-level; colocating neighboring clusters avoids remote reads during descent.
+- **Boundary replication:** Vectors near k-means boundaries **replicated** to neighboring nodes before local re-clustering — recall defense, also spreads boundary query load.
+- **Hot spots:** Paper mentions **global partition IDs** to **mitigate hot-spots under skewed workloads** during merge; **elastic** stateless query engines scale independently. **Does not** dynamically move vector data based on query traces.
+
+#### VStream (Gong et al.; PVLDB 2025)
+
+- **PDF:** [PVLDB](https://www.vldb.org/pvldb/vol18/p1593-gao.pdf) · **Local:** [`sec4/vstream.pdf`](../related-work/pdfs/sec4/vstream.pdf)
+- **Hardware:** Multi-node; **four-tier** memory / local disk / remote disk; Flink streaming integration.
+- **Geometry signal:** **LSH** → low-dim hash space → **space-filling curve (Z-order/Hilbert/Peano)** → 1D partition ID. Neighboring vectors in embedding space → same/nearby partitions.
+- **Why colocate:** ID/hash partitioner destroys locality when streams drift; curve encoding preserves neighborhood; query scans **limited partition range** on 1D order.
+- **Hot regions / drift:** **Explicit problem statement:** rapid **distribution shift** in streaming vectors causes **load imbalance** under static partitioning. **Dynamic Partitioning Templates (DPT)** continuously **adjust partition boundaries** from per-partition workload. Addresses **data drift**; query hotspot shift is related but not isolated in eval.
+
+#### Unleashing Graph Partitioning (Gottesbüren et al.; PVLDB 2025)
+
+- **PDF:** [PVLDB](https://www.vldb.org/pvldb/vol18/p1649-gottesbueren.pdf) · **Local:** [`sec4/unleashing-graph-partitioning-for-large-scale-near.pdf`](../related-work/pdfs/sec4/unleashing-graph-partitioning-for-large-scale-near.pdf)
+- **Hardware:** Multi-node; **shard-local HNSW** per graph partition.
+- **Geometry signal:** **Balanced graph partition (METIS-style)** for data placement + modular routers **kRt** (hierarchical **k-means centers**) or **hRt** (**LSH**) to pick **few shards** near query.
+- **Why colocate:** Graph cut minimizes **cross-shard edges**; k-means/LSH routing sends query only to shards whose **representatives are near query** — up to **1.72× QPS @ 90% recall@10** vs prior billion-scale methods.
+- **Hot regions:** Balanced **vertex count** per shard. **kRt/hRt** reduce shards touched but **hot query clusters** still map to same center-neighborhood shards — **not addressed**.
+
+#### RED-ANNS (PVLDB 2026)
+
+- **PDF:** [Author copy](https://kay21s.github.io/RED-ANNS-VLDB2026.pdf) · **Local:** [`sec4/red-anns.pdf`](../related-work/pdfs/sec4/red-anns.pdf)
+- **Hardware:** Multi-node **RDMA** disaggregated memory; logically **full graph** (GPS strategy).
+- **Geometry signal:** **Locality-aware placement** — vectors placed to preserve graph connectivity; **affinity scheduling** assigns query to node owning query-proximate vectors.
+- **Why colocate:** Avoid MapReduce-style graph cuts; RDMA makes remote hops cheap but locality still wins vs random placement.
+- **Hot regions / imbalance:** **Explicit** — affinity can **imbalance query assignment** across nodes. **Work-stealing** module steals queries when load imbalance detected, trading **locality for balance**. Eval includes **in-distribution and OOD** query workloads. Closest cluster-graph analog to query-load rebalancing.
+
+#### HARMONY (SIGMOD 2025)
+
+- **PDF:** [MIT DSpace](https://dspace.mit.edu/bitstream/handle/1721.1/164256/3749167.pdf) · **Local:** [`sec4/harmony.pdf`](../related-work/pdfs/sec4/harmony.pdf)
+- **Hardware:** Multi-node (**4 nodes** in eval); in-memory distributed IVFPQ-style pipeline.
+- **Geometry signal:** **k-means vector partitioning** preserves embedding locality; **dimension-based partitioning** splits work across coordinate dimensions with additive partial distance.
+- **Why hybrid:** Pure **vector** shards → locality but **hot shards** under skew; pure **dimension** shards → balance but many round trips. Cost model **picks mode per query**; dimension early-stop prunes ~97% candidates.
+- **Hot regions:** **Explicit skewed workload eval** — **58% throughput gain** on skewed vs leading systems. Uses **dimension mode** as relief valve when vector spatial shards overload — ** sacrifices pure colocation** to spread compute.
+
+#### Quake (OSDI 2025)
+
+- **PDF:** [USENIX](https://www.usenix.org/system/files/osdi25-mohoney.pdf) · **Local:** [`sec4/quake.pdf`](../related-work/pdfs/sec4/quake.pdf)
+- **Scope note:** **Single-node NUMA**, not multi-node cluster — included because it is the clearest treatment of **access-pattern skew vs spatial partitions**.
+- **Hardware:** Single server, **multi-level k-means IVF** in memory; **NUMA-aware** partition placement and scheduling.
+- **Geometry signal:** Partitions assigned to **NUMA nodes** by affinity; search prefers **local partitions** to cut remote memory latency.
+- **Why colocate:** Remote NUMA access dominates tail latency when partitions scatter randomly across sockets.
+- **Hot regions:** **Central problem** — Wikipedia-like **popular pages get disproportionate queries**; inserts also skew over time. **Adaptive split/merge** of partitions using cost + recall models; **APS** adapts nprobe online. **Directly addresses shifting hot regions** — but on **one machine**, not distributed shard migration.
+
+#### LindormVector (SIGMOD 2026 Industry)
+
+- **PDF:** [ACM](https://dl.acm.org/doi/pdf/10.1145/3788853.3803088) · **Local:** `NOT_DOWNLOADED`
+- **Hardware:** Multi-node Lindorm; compute–storage separation; SSD KV.
+- **Geometry signal:** **k-means IVFPQ** posting lists stored on **Lindorm shard/range boundaries** — vector index geometry aligned with existing KV partitioning.
+- **Why colocate:** Avoid separate routing layer; postings live where KV already shards.
+- **Hot regions:** Not discussed in available abstract/industry summary.
+
+---
+
+### 4.5 Baseline vocabulary (SABES lineage)
+
+| Baseline | Split unit | Query behavior |
+|----------|-----------|----------------|
+| **DES** | Vectors evenly | All nodes probed |
+| **BES** | ANN buckets evenly | Nodes with **w** nearest bucket centroids |
+| **SABES** | Buckets by **centroid spatial groups** | Same as BES, fewer nodes per query |
+| **SABBS / SABBSR** | SABES + caps / **probe-frequency relevance** | Same as BES |
+
+---
+
+### 4.6 Explicitly surveyed but excluded from §4
+
+| Paper | Reason excluded |
+|-------|-----------------|
+| Auncel (NSDI 2023) | **Random uniform** shard placement; geometry only inside local ELP |
+| HAKES (PVLDB 2025) | Optional IVF-list/refine colocation — pipeline optimization, not cluster sharding |
+| LEQAT (VLDBJ 2023) | Per-query nprobe knapsack on fixed partitions |
+| DistributedANN | Graph/KV **storage layout** for one global graph — not centroid/bucket colocation for probe locality |
+| Milvus / Weaviate / Qdrant | Hash sharding |
+| Building Stateless Serverless Vector DBs (block partitioning) | Fixed-size blocks, no geometry |
+
+---
 ## Industry Systems (Category 1 pattern)
 
 Industry entries use official docs/blogs instead of PDFs where no paper exists.
@@ -1179,3 +1288,7 @@ Industry entries use official docs/blogs instead of PDFs where no paper exists.
 | 2026-06-16 | Restructured by architectural pattern (superseded) |
 | 2026-06-16 | Reclassified into 3 partitioning layers + §4 centroid proximity |
 | 2026-06-16 | **Local PDF inventory** in `related-work/pdfs/`; Category + Deployment scope per entry; §4 expanded; #1+#2 unified as systems partition; replaced paraphrased abstracts with paper text where available |
+| 2026-06-16 | Removed Faiss 1T wiki (not a Faiss feature). SPANN → category #3, single-node paper only. DistributedANN: added "When #2 beats #1" Bing-scale table |
+| 2026-06-17 | §4: split SABES vs SABBS/SABBSR with correct PDFs; removed hash/block baseline row; replaced vague colocation column with placement/routing table |
+| 2026-06-17 | §4 PDFs moved to `related-work/pdfs/sec4/`; in-doc links updated |
+| 2026-06-17 | §4 full rewrite: 14 papers, master table, query-skew subsection (§4.3), self-contained per-paper entries; added SPIRE, VStream, Unleashing GP, RED-ANNS, HARMONY, Quake, LindormVector |

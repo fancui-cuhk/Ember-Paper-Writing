@@ -15,7 +15,7 @@
 | # | User intent | Survey section |
 |---|-------------|----------------|
 | **1** | Partition **data** first → build **independent index** per shard (IVF or HNSW) | §1 |
-| **2** | **One logical index** sharded across nodes (DistributedANN, HARMONY, Faiss distributed IVF) | §2 |
+| **2** | **One logical index** sharded across nodes (DistributedANN, HARMONY) | §2 |
 | **3** | **Partition-intrinsic** index (IVF, LSH, k-means tree) — partitioning required by algorithm | §3 |
 | **4** | Cross-cutting analysis: centroid/bucket **spatial proximity** for **external** placement | §4 |
 

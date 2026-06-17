@@ -22,5 +22,5 @@ Example: `lindorm-vector-sigmod2026.md`
 |------|----------------|-----------|
 | [lindorm-vector-sigmod2026.md](lindorm-vector-sigmod2026.md) | LindormVector (SIGMOD 2026 Industry) | 2026-05-28 |
 | [anyblob-vldb2023.md](anyblob-vldb2023.md) | AnyBlob / S3 OLAP performance (PVLDB 2023) | 2026-06-03 |
-| [pdfs/](pdfs/) | Local PDF inventory for partition/sharding survey (~48 papers) | 2026-06-16 |
+| [pdfs/](pdfs/) | Local PDF inventory for partition/sharding survey (~48 papers); §4 subset in `pdfs/sec4/` | 2026-06-16 |
 | [discussions/2026-06-16-leann-mlsys2026-reading.md](../discussions/2026-06-16-leann-mlsys2026-reading.md) | LEANN (MLSys 2026) | 2026-06-16 |

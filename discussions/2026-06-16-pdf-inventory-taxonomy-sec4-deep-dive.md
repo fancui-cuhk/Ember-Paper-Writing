@@ -22,13 +22,11 @@ Failed PDF downloads are acceptable — proceed with remaining papers.
 | SABES | IVFADC | Yes | Fewer nodes per query |
 | ADBV | Sharding uses k-means; index is VGPQ | Route to near partitions | Avoid all-node fan-out |
 | GaussDB-Vector | Yes (IVF path) | Yes (distance sharding) | DN locality + routing |
-| HAKES | Yes | Optional (IVF-assignment refine) | Cut refine network traffic |
-| SPANN distributed | Yes | Partial (pruning + bin-pack) | Fewer machines + load balance |
-| CoTra | No (graph) | Partial (k-means vectors) | Access locality for graph |
+| CoTra | No (graph) | Partial (k-means vectors) | Fewer inter-node graph hops |
 | Vexless | Per-shard IVF/LSH/HNSW | Route-only | Serverless cost |
 | Distributed LSH | LSH | Yes | Fewer peer hops |
-| Faiss distributed | Yes | No | Vertical slice scale-out |
-| LEQAT | Yes | N/A (query opt only) | nprobe budget |
+
+*(Superseded for detail by §4 revision 2026-06-17; HAKES/LEQAT/Faiss removed — not §4 centroid spatial sharding.)*
 
 ## NOT_DOWNLOADED
 
