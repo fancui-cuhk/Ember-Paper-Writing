@@ -24,7 +24,7 @@ Local PDFs for **§5** of [`summaries/read-amplification-disk-vector-search-surv
 | `sk-lsh.pdf` | SK-LSH | LSH external memory |
 | `i-o-efficient-approximate-nearest-neighbour-search.pdf` | Learned-function lists | LSH / sequential I/O |
 | `hakes.pdf` | HAKES | Hybrid filter + refine |
-| `lindormvector-sigmod2026.pdf` | LindormVector | IVFPQ on DFS |
+| `lindorm-vector.pdf` | LindormVector | IVFPQ on DFS |
 | `dsann.pdf` | DSANN | Graph on DFS |
 | `milvus.pdf` | Milvus (SIGMOD 2021) | Segment-level systems |
 | `pinecone.pdf` | Pinecone serverless blog | HTML snapshot |

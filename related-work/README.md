@@ -20,6 +20,8 @@ Example: `lindorm-vector-sigmod2026.md`
 
 | File | System / paper | Date read |
 |------|----------------|-----------|
+| [serverless-block-partitioning-sigmod2025.md](serverless-block-partitioning-sigmod2025.md) | Stateless serverless vector DB / block partitioning (SIGMOD 2025) | 2026-06-18 |
+| [gp-ann.md](gp-ann.md) | GP-ANN / Unleashing Graph Partitioning (PVLDB 2025) | 2026-06-17 |
 | [lindorm-vector-sigmod2026.md](lindorm-vector-sigmod2026.md) | LindormVector (SIGMOD 2026 Industry) | 2026-05-28 |
 | [anyblob-vldb2023.md](anyblob-vldb2023.md) | AnyBlob / S3 OLAP performance (PVLDB 2023) | 2026-06-03 |
 | [pdfs/](pdfs/) | Local PDF inventory for partition/sharding survey (~48 papers); §4 subset in `pdfs/spatial-related/`; read-amp survey in `pdfs/read-amp-related/` | 2026-06-17 |

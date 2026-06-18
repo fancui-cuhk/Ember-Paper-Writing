@@ -85,7 +85,7 @@ Production vector DBs most often follow this pattern: hash/range/semantic **data
 
 - **Category:** 1
 - **Deployment scope:** Multi-node (AWS Lambda)
-- **Local PDF:** [`building-stateless-serverless-vector-dbs-via-block.pdf`](../related-work/pdfs/building-stateless-serverless-vector-dbs-via-block.pdf)
+- **Local PDF:** [`building-stateless-serverless-vector-dbs-via-block.pdf`](../related-work/pdfs/building-stateless-serverless-vector-dbs-via-block.pdf) — see [`related-work/serverless-block-partitioning-sigmod2025.md`](../related-work/serverless-block-partitioning-sigmod2025.md)
 - **Venue:** SIGMOD 2025 (PACMMOD)
 - **PDF:** [Author copy](https://danielbcn.com/papers/2025-SIGMOD-Serverless_Vector_DBs_Partitioning.pdf)
 - **Abstract:** Serverless vector DBs on stateless FaaS are promising but partitioning strategy is unclear. This study compares clustering-based vs. block-based partitioning for dynamic datasets on AWS Lambda: block partitioning is up to 5.8× faster to partition, up to 63% cheaper, with similar query latency. A block-based serverless design is competitive with Milvus on indexing, latency, recall, and cost, with large savings on sparse workloads.
@@ -150,11 +150,11 @@ Production vector DBs most often follow this pattern: hash/range/semantic **data
 
 ---
 
-### Unleashing Graph Partitioning for Large-Scale Nearest Neighbor Search
+### GP-ANN (Unleashing Graph Partitioning for Large-Scale Nearest Neighbor Search)
 
 - **Category:** 1
 - **Deployment scope:** Multi-node (shard-local HNSW)
-- **Local PDF:** [`spatial-related/unleashing-graph-partitioning-for-large-scale-near.pdf`](../related-work/pdfs/spatial-related/unleashing-graph-partitioning-for-large-scale-near.pdf)
+- **Local PDF:** [`spatial-related/gp-ann.pdf`](../related-work/pdfs/spatial-related/gp-ann.pdf) — see [`related-work/gp-ann.md`](../related-work/gp-ann.md)
 - **§4 centroid-locality:** covered in §4
 - **Venue:** PVLDB 2025
 - **PDF:** [PVLDB](https://www.vldb.org/pvldb/vol18/p1649-gottesbueren.pdf)
@@ -229,7 +229,7 @@ These systems keep **one index abstraction** (one IVF posting namespace, one nav
 
 - **Category:** 2
 - **Deployment scope:** Multi-node (Lindorm shards/ranges)
-- **Local PDF:** [`spatial-related/lindormvector-sigmod2026.pdf`](../related-work/pdfs/spatial-related/lindormvector-sigmod2026.pdf)
+- **Local PDF:** [`spatial-related/lindorm-vector.pdf`](../related-work/pdfs/spatial-related/lindorm-vector.pdf)
 - **Venue:** SIGMOD 2026 (Industry)
 - **PDF:** [ACM](https://dl.acm.org/doi/pdf/10.1145/3788853.3803088)
 - **Abstract:** LindormVector embeds distributed IVFPQ-based vector retrieval into Alibaba Lindorm multi-model NoSQL, with compute–storage separation, hybrid scalar/full-text/vector optimization, and production-scale VectorDBBench evaluation.
@@ -418,7 +418,8 @@ These systems keep **one index abstraction** (one IVF posting namespace, one nav
 
 - **Category:** 2
 - **Deployment scope:** Multi-node (disaggregated memory)
-- **Local PDF:** [`shine.pdf`](../related-work/pdfs/shine.pdf)
+- **Local PDF:** [`spatial-related/shine.pdf`](../related-work/pdfs/spatial-related/shine.pdf)
+- **§4 centroid-locality:** covered in §4 (logical k-means routing; graph-preserving)
 - **Venue:** arXiv
 - **PDF:** [arXiv](https://arxiv.org/pdf/2507.17647.pdf)
 - **Abstract:** Approximate nearest neighbor (ANN) search is a fundamental problem in computer science for which in-memory graph-based methods, such as Hierarchical Navigable Small World (HNSW), perform exceptionally well. To scale beyond billions of high-dimensional vectors, the index must be distributed. The disaggregated memory architecture physically separates compute and memory into two distinct hardware units and has become popular in modern data centers. Both units are connected via RDMA networks that allow compute nodes to directly access remote memory and perform all the computations, posing unique challenges for disaggregated indexes.   In this work, we propose a scalable HNSW index for ANN search in disaggregated memory. In contrast to existing distributed approaches, which partition the graph at the cost of accuracy, our method builds a graph-preserving index that reaches the same accuracy as a single-machine HNSW. Continuously fetching high-dimensional vector data from remote memory leads to severe network bandwidth limitations, which we overcome by employing an efficient caching mechanism. Since answering a single query involves processing numerous unique graph nodes, caching alone is not sufficient to achieve high scalability. We logically combine the caches of the compute nodes to increase the overall cache effectiveness and confirm the efficiency and scalability of our method in our evaluation.
@@ -435,7 +436,8 @@ These systems keep **one index abstraction** (one IVF posting namespace, one nav
 
 - **Category:** 2
 - **Deployment scope:** Multi-node (disaggregated memory)
-- **Local PDF:** [`d-hnsw.pdf`](../related-work/pdfs/d-hnsw.pdf)
+- **Local PDF:** [`spatial-related/d-hnsw.pdf`](../related-work/pdfs/spatial-related/d-hnsw.pdf)
+- **§4 centroid-locality:** covered in §4 (balanced k-means sub-HNSW placement)
 - **Venue:** arXiv
 - **PDF:** [arXiv](https://arxiv.org/pdf/2603.13591.pdf)
 - **Abstract:** Efficient vector search is essential for powering large-scale AI applications, such as LLMs. Existing solutions are designed for monolithic architectures where compute and memory are tightly coupled. Recently, disaggregated architecture breaks this coupling by separating compution and memory resources into independently scalable pools to improve utilization. However, applying vector database on disaggregated memory system brings unique challenges to system design due to its graph-based index. We present d-HNSW, the first RDMA-based vector search engine optimized for disaggregated memory systems. d-HNSW preserves HNSW's high accuracy while addressing the new system-level challenges introduced by disaggregation: 1) network inefficiency from pointer-chasing traversals, 2) non-contiguous remote memory layout induced by dynamic insertions, 3) redundant data transfers in batch workloads, and 4) resource underutilization due to sequential execution. d-HNSW tackles these challenges through a set of hardware-algorithm co-designed techniques, including 1) balanced clustering with a lightweight representative index to reduce network round-trips and ensure predictable latency, 2) an RDMA-friendly graph layout that preserves data contiguity under dynamic insertions, 3) query-aware data loading to eliminate redundant fetches across batch queries, and 4) a pipelined execution model that overlaps RDMA transfers with computation to hide network latency and improve throughput. Our evaluation results in a public cloud show that d-HNSW achieves up to < 10-2x query latency and > 100x query throughput compared to other baselines, while maintaining a high recall of 94%.
@@ -452,7 +454,8 @@ These systems keep **one index abstraction** (one IVF posting namespace, one nav
 
 - **Category:** 2
 - **Deployment scope:** Multi-node (multi-server NVMe)
-- **Local PDF:** [`batann.pdf`](../related-work/pdfs/batann.pdf)
+- **Local PDF:** [`spatial-related/batann.pdf`](../related-work/pdfs/spatial-related/batann.pdf)
+- **§4 centroid-locality:** covered in §4 (graph / spatial partition)
 - **Venue:** arXiv
 - **PDF:** [arXiv](https://arxiv.org/pdf/2512.09331.pdf)
 - **Abstract:** Vector search underpins modern information-retrieval systems, including retrieval-augmented generation (RAG) pipelines and search engines over unstructured text and images. As datasets scale to billions of vectors, disk-based vector search has emerged as a practical solution. However, looking to the future, we must anticipate datasets too large for any single server and throughput demands that exceed the limits of locally attached SSDs. We present BatANN, a distributed disk-based approximate nearest neighbor (ANN) system that retains the logarithmic search efficiency of a single global graph while achieving near-linear throughput scaling in the number of servers. Our core innovation is that when accessing a neighborhood which is stored on another machine, we send the full state of the query to the other machine to continue executing there for improved locality. On 1B-point datasets at 0.95 recall using 10 servers, BatANN achieves 3.5-5.59x of the scatter-gather baseline and 1.44-2.09x the throughput of DistributedANN, respectively, while maintaining mean latency below 3 ms. Moreover, we get these results on standard TCP. To our knowledge, BatANN is the first open-source distributed disk-based vector search system to operate over a single global graph.
@@ -928,7 +931,7 @@ It answers one systems question:
 **Included (§4):**
 
 - **Placement-time colocation** — assign buckets/clusters/vectors to nodes using spatial proximity (SABES, SPIRE, CoTra k-means, VStream curve encoding).
-- **Query-time centroid routing** — route each query only to partitions whose centroids/representatives are near the query (ADBV, GaussDB-Vector, Vexless, Unleashing kRt/hRt).
+- **Query-time centroid routing** — route each query only to partitions whose centroids/representatives are near the query (ADBV, GaussDB-Vector, Vexless, GP-ANN kRt/hRt).
 - **Both** (most production-flavored designs).
 
 **Excluded (covered elsewhere in this survey):**
@@ -957,10 +960,13 @@ It answers one systems question:
 | **ADBV** | PVLDB 2020 | Multi (16 eval) | In-memory | **256 k-means sharding centroids** (separate from IVF nlist) | Hash sharding fans out to all nodes; nearest-centroid routing prunes partitions | Optimizer → **N partitions with closest centroids** | **Not addressed** — k-means balances **vector count**; no query-frequency rebalancing; hot queries still concentrate on same centroid-neighborhood partitions |
 | **GaussDB-Vector** | PVLDB 2025 | Multi prod | Memory + disk pages | **Two-layer k-means IVF centroids** | Avoid all-DN fan-out; locality in embedding space | Route to DNs for **nearby cluster centroids** + boundary expansion | **Not discussed** — production skew handling unclear from paper |
 | **CoTra** | SIGMOD 2026 / arXiv | Multi RDMA (8–16) | In-memory global graph | **Raw vector coordinates** (balanced k-means) | Graph traversal visits similar vectors → colocate to keep **~73.8%** of hops local | Query coordinator = partition with **most vectors this query will touch**; Pull-Push for remote hops | **Not addressed** — equal **vector count** per machine at build time; no query-rate-aware placement; hot query regions overload coordinator partition |
+| **SHINE** | arXiv | Disaggregated memory | Remote HNSW graph | **Balanced k-means on index nodes** (logical) | Route query to CN whose centroid is closest → better **cache hit rate**; **all edges kept** (not edge-cut colocation) | Oracle ranks CNs by query–centroid distance; adaptive routing | **Partial** — load-balanced **query dispatch** across CNs; no data reshuffle by query skew |
+| **d-HNSW** | arXiv | Disaggregated memory | Remote sub-HNSW clusters | **Balanced k-means** on vectors | Similar vectors in same sub-HNSW → fewer remote fetches + recall; meta-HNSW routes to few partitions | meta-HNSW search → fetch top sub-HNSW(s) only | **Build-time** equal partition sizes; **not** query-hotspot aware |
+| **BatANN** | arXiv | Multi-server NVMe | Disk global Vamana graph | **Graph partition** (Gottesbüren) or k-means | **Nearby points on same server** → fewer inter-partition hops (~11–24% of hops) | Baton-passing continues search on owning server | **Not addressed** — graph partition balances vertices, not query QPS |
 | **Vexless** | SIGMOD 2024 | Serverless functions | ~1.5 GB RAM / function | **Constrained k-means shard centroids** | Semantic shards + activate only nearby centroids vs. all-shard probe | Orchestrator activates shards within **centroid distance threshold** | **Memory cap** per function, not query QPS skew; bursty/sparse eval, not shifting hot regions |
 | **SPIRE** | arXiv / VecDB 2025 | Multi (46, 8B vec) | Memory index + SSD vectors | **Hierarchical k-means** cluster centroids | Colocate neighboring clusters; hierarchical routing like IVF | Top-down **nearest centroid** descent level-by-level | **Mentions** mitigating **hot-spots under skewed workloads** via global partition IDs + boundary replication; **no query-trace rebalancer** in paper |
 | **VStream** | PVLDB 2025 | Multi tiered | Memory + local + remote disk | **LSH hash → space-filling curve (Z/Hilbert)** | Neighboring vectors same partition; query hits **limited nearby partitions** only | Range filter on 1D curve encoding | **Explicit:** streaming **distribution shift** causes load imbalance → **Dynamic Partitioning Templates** rebalance partition boundaries on workload |
-| **Unleashing Graph Partitioning** | PVLDB 2025 | Multi shard HNSW | In-memory | **Graph partition** + **k-means centers (kRt)** or **LSH (hRt)** for routing | Graph METIS cut preserves neighbor locality; modular routing sends query to **few near shards** | kRt: nearest k-means centers; hRt: LSH buckets | **Not addressed** — balanced **graph** partition; routing reduces shards touched but hot query regions still hit same centers |
+| **GP-ANN** | PVLDB 2025 | Multi shard HNSW | In-memory | **Graph partition** + **k-means centers (kRt)** or **LSH (hRt)** for routing | Graph METIS cut preserves neighbor locality; modular routing sends query to **few near shards** | kRt: nearest k-means centers; hRt: LSH buckets | **Not addressed** — balanced **graph** partition; routing reduces shards touched but hot query regions still hit same centers |
 | **RED-ANNS** | PVLDB 2026 | Multi RDMA | Disaggregated memory graph | **Locality-aware vector placement** preserving GPS graph | Keep graph edges local; affinity scheduling | **Affinity-based** query assignment to node owning query-near vectors | **Explicit:** **work-stealing** when query assignment imbalanced; eval includes **OOD** workloads; trade-off: stealing vs. locality loss |
 | **LindormVector** | SIGMOD 2026 Industry | Multi | Memory + SSD KV | **k-means IVFPQ** lists aligned to Lindorm **shard/range** | Posting lists co-located with KV shard boundaries | Shard/range routing from Lindorm | **Not discussed** in available materials |
 
@@ -973,7 +979,7 @@ It answers one systems question:
 1. **Multi-probe structure:** IVF nprobe, LSH multi-probe, and hierarchical k-means routing visit **sets of nearby partitions/buckets**. Two different situations:
    - **DES / hash all-shard probe:** every node runs local search **in parallel**, then the coordinator **merges** partial top-k. Latency is roughly **max(straggler node) + merge**, not zero — and **cluster work per query scales with P** (all nodes burn CPU/network even if wall-clock is parallel). SABES reports **14.5× vs DES @ 160 nodes** partly because touching all nodes is wasteful at scale.
    - **Subset routing (BES, SABES, ADBV):** only **some** nodes participate. **BES** spreads buckets evenly → probing **w** nearest buckets often means **up to w different nodes**. **SABES** colocates spatially neighboring buckets on the same node → the same **w** probes often hit **1–2 nodes**. Fan-out is still parallel, but you wait for **fewer** remote responses and merge **fewer** partial results. The win is **fewer nodes contacted + less merge/network**, not “sequential latency × w.”
-2. **Graph traversal locality:** DiskANN/HNSW hops land on **similar vectors**. Random sharding makes most hops remote (CoTra, RED-ANNS, SPIRE).
+2. **Graph traversal locality:** DiskANN/HNSW hops land on **similar vectors**. Random sharding makes most hops remote (CoTra, RED-ANNS, BatANN, SPIRE). d-HNSW colocates similar vectors in sub-HNSW partitions; SHINE uses k-means **routing** only (graph uncut).
 3. **Economic argument:** Fewer nodes touched → less network bandwidth, less scatter-gather merge, better cache behavior on multi-node paths.
 
 **The caveat (your concern — query skew / hot spatial regions):**
@@ -990,7 +996,7 @@ This is **different from partition-size balance** (equal vector count per k-mean
 
 | Strategy | Papers | Mechanism | Does it fix hot query regions? |
 |----------|--------|-----------|------------------------------|
-| **Ignore / assume uniform queries** | SABES, ADBV, CoTra, GaussDB, Unleashing | Eval on random/i.i.d. query sets | **No** — hot regions not modeled |
+| **Ignore / assume uniform queries** | SABES, ADBV, CoTra, GaussDB, GP-ANN | Eval on random/i.i.d. query sets | **No** — hot regions not modeled |
 | **Cap spatial colocation** | SABBS | Limit buckets/descriptors per node even if centroids want to group | **Partial** — static data cap, not query-rate |
 | **Weight by query frequency** | **SABBSR** | Bucket relevance = size × **how often bucket is probed** | **Yes, explicitly** — only §4 paper with probe-frequency in placement objective |
 | **Dynamic repartition on drift** | **VStream** | Dynamic Partitioning Templates when stream distribution shifts | **Partial** — data drift, not necessarily query hotspot drift |
@@ -1012,7 +1018,7 @@ This is **different from partition-size balance** (equal vector count per k-mean
 
 #### SABES — Spatial-Aware Bucket Equal Split (Andrade, Teodoro, Ferreira; SBAC-PAD 2020)
 
-- **PDF:** [DOI](https://doi.org/10.1109/SBAC-PAD49847.2020.00027) · **Local:** `NOT_DOWNLOADED` → [`spatial-related/andrade-sabes-sbac-pad-2020.pdf`](../related-work/pdfs/spatial-related/andrade-sabes-sbac-pad-2020.pdf)
+- **PDF:** [DOI](https://doi.org/10.1109/SBAC-PAD49847.2020.00027) · **Local:** [`spatial-related/sabes.pdf`](../related-work/pdfs/spatial-related/sabes.pdf)
 - **Hardware:** Multi-node distributed memory; up to **160 nodes**; buckets in **RAM**.
 - **Geometry signal:** After IVFADC/LSH indexing, **k-means on coarse centroids**; assign centroid groups to query-processing nodes so spatially close buckets colocate.
 - **Why colocate:** BES spreads buckets evenly across nodes but ignores that **multi-probe search visits neighboring buckets** — scattering neighbors → all-node traffic. SABES keeps co-probed buckets on one node (**2.4× vs DES @ 5 nodes**, **14.5× @ 160 nodes**).
@@ -1021,7 +1027,7 @@ This is **different from partition-size balance** (equal vector count per k-mean
 
 #### SABBS / SABBSR (Pereira, Barreiros Jr., Ferreira, Teodoro; Research Square 2024)
 
-- **PDF:** [Research Square](https://www.researchsquare.com/article/rs-4973077/v1) · **Local:** [`spatial-related/pereira-sabbs-sabbsr-2024.pdf`](../related-work/pdfs/spatial-related/pereira-sabbs-sabbsr-2024.pdf)
+- **PDF:** [Research Square](https://www.researchsquare.com/article/rs-4973077/v1) · **Local:** [`spatial-related/sabbsr.pdf`](../related-work/pdfs/spatial-related/sabbsr.pdf)
 - **Hardware:** Multi-node; weak scaling to **60 nodes**, **12B × 128-dim** descriptors; in-memory IVFADC.
 - **Geometry signal:** Same centroid-group colocation as SABES.
 - **Why colocate:** Same inter-node traffic argument as SABES.
@@ -1089,9 +1095,9 @@ This is **different from partition-size balance** (equal vector count per k-mean
 - **Why colocate:** ID/hash partitioner destroys locality when streams drift; curve encoding preserves neighborhood; query scans **limited partition range** on 1D order.
 - **Hot regions / drift:** **Explicit problem statement:** rapid **distribution shift** in streaming vectors causes **load imbalance** under static partitioning. **Dynamic Partitioning Templates (DPT)** continuously **adjust partition boundaries** from per-partition workload. Addresses **data drift**; query hotspot shift is related but not isolated in eval.
 
-#### Unleashing Graph Partitioning (Gottesbüren et al.; PVLDB 2025)
+#### GP-ANN (Gottesbüren et al.; PVLDB 2025)
 
-- **PDF:** [PVLDB](https://www.vldb.org/pvldb/vol18/p1649-gottesbueren.pdf) · **Local:** [`spatial-related/unleashing-graph-partitioning-for-large-scale-near.pdf`](../related-work/pdfs/spatial-related/unleashing-graph-partitioning-for-large-scale-near.pdf)
+- **PDF:** [PVLDB](https://www.vldb.org/pvldb/vol18/p1649-gottesbueren.pdf) · **Local:** [`spatial-related/gp-ann.pdf`](../related-work/pdfs/spatial-related/gp-ann.pdf) · **Notes:** [`related-work/gp-ann.md`](../related-work/gp-ann.md)
 - **Hardware:** Multi-node; **shard-local HNSW** per graph partition.
 - **Geometry signal:** **Balanced graph partition (METIS-style)** for data placement + modular routers **kRt** (hierarchical **k-means centers**) or **hRt** (**LSH**) to pick **few shards** near query.
 - **Why colocate:** Graph cut minimizes **cross-shard edges**; k-means/LSH routing sends query only to shards whose **representatives are near query** — up to **1.72× QPS @ 90% recall@10** vs prior billion-scale methods.
@@ -1099,15 +1105,39 @@ This is **different from partition-size balance** (equal vector count per k-mean
 
 #### RED-ANNS (PVLDB 2026)
 
-- **PDF:** [Author copy](https://kay21s.github.io/RED-ANNS-VLDB2026.pdf) · **Local:** [`spatial-related/red-anns.pdf`](../related-work/pdfs/spatial-related/red-anns.pdf)
+- **PDF:** [Author copy](https://kay21s.github.io/RED-ANNS-VLDB2026.pdf) · **Local:** [`spatial-related/red-anns.pdf`](../related-work/pdfs/spatial-related/red-anns.pdf) · **Notes:** [`related-work/red-anns-vldb2026.md`](../related-work/red-anns-vldb2026.md)
 - **Hardware:** Multi-node **RDMA** disaggregated memory; logically **full graph** (GPS strategy).
 - **Geometry signal:** **Locality-aware placement** — vectors placed to preserve graph connectivity; **affinity scheduling** assigns query to node owning query-proximate vectors.
 - **Why colocate:** Avoid MapReduce-style graph cuts; RDMA makes remote hops cheap but locality still wins vs random placement.
 - **Hot regions / imbalance:** **Explicit** — affinity can **imbalance query assignment** across nodes. **Work-stealing** module steals queries when load imbalance detected, trading **locality for balance**. Eval includes **in-distribution and OOD** query workloads. Closest cluster-graph analog to query-load rebalancing.
 
+#### SHINE (arXiv)
+
+- **PDF:** [arXiv](https://arxiv.org/pdf/2507.17647.pdf) · **Local:** [`spatial-related/shine.pdf`](../related-work/pdfs/spatial-related/shine.pdf)
+- **Hardware:** Disaggregated memory + RDMA; **global HNSW with all edges** (no graph cut).
+- **Geometry signal:** **Balanced k-means** clusters index **nodes** into logical partitions (one per compute node); **purely logical** — no data moved.
+- **Why route locally:** Joint cross-CN cache suffers **segmentation** under random query dispatch; routing query to CN whose partition centroid is nearest improves cache hits.
+- **Hot regions:** **Adaptive query routing** balances work across CNs; does **not** rebalance vector placement by query rate.
+
+#### d-HNSW (arXiv)
+
+- **PDF:** [arXiv](https://arxiv.org/pdf/2603.13591.pdf) · **Local:** [`spatial-related/d-hnsw.pdf`](../related-work/pdfs/spatial-related/d-hnsw.pdf)
+- **Hardware:** Disaggregated memory + RDMA; **meta-HNSW + sub-HNSW per partition**.
+- **Geometry signal:** **Balanced k-means** (capacity-constrained) preserving **similarity within partitions**; lightweight meta-HNSW over centroids for routing.
+- **Why colocate:** Pointer-chasing over network is expensive; restrict search to **few relevant sub-HNSWs** fetched via RDMA. Splitting similar vectors across partitions **drops recall**.
+- **Hot regions:** Equal **vector count** per partition at build; batch query-aware loading reduces redundant fetches — not query-skew placement.
+
+#### BatANN (arXiv)
+
+- **PDF:** [arXiv](https://arxiv.org/pdf/2512.09331.pdf) · **Local:** [`spatial-related/batann.pdf`](../related-work/pdfs/spatial-related/batann.pdf)
+- **Hardware:** Multi-server NVMe; **single global disk graph**; TCP baton-passing.
+- **Geometry signal:** **Graph partitioning** (Gottesbüren et al.) or balanced k-means — **nearby points likely on same server**; preserves spatial relationships vs random shard.
+- **Why colocate:** Beam search hops stay local when neighborhood is co-located; **baton-passing** sends full query state to owning server instead of per-hop RPC.
+- **Hot regions:** Inter-partition hops ~11–24% at 0.95 recall; **not** query-rate-aware rebalancing.
+
 #### LindormVector (SIGMOD 2026 Industry)
 
-- **PDF:** [ACM](https://dl.acm.org/doi/pdf/10.1145/3788853.3803088) · **Local:** [`spatial-related/lindormvector-sigmod2026.pdf`](../related-work/pdfs/spatial-related/lindormvector-sigmod2026.pdf)
+- **PDF:** [ACM](https://dl.acm.org/doi/pdf/10.1145/3788853.3803088) · **Local:** [`spatial-related/lindorm-vector.pdf`](../related-work/pdfs/spatial-related/lindorm-vector.pdf)
 - **Hardware:** Multi-node Lindorm; compute–storage separation; SSD KV.
 - **Geometry signal:** **k-means IVFPQ** posting lists stored on **Lindorm shard/range boundaries** — vector index geometry aligned with existing KV partitioning.
 - **Why colocate:** Avoid separate routing layer; postings live where KV already shards.
@@ -1116,6 +1146,8 @@ This is **different from partition-size balance** (equal vector count per k-mean
 ---
 
 ### 4.5 Baseline vocabulary (SABES lineage)
+
+Names **DES**, **BES**, **SABES** are defined in Andrade et al. (SBAC-PAD 2020) as baselines for that paper's distributed IVFADC/LSH setting — **not** universal industry terms (unlike IVF or HNSW).
 
 | Baseline | Split unit | Query behavior |
 |----------|-----------|----------------|
@@ -1274,4 +1306,7 @@ Industry entries use official docs/blogs instead of PDFs where no paper exists.
 | 2026-06-17 | §4 full rewrite: 12 papers, master table, query-skew subsection (§4.3), self-contained per-paper entries; added SPIRE, VStream, Unleashing GP, RED-ANNS, LindormVector |
 | 2026-06-17 | Removed Quake from §4 (NUMA hardware affinity ≠ embedding-space cluster colocation); PDF in root `pdfs/` for §3 entry |
 | 2026-06-17 | Removed HARMONY from §4 (query-aware hybrid partitioning, not geometry-driven placement); PDF stays in root `pdfs/` for §2 entry |
-| 2026-06-17 | LindormVector PDF relocated (manual download) to `spatial-related/` and `read-amp-related/` |
+| 2026-06-18 | SABES PDF manually downloaded → `spatial-related/sabes.pdf`; §4.5 note that DES/BES are paper-local baseline names |
+| 2026-06-18 | Renamed PDFs: `sabes.pdf`, `sabbsr.pdf`, `lindorm-vector.pdf` (spatial + read-amp) |
+| 2026-06-18 | Moved SHINE, d-HNSW, BatANN PDFs to `spatial-related/`; added §4 entries (graph/locality line with CoTra/RED-ANNS) |
+| 2026-06-18 | Reading note: `serverless-block-partitioning-sigmod2025.md` |

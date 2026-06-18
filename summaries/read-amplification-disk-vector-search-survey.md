@@ -455,7 +455,7 @@ Entries include **Category** (graph / IVF / LSH / systems), **RA source** (§3 l
 
 - **Category:** Systems (IVFPQ on DFS)
 - **RA source:** D, C
-- **Local PDF:** [`lindormvector-sigmod2026.pdf`](../related-work/pdfs/read-amp-related/lindormvector-sigmod2026.pdf) — see [`related-work/lindorm-vector-sigmod2026.md`](../related-work/lindorm-vector-sigmod2026.md)
+- **Local PDF:** [`lindorm-vector.pdf`](../related-work/pdfs/read-amp-related/lindorm-vector.pdf) — see [`related-work/lindorm-vector-sigmod2026.md`](../related-work/lindorm-vector-sigmod2026.md)
 - **Technique:** Centroids/HNSW resident; **posting lists on LindormDFS** with LDServer cache.
 - **RA story:** On cache miss, each probed cluster = DFS read; **does not solve** object-level RA vs request trade-off on cold path (reader analysis).
 

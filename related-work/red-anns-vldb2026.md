@@ -67,7 +67,7 @@ All of these share: **one navigable graph, data/index state split across machine
 | **d-HNSW** | Yes — RDMA disaggregated memory HNSW | Balanced clustering + representative index + pipelined RDMA/compute |
 | **CoTra** | Yes — one global Vamana graph, k-means machine partitions | Pull-Push RDMA; coordinator partition per query |
 | **BatANN** | Yes — distributed **disk** graph, one logical index | Baton-passing pipeline across nodes |
-| **Unleashing Graph Partitioning** | Partially — shard-local HNSW but **kRt/hRt routing** to few shards | Accepts shard-local subgraphs + modular routing; not full-GPS over RDMA |
+| **GP-ANN** | Partially — shard-local HNSW but **kRt/hRt routing** to few shards | Accepts shard-local subgraphs + modular routing; not full-GPS over RDMA |
 | **Milvus / segment MapReduce** | **No** — explicit **sub-GPS** baseline in RED-ANNS eval | Independent per-segment indexes + all-shard probe |
 
 **Takeaway for Ember writing:** RED-ANNS is not a new partition *primitive* (like SABES centroid colocation in §4). It is another **Category #2 execution stack** paper: preserve graph connectivity, pay cross-node access cost, optimize with **network + placement + query scheduling**.
