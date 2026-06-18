@@ -7,6 +7,7 @@ Working copies of papers referenced in [`summaries/partition-sharding-vector-sea
 - Each survey entry lists **Local PDF** when a file exists here.
 - **§4 papers** (centroid/bucket spatial proximity) live in [`spatial-related/`](spatial-related/) — see [`spatial-related/README.md`](spatial-related/README.md).
 - **Read-amplification survey (§5)** papers live in [`read-amp-related/`](read-amp-related/) — see [`read-amp-related/README.md`](read-amp-related/README.md).
+- **Parallel-or-not classics** (Amdahl, Gustafson, Lamport, …) live in [`parallel-or-not/`](parallel-or-not/) — see [`parallel-or-not/README.md`](parallel-or-not/README.md) and [`../parallel-or-not-report.md`](../parallel-or-not-report.md).
 - If download failed (ACM 403, blog-only source, etc.), the entry says `NOT_DOWNLOADED` and keeps the online **PDF** link.
 - HTML snapshots (product docs) are saved as `.pdf` for reference only — not academic PDFs.
 

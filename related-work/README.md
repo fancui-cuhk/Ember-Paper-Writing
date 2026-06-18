@@ -20,6 +20,9 @@ Example: `lindorm-vector-sigmod2026.md`
 
 | File | System / paper | Date read |
 |------|----------------|-----------|
+| [spann-distributed-skew.md](spann-distributed-skew.md) | SPANN §4.3 distributed / query-access bin-packing (NeurIPS 2021) | 2026-06-18 |
+| [flann-distributed-tpami2014.md](flann-distributed-tpami2014.md) | FLANN distributed fan-out-all (TPAMI 2014) | 2026-06-18 |
+| [pyramid-bigdata2019.md](pyramid-bigdata2019.md) | Pyramid distributed HNSW (Big Data 2019; low Ember relevance) | 2026-06-18 |
 | [serverless-block-partitioning-sigmod2025.md](serverless-block-partitioning-sigmod2025.md) | Stateless serverless vector DB / block partitioning (SIGMOD 2025) | 2026-06-18 |
 | [gp-ann.md](gp-ann.md) | GP-ANN / Unleashing Graph Partitioning (PVLDB 2025) | 2026-06-17 |
 | [lindorm-vector-sigmod2026.md](lindorm-vector-sigmod2026.md) | LindormVector (SIGMOD 2026 Industry) | 2026-05-28 |

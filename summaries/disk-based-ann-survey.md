@@ -201,6 +201,34 @@ Each machine computes a partial distance over its assigned dimensions. Once the 
 
 **Graph incompatibility:** HARMONY notes explicitly that graph-based indexes are poorly suited to distribution — query paths generate edges across machines, resulting in high network latency per hop. IVF and cluster-based approaches are inherently more distribution-friendly.
 
+### 9.6 Repo inventory — distributed **and** disk-based (2026-06-18)
+
+*Works catalogued in this repo that are **multi-node** and treat **disk / SSD / DFS / object storage** as a primary vector or index tier — not in-memory-only distributed graph.*
+
+| Work | Tier | Storage model | Index family | Repo pointer |
+|------|------|---------------|--------------|--------------|
+| **BatANN** | A — explicit | Multi-server **NVMe** | Global **disk graph** (Vamana) + baton-passing | `partition-sharding` §2 · `spatial-related/batann.pdf` |
+| **DSANN** | A — explicit | **Distributed file system** (Pangu-class) | Graph–cluster hybrid (PAG) | `partition-sharding` §2 · `dsann.pdf` |
+| **DistributedANN** | A | **Distributed KV** (persistent, DiskANN lineage) | Single logical **DiskANN** graph | `distributedann.pdf` · `red-anns-vldb2026.md` |
+| **SPANN §4.3** | A | **Memory + SSD** postings per machine | Distributed **IVF** + query-access bin-packing | `spann-distributed-skew.md` |
+| **SPIRE** | B | **SSD vectors** + memory routing graph | Hierarchical k-means **IVF** + HNSW-on-centroids | `spire-arxiv2025.md` · `spatial-related/spire.pdf` |
+| **GaussDB-Vector** | B | **Page-based persistence** + distributed memory | Two-layer k-means **IVF** + PQ graph segments | `spatial-related/gaussdb-vector.pdf` |
+| **LindormVector** | B | **LindormDFS / ESSD** posting lists | **IVFPQ** + HNSW on centroids | `lindorm-vector-sigmod2026.md` |
+| **Cosmos DB Sharded DiskANN** | B | Cloud DB **persistent index trees** | **DiskANN** per partition / shard key | `partition-sharding` §1 · `cost-effective-low-latency-vector-search-with-azur.pdf` |
+| **C-SPANN** | B | **CockroachDB KV ranges** on cloud storage | SPANN/SPFresh-style **IVF postings** | `partition-sharding` §2 (blog; PDF NOT_DOWNLOADED) |
+| **VStream** | B | **4-tier** memory / local disk / remote disk | LSH + curve partitions (streaming) | `spatial-related/vstream.pdf` |
+| **Milvus** | C | **Object storage** (WAL/binlog) + segment cache | Per-segment **IVF / HNSW / DiskANN** | `partition-sharding` §1 · `milvus.pdf` |
+| **Pinecone** (serverless) | C | **S3** slabs | IVF / PQFS / SimHash per slab | `partition-sharding` §1 · `pinecone.pdf` |
+| **Block-based serverless VDB** | C | **S3** partitions + indexes | Per-partition **Faiss IVF** | `serverless-block-partitioning-sigmod2025.md` |
+| **Turbopuffer** | C | **Object storage** cluster objects | SPFresh-style **centroid clusters** | `partition-sharding` product table |
+| **OpenSearch k-NN** | C | **Disk segments** (Lucene) | **HNSW** per shard | `opensearch-k-nn.pdf` |
+
+**Tier key:** **A** = paper/system explicitly targets distributed disk/DFS ANN; **B** = distributed DB / disaggregated compute–storage with disk/SSD as authoritative vector tier; **C** = distributed sharding with **object/block storage** cold path (S3-class or segment files).
+
+**Not in this table (distributed but memory-primary in repo):** HARMONY, CoTra, RED-ANNS, HAKES, GP-ANN, Vexless, SABES, Pyramid, NetANNS, CXL-ANNS, ADBV, Auncel, JD visual search, Weaviate/Qdrant (in-memory HNSW shards; persistence optional but not disk-ANN focused).
+
+**Single-node disk-only (in repo, not distributed):** DiskANN, SPANN (main body), SPFresh, PipeANN, Starling, PageANN, OctopusANN, B+ANN, I-LSH, RAIRS, etc. — see [`read-amplification-disk-vector-search-survey.md`](read-amplification-disk-vector-search-survey.md).
+
 ---
 
 ## 10. Graph vs. IVF: Distribution Summary

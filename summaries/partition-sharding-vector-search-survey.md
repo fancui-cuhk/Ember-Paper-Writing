@@ -974,6 +974,8 @@ It answers one systems question:
 
 ### 4.3 Research question — why colocate if hot regions exist?
 
+> **Deep dive (2026-06-18):** Full catalog of how each system handles **query skew** vs spatial placement → [`query-skew-spatial-partitioning-survey.md`](query-skew-spatial-partitioning-survey.md).
+
 **The benefit (why papers do it):**
 
 1. **Multi-probe structure:** IVF nprobe, LSH multi-probe, and hierarchical k-means routing visit **sets of nearby partitions/buckets**. Two different situations:

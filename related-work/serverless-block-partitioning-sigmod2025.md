@@ -69,6 +69,8 @@ Prototype: **Lithops** map-reduce on AWS Lambda; **Faiss IVF** (k=512, nprobe=32
 
 **Survey placement:** Category **#1** entry (serverless block sharding); **excluded from §4** (no embedding-space colocation).
 
+**Ember link — FLANN (Muja & Lowe, TPAMI 2014):** Distributed FLANN uses the **same query path**: equal disjoint subsets + **broadcast query to all shards**. Neither paper models embedding hotspots; both **avoid skew by giving up subset routing**. See [`flann-distributed-tpami2014.md`](flann-distributed-tpami2014.md).
+
 ---
 
 ## Open questions
