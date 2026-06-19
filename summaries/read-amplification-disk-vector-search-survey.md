@@ -4,7 +4,7 @@
 
 **Read amplification** here means: the system **reads (or transfers) more bytes than the query logically needs** to produce its approximate nearest-neighbor result. The wasted fraction grows when storage access granularity is coarser than the index’s logical working set.
 
-This note surveys read amplification in **disk-resident** and **disaggregated-storage** vector search: **sources** (§3), **fix approaches** (§4), and **papers** (§5). It complements:
+This note surveys read amplification in **disk-resident** and **disaggregated-storage** vector search: **sources** (§3), **fix approaches** (§4), and a **detailed paper catalog** (§5: how each work defines and handles RA). It complements:
 
 - [`disk-based-ann-survey.md`](disk-based-ann-survey.md) — disk ANN algorithms and I/O profiles
 - [`partition-sharding-vector-search-survey.md`](partition-sharding-vector-search-survey.md) — where data is placed
@@ -309,203 +309,277 @@ Most production stacks **compose** several families (e.g., PQ in RAM + sector-al
 
 ---
 
-## 5. Paper catalog (by mitigation strategy)
+## 5. Disk-based paper catalog — RA definition and handling
 
-Entries include **Category** (graph / IVF / LSH / systems), **RA source** (§3 letter), **Local PDF** when available.
+This section lists **disk-resident** and **disaggregated-storage** vector-search papers in the repo’s read-amp PDF set. For each paper we record:
 
-### 5.1 Page-aligned / block-local graph layout
+1. **How RA is defined** (explicit term or proxy metric)
+2. **Root cause** targeted (§3 letter)
+3. **How RA is handled** (mechanism)
+4. **Evaluation metric** for I/O waste
+
+**Entry template:** Category · §3 source · Local PDF · Definition · Problem · Solution · Metrics.
+
+**Quick index**
+
+| Paper | Index | Defines RA as… | Primary handle |
+|-------|-------|----------------|----------------|
+| DiskANN | Graph | Random SSD reads × sector granularity | Sector batching + PQ-in-RAM |
+| PageANN | Graph | Page misalignment; wasted bytes per 4 KB read | 1 node = 1 page |
+| Starling | Graph | Low **overlap ratio** OR(G) in disk blocks | Block shuffling (BNP/BNF/BNS) |
+| OctopusANN | Graph | Page-level OR + I/O time fraction | Joint mem/disk/search design space |
+| NaviX | Graph | Page-granularity waste in disk HNSW | Graph/block partition on DB pages |
+| PipeANN | Graph | Sequential I/O underutilization; speculative waste | Async pipelined I/O (io_uring) |
+| Gorgeous | Graph | Disk I/O count; poor neighbor locality | Neighbor-packed disk blocks |
+| LAANN | Graph | **I/O read amplification**; excess I/O ops | Look-ahead + I/O-aware search |
+| VeloANN | Graph | **Read amplification** / over-fetch per page | Affinity page placement + buffer pool |
+| B+ANN | Graph/disk | Block-level locality vs random hops | k-means++ blocks in B+ tree pages |
+| SPANN | IVF | **Disk-access count**; oversized postings | HBC bounded lists + query-aware prune |
+| SPFresh | IVF | Unbalanced posting I/O on update | LIRE split/rebalance (SPANN lineage) |
+| IVF-PQ | IVF | Bytes per list candidate | PQ codes in postings |
+| RAIRS | IVF | **Redundant list I/O** from multi-assignment | SEIL shared-cell layout |
+| I-LSH / SK-LSH | LSH | Pages per bucket probe | Incremental probe + sorted buckets |
+| HAKES | Hybrid | Full-vector bytes on refine path | Filter (RAM) → refine (disk) |
+| LindormVector | Systems/IVF | DFS read per posting on cache miss | LDServer cache + IVFPQ on DFS |
+| DSANN | Graph/DFS | Blocking DFS reads; hop amplification | PAG + async overlap |
+| Milvus | Systems | Segment-sized cold load vs nprobe need | Segment cache (does not fix unit size) |
+| Pinecone / Turbopuffer | Systems | Slab/object granularity vs probed subset | Slabs vs per-cluster objects |
+| IISWC 2025 | Measurement | Per-query read bandwidth | DiskANN I/O profiling |
+
+---
+
+### 5.1 Graph indexes on SSD / local disk
 
 #### DiskANN (NeurIPS 2019)
 
-- **Category:** Graph
-- **RA source:** A (sector alignment), B (hop chain), E (rerank)
-- **Local PDF:** [`diskann.pdf`](../related-work/pdfs/read-amp-related/diskann.pdf)
-- **Technique:** Vamana on SSD with **sector-aligned** nodes; PQ vectors in DRAM for navigation; SSD for full vectors + graph.
-- **RA story:** Padding to sector size accepts some internal waste to avoid **partial-page** reads. Still **70–90%** of latency is I/O in follow-on work because **hop count** dominates.
+- **Category:** Graph · **§3:** A, B, E · **PDF:** [`diskann.pdf`](../related-work/pdfs/read-amp-related/diskann.pdf)
+- **RA definition:** Does not use the phrase “read amplification.” Defines the bottleneck as **too many random SSD reads per query** (hundreds if naïve in-memory graphs are placed on disk) and **sector-granularity waste** — fetching one graph neighborhood may require reading a full **sector-aligned** slot while only part is useful.
+- **Root cause:** Graph hop chain (**B**) + node size misaligned with SSD read unit (**A**) + full-precision rerank from SSD (**E**).
+- **How handled:**
+  - **Vamana** graph with bounded degree to cap hop count.
+  - **Sector-aligned layout:** batch up to *W* consecutive neighbors per sector read (amortize random-read latency; accept padding waste if *W* is too large).
+  - **Two-tier storage:** PQ-compressed vectors in **DRAM** for navigation distances; **full vectors + graph topology on SSD**, fetched only for candidates in the beam.
+- **Metrics:** Random reads/query, latency vs in-memory HNSW; follow-on work reports **70–90%** query time in I/O.
 
 #### PageANN (arXiv 2025)
 
-- **Category:** Graph
-- **RA source:** A (explicit target)
-- **Local PDF:** [`pageann.pdf`](../related-work/pdfs/read-amp-related/pageann.pdf)
-- **Technique:** **Page-node graph** — one logical node maps to **one 4 KB SSD page**; clustered similar vectors; coordinated memory/disk allocation.
-- **RA story:** Paper claims elimination of **page-level read amplification** vs DiskANN misalignment; 1.85×–10.83× throughput vs SOTA disk ANN.
+- **Category:** Graph · **§3:** A (primary) · **PDF:** [`pageann.pdf`](../related-work/pdfs/read-amp-related/pageann.pdf)
+- **RA definition:** Explicitly names **misalignment with storage I/O granularity** — SSD must read whole **4 KB pages** while graph nodes are smaller and scattered, so each hop wastes sibling bytes (**page-level read amplification**).
+- **Root cause:** Node size ≠ page size; long I/O traversal paths from scattered layout (**A**, **B**).
+- **How handled:**
+  - **Page-node graph:** cluster similar vectors; map **one logical page-node ↔ one physical SSD page**.
+  - Co-designed **memory navigation graph + disk page graph**; representative vectors form inter-page edges.
+  - Merging within page packs topology so one page read is fully utilized.
+- **Metrics:** Pages read per query; claims **elimination of page-level RA** vs DiskANN; **1.85×–10.83×** throughput vs SOTA disk ANN.
 
 #### Starling (SIGMOD 2024)
 
-- **Category:** Graph (within one **segment**)
-- **RA source:** A, B
-- **Local PDF:** [`starling.pdf`](../related-work/pdfs/read-amp-related/starling.pdf)
-- **Technique:** In-memory navigation graph + **reordered disk graph** with **block shuffling** so co-accessed neighbors share blocks; block search strategy.
-- **RA story:** Targets Milvus-style **segment** where neighbors span blocks → one hop used to pull whole block including unrelated nodes.
+- **Category:** Graph (Milvus **segment** setting) · **§3:** A, B · **PDF:** [`starling.pdf`](../related-work/pdfs/read-amp-related/starling.pdf)
+- **RA definition:** **Overlap ratio** OR(G) — for vertex *u*, fraction of neighbors in the same disk **block** as *u*; global OR(G) averages over vertices. Low OR ⇒ loading a block pulls mostly **unrelated** vertices (**vertex utilization ratio**).
+- **Root cause:** DiskANN-style ID-contiguous layout scatters graph neighbors across blocks (**B**); each block read amplifies bytes (**A**).
+- **How handled:**
+  - In-memory **navigation graph** + **reordered disk graph**.
+  - **Block shuffling** (NP-hard): maximize OR(G) via heuristics **BNP** (padding neighbors into blocks), **BNF** (assign to block with most neighbors), **BNS** (swap low-overlap vertices).
+  - **Block-aware search** to exploit colocated neighbors.
+- **Metrics:** OR(G), block reads vs hops, I/O time fraction; **43.9×** throughput vs baselines on segment budget.
 
 #### OctopusANN (PVLDB 2026)
 
-- **Category:** Graph
-- **RA source:** A, B (design-space exploration)
-- **Local PDF:** [`octopusann.pdf`](../related-work/pdfs/read-amp-related/octopusann.pdf)
-- **Technique:** Joint optimization of **memory layout, disk layout, search algorithm**; page-level I/O model.
-- **RA story:** Reports **70–90%** query time in I/O; compositions beat Starling/DiskANN by reducing effective bytes per hop.
+- **Category:** Graph · **§3:** A, B · **PDF:** [`octopusann.pdf`](../related-work/pdfs/read-amp-related/octopusann.pdf)
+- **RA definition:** Same **page-level overlap ratio** as Starling (Eq. 1 in paper); also reports **I/O time as 70–90%** of query latency. Design-space paper — RA is **bytes wasted per page read × pages touched**.
+- **Root cause:** Poor data locality on disk; fragmented optimizations in prior work.
+- **How handled:** **Three-axis taxonomy** — memory layout, disk layout, search algorithm — composed systematically (page shuffle, mem graph, beam policies, etc.). Page shuffle = Starling-style reordering to raise OR(G).
+- **Metrics:** I/O time %, QPS at matched Recall@10; **4.1–37.9%** over Starling, **87.5–149.5%** over DiskANN.
 
 #### NaviX (PVLDB 2025)
 
-- **Category:** Graph (graph DBMS disk HNSW)
-- **RA source:** A
-- **Local PDF:** [`navix.pdf`](../related-work/pdfs/read-amp-related/navix.pdf)
-- **Technique:** Disk HNSW with **graph/block partition** aligned to DB pages for filtered queries.
-- **RA story:** Page-local layout for hybrid vector+graph workloads.
+- **Category:** Graph (disk HNSW in graph DBMS) · **§3:** A · **PDF:** [`navix.pdf`](../related-work/pdfs/read-amp-related/navix.pdf)
+- **RA definition:** Implicit — **page-granularity** reads in filtered graph+vector queries waste bytes when graph partitions span DB pages.
+- **Root cause:** Disk-resident HNSW layout not aligned with storage/page boundaries (**A**).
+- **How handled:** **Graph/block partitioning** co-designed with DB page layout so filtered traversals stay page-local.
+- **Metrics:** Query latency under hybrid vector+graph filters (paper-specific workloads).
 
 #### PipeANN (OSDI 2025)
 
-- **Category:** Graph
-- **RA source:** B (latency), **F** (speculative over-read)
-- **Local PDF:** [`pipeann.pdf`](../related-work/pdfs/read-amp-related/pipeann.pdf)
-- **Technique:** Async pipelined best-first search (io_uring); speculative I/O; dynamic beam width.
-- **RA story:** Trades **bandwidth RA** for latency — may read pages not on final frontier.
+- **Category:** Graph · **§3:** B, **F** · **PDF:** [`pipeann.pdf`](../related-work/pdfs/read-amp-related/pipeann.pdf)
+- **RA definition:** Does not optimize RA ratio directly. Identifies **serialized I/O+compute** and **underutilized I/O pipeline**; speculative reads may fetch pages **never on the final frontier** (**I/O over-fetching**).
+- **Root cause:** Sequential dependency of graph hops (**B**); latency masking can **increase bandwidth RA** (**F**).
+- **How handled:** **PipeSearch** — io_uring async pipeline; prefetch next-hop pages while computing current frontier; dynamic beam width; overlap compute with I/O.
+- **Metrics:** Latency vs in-memory Vamana (**1.14×–2.02×**); **35%** of DiskANN latency; tracks wasted speculative I/O qualitatively.
 
 #### Gorgeous (arXiv 2025)
 
-- **Category:** Graph
-- **RA source:** A, B (explicit I/O reduction target)
-- **Local PDF:** [`gorgeous.pdf`](../related-work/pdfs/read-amp-related/gorgeous.pdf)
-- **Technique:** **Graph-prioritized memory cache** (adjacency lists over full vectors); **graph-replicated disk blocks** with **neighbor packing** (prefetch neighbors' adjacency lists in same 4 KB block); async prefetch.
-- **RA story:** Reports **~39% fewer disk I/Os** at matched recall vs DiskANN/Starling; addresses Starling's diminishing block overlap at high dimension by packing **graph structure** instead of only co-locating vectors.
+- **Category:** Graph · **§3:** A, B · **PDF:** [`gorgeous.pdf`](../related-work/pdfs/read-amp-related/gorgeous.pdf)
+- **RA definition:** **Disk I/O count** and poor locality when co-located **vectors** alone fail at high dimension (Starling overlap drops). Notes **disk space amplification** from replicated adjacency in blocks.
+- **Root cause:** Vector co-location in 4 KB blocks insufficient when nodes are large (**A**); graph structure still scattered (**B**).
+- **How handled:**
+  - **Graph-prioritized memory cache** (adjacency lists over full vectors).
+  - **Graph-replicated disk blocks** with **neighbor packing** — store neighbors’ **adjacency lists** inside a node’s disk block so later hops avoid extra reads.
+  - Async prefetch of packed blocks.
+- **Metrics:** Average **disk I/Os per query** (~**39%** reduction vs DiskANN/Starling at matched recall).
 
 #### LAANN (arXiv 2026)
 
-- **Category:** Graph
-- **RA source:** B, F (I/O count reduction + pipeline)
-- **Local PDF:** [`laann.pdf`](../related-work/pdfs/read-amp-related/laann.pdf)
-- **Technique:** **Look-ahead search** (phase-aware I/O vs compute trade-off); **priority I/O–CPU pipeline**; lightweight in-memory centroid graph over page nodes; page-granular disk graph.
-- **RA story:** Explicitly targets **I/O read amplification** and hop count — **1.59×–6.34× fewer I/O operations** vs SOTA disk ANN at Recall@10=0.9; complements PipeANN's latency masking with **I/O-aware search policy**.
+- **Category:** Graph · **§3:** B, F · **PDF:** [`laann.pdf`](../related-work/pdfs/read-amp-related/laann.pdf)
+- **RA definition:** Explicitly targets **I/O read amplification** — issuing disk reads whose results are not used because search issues I/O **before** knowing which nodes matter.
+- **Root cause:** Decoupled CPU/I/O phases in best-first search (**B**, **F**).
+- **How handled:**
+  - **Look-ahead search** — phase-aware balance of I/O reduction vs timely issuance.
+  - **Priority I/O–CPU pipeline** — use I/O wait time for cheap in-memory work.
+  - Lightweight **in-memory centroid graph** over page nodes to guide which pages to read.
+- **Metrics:** **I/O operations per query** (**1.59×–6.34×** fewer vs SOTA at Recall@10=0.9); latency decomposition (I/O-only vs overlap vs CPU).
 
 #### VeloANN (arXiv 2026)
 
-- **Category:** Graph
-- **RA source:** A, B (read amplification / over-fetch)
-- **Local PDF:** [`veloann.pdf`](../related-work/pdfs/read-amp-related/veloann.pdf)
-- **Technique:** **Affinity-based page placement**; hierarchical compression; **record-level buffer pool** (hot neighbor records pinned); coroutine async runtime; beam-aware search prioritizing cached records.
-- **RA story:** Names **read amplification** and storage stalls from poor traversal locality; co-locates related vectors in same page to cut **over-fetching** and page swapping under memory pressure.
+- **Category:** Graph · **§3:** A, B · **PDF:** [`veloann.pdf`](../related-work/pdfs/read-amp-related/veloann.pdf)
+- **RA definition:** Explicit **read amplification** — “storage stalls” from loading a **whole page** but using one record; **over-fetching** under memory pressure causes page swapping.
+- **Root cause:** Poor traversal locality; synchronous I/O (**A**, **B**).
+- **How handled:**
+  - **Affinity-based page placement** — co-locate related vectors in same page.
+  - **Record-level buffer pool** — pin hot neighbor records.
+  - Hierarchical compression + coroutine async runtime; beam-aware search prefers cached records.
+- **Metrics:** QPS/latency vs PipeANN/DiskANN; storage stall reduction (paper benchmarks).
 
 #### B+ANN (arXiv 2025)
 
-- **Category:** Graph / B+-tree hybrid
-- **RA source:** A, B (block locality)
-- **Local PDF:** [`b-plus-ann.pdf`](../related-work/pdfs/read-amp-related/b-plus-ann.pdf)
-- **Technique:** k-means++ **semantic blocks** stored in **B+ tree** pages on disk; hybrid block- and edge-level in-memory traversal; batched SIMD distance within blocks.
-- **RA story:** Improves **spatial/temporal locality** vs random graph hops — **19% fewer cache misses** vs HNSW; block reads amortize multiple vectors per I/O vs fine-grained DiskANN hops (different index family, same RA axis).
+- **Category:** Graph / B+-tree on disk · **§3:** A, B · **PDF:** [`b-plus-ann.pdf`](../related-work/pdfs/read-amp-related/b-plus-ann.pdf)
+- **RA definition:** Implicit — random graph hops cause **block-granularity over-read**; reports **19% fewer cache misses** (CPU hierarchy) vs HNSW; disk path amortizes multiple vectors per block read.
+- **Root cause:** Unstructured graph layout on disk (**B**).
+- **How handled:** **k-means++ semantic blocks** stored in **B+ tree pages**; hybrid block-level + edge-level traversal; SIMD distance within a block (one I/O → many candidates).
+- **Metrics:** Cache misses, QPS/recall vs HNSW/DiskANN-class baselines.
 
 ---
 
-### 5.2 Bounded / selective IVF list reads
+### 5.2 IVF / LSH on disk
 
 #### SPANN (NeurIPS 2021)
 
-- **Category:** IVF on disk
-- **RA source:** C
-- **Local PDF:** [`spann.pdf`](../related-work/pdfs/read-amp-related/spann.pdf)
-- **Technique:** Hierarchical balanced clustering → **bounded posting size** (12–48 KB); centroids + SPTAG in RAM; **query-aware dynamic pruning** of lists.
-- **RA story:** Limits **maximum bytes per list read**; reduces **nprobe effective** via distance threshold — directly attacks IVF list RA.
+- **Category:** IVF · **§3:** C · **PDF:** [`spann.pdf`](../related-work/pdfs/read-amp-related/spann.pdf)
+- **RA definition:** **Number of disk accesses** and **bytes per posting list read** — large, unbalanced IVF lists force reading data not needed for top-*k*; centroids stay in RAM, **large postings on disk**.
+- **Root cause:** Oversized / unbalanced posting lists (**C**); reading whole lists when only head matters.
+- **How handled:**
+  - **Hierarchical Balanced Clustering (HBC)** — cap posting size (**12–48 KB**).
+  - **Closure expansion** for recall at cluster boundaries.
+  - **Query-aware dynamic pruning** — skip lists/posting tails by distance threshold (reduces effective nprobe).
+  - Centroids + head index (SPTAG) in memory; disk = postings only.
+- **Metrics:** Disk-access count, posting bytes read, QPS vs DiskANN at same DRAM budget; **2×** faster at 90% recall on billion-scale sets.
 
 #### SPFresh (SOSP 2023)
 
-- **Category:** IVF on disk (updates)
-- **RA source:** C
-- **Local PDF:** [`spfresh.pdf`](../related-work/pdfs/read-amp-related/spfresh.pdf)
-- **Technique:** Balanced small postings (SPANN lineage); LIRE split/rebalance.
-- **RA story:** Balanced postings bound **per-probe I/O** and tail latency — RA control via list size invariants.
+- **Category:** IVF (mutable) · **§3:** C · **PDF:** [`spfresh.pdf`](../related-work/pdfs/read-amp-related/spfresh.pdf)
+- **RA definition:** Same SPANN framing — **posting length imbalance** ⇒ unpredictable **per-probe I/O** and tail latency on disk.
+- **Root cause:** Updates break balanced postings (**C**).
+- **How handled:** SPANN-style **small balanced postings** + **LIRE** split/rebalance on ingest; keeps list-size invariants so each disk read stays bounded.
+- **Metrics:** Update throughput, query latency tail, recall under churn.
 
-#### SPANN / IVF-PQ (Jégou et al., foundational)
+#### IVF-PQ (Jégou et al., TPAMI 2011)
 
-- **Category:** IVF
-- **RA source:** C, E
-- **Local PDF:** [`product-quantization-for-nearest-neighbor-search.pdf`](../related-work/pdfs/read-amp-related/product-quantization-for-nearest-neighbor-search.pdf) (verify — small HAL export)
-- **Technique:** Inverted file + PQ codes in lists; asymmetric distance computation.
-- **RA story:** PQ shrinks **useful-bytes-per-candidate** inside each list read.
+- **Category:** IVF · **§3:** C, E · **PDF:** [`product-quantization-for-nearest-neighbor-search.pdf`](../related-work/pdfs/read-amp-related/product-quantization-for-nearest-neighbor-search.pdf)
+- **RA definition:** Implicit — inverted lists store **full vectors** unless compressed; RA = `list_bytes / useful_candidate_bytes`.
+- **Root cause:** Full-precision postings (**C**, **E**).
+- **How handled:** **PQ codes in postings** + asymmetric distance computation — same list read, fewer bytes per candidate scored.
+- **Metrics:** Recall–bits tradeoff; distance computation cost (typically in-RAM in original paper; disk IVF stacks inherit same compression lever).
 
 #### RAIRS (SIGMOD 2026)
 
-- **Category:** IVF
-- **RA source:** C (redundant assignment → duplicate work/bytes)
-- **Local PDF:** [`rairs.pdf`](../related-work/pdfs/read-amp-related/rairs.pdf)
-- **Technique:** SEIL layout shares cells across redundant IVF assignments.
-- **RA story:** Cuts **redundant distance computation and list I/O** from duplicate vectors across lists.
+- **Category:** IVF · **§3:** C · **PDF:** [`rairs.pdf`](../related-work/pdfs/read-amp-related/rairs.pdf)
+- **RA definition:** **Redundant assignment** (vector in multiple lists) causes the **same vector to be read/scored multiple times** across lists — multiplicative I/O and compute waste.
+- **Root cause:** Duplicate vectors across IVF lists from redundancy-for-recall (**C**).
+- **How handled:** **SEIL** list layout — shared cells across redundant assignments so one physical store serves multiple list memberships; optimized assignment policy.
+- **Metrics:** Distance computations avoided, QPS/recall vs naive redundant IVF.
 
-#### I-LSH (ICDE 2019) · SK-LSH (PVLDB 2014) · Learned-function lists (ICDE 2020)
+#### I-LSH (ICDE 2019)
 
-- **Category:** LSH / external memory
-- **RA source:** A, C (bucket/page layout)
-- **Local PDF:** [`i-lsh.pdf`](../related-work/pdfs/read-amp-related/i-lsh.pdf), [`sk-lsh.pdf`](../related-work/pdfs/read-amp-related/sk-lsh.pdf), [`i-o-efficient-approximate-nearest-neighbour-search.pdf`](../related-work/pdfs/read-amp-related/i-o-efficient-approximate-nearest-neighbour-search.pdf)
-- **Technique:** Incremental probing; **sorted bucket layout** on disk; learned orderings for sequential I/O.
-- **RA story:** Reduce **pages touched per bucket** and improve sequentiality — RA via better locality on disk.
+- **Category:** LSH / external memory · **§3:** A, C · **PDF:** [`i-lsh.pdf`](../related-work/pdfs/read-amp-related/i-lsh.pdf)
+- **RA definition:** **Pages read per query** in external memory — probing many buckets touches many disk pages.
+- **Root cause:** LSH multi-probe without early stop (**C**).
+- **How handled:** **Incremental probing** — add probes until recall target; stop early to reduce pages read.
+- **Metrics:** I/O complexity / pages accessed vs fixed probe count.
+
+#### SK-LSH (PVLDB 2014)
+
+- **Category:** LSH · **§3:** A, C · **PDF:** [`sk-lsh.pdf`](../related-work/pdfs/read-amp-related/sk-lsh.pdf)
+- **RA definition:** External-memory **bucket access cost** — random bucket layout ⇒ many seeks/pages.
+- **Root cause:** Hash buckets not sequential on disk (**A**).
+- **How handled:** **Sorted bucket layout** on disk for sequential reads within a bucket; reduces pages per bucket probe.
+- **Metrics:** Disk I/Os vs baseline LSH on disk-resident data.
+
+#### Learned-function lists (ICDE 2020)
+
+- **Category:** LSH/IVF hybrid · **§3:** C · **PDF:** [`i-o-efficient-approximate-nearest-neighbour-search.pdf`](../related-work/pdfs/read-amp-related/i-o-efficient-approximate-nearest-neighbour-search.pdf)
+- **RA definition:** **I/O-efficient** ANN — minimize block/page transfers for list probes.
+- **Root cause:** Poor on-disk ordering of candidates (**C**).
+- **How handled:** **Learned orderings** of posting/bucket contents for sequential I/O during probe.
+- **Metrics:** I/O cost vs recall on disk-resident indexes.
 
 ---
 
-### 5.3 Hybrid memory–disk / two-stage (reduce disk useful-set)
+### 5.3 Hybrid memory–disk and distributed file systems
 
 #### HAKES (PVLDB 2025)
 
-- **Category:** IVF two-stage (filter + refine)
-- **RA source:** C, E
-- **Local PDF:** [`hakes.pdf`](../related-work/pdfs/read-amp-related/hakes.pdf)
-- **Technique:** Compressed IVF filter in memory; full vectors on RefineWorkers; optional IVF-assignment sharding.
-- **RA story:** Minimizes **full-vector bytes read**; filter stage avoids loading raw embeddings for entire lists.
+- **Category:** IVF two-stage · **§3:** C, E · **PDF:** [`hakes.pdf`](../related-work/pdfs/read-amp-related/hakes.pdf)
+- **RA definition:** **Full-precision vector bytes** fetched from slow tier during refine — navigation should not pull entire raw embeddings.
+- **Root cause:** Single-stage IVF reads full vectors from disk (**C**, **E**).
+- **How handled:** **Filter workers** — compressed IVF in memory; **Refine workers** — full vectors on disk/remote; only short candidate list refined.
+- **Metrics:** End-to-end latency, bytes moved to refine tier, recall@k.
 
 #### LindormVector (SIGMOD 2026 Industry)
 
-- **Category:** Systems (IVFPQ on DFS)
-- **RA source:** D, C
-- **Local PDF:** [`lindorm-vector.pdf`](../related-work/pdfs/read-amp-related/lindorm-vector.pdf) — see [`related-work/lindorm-vector-sigmod2026.md`](../related-work/lindorm-vector-sigmod2026.md)
-- **Technique:** Centroids/HNSW resident; **posting lists on LindormDFS** with LDServer cache.
-- **RA story:** On cache miss, each probed cluster = DFS read; **does not solve** object-level RA vs request trade-off on cold path (reader analysis).
+- **Category:** IVFPQ on DFS · **§3:** D, C · **PDF:** [`lindorm-vector.pdf`](../related-work/pdfs/read-amp-related/lindorm-vector.pdf) · notes: [`related-work/lindorm-vector-sigmod2026.md`](../related-work/lindorm-vector-sigmod2026.md)
+- **RA definition:** Each probed cluster ⇒ **DFS read** on cache miss; RA at **posting-list** granularity unless LDServer cache hits.
+- **Root cause:** Disaggregated storage + IVFPQ lists not co-located with compute (**D**, **C**).
+- **How handled:** Centroids/HNSW in memory; **posting lists on LindormDFS**; **LDServer** compute-side cache — hides RA on warm path, not cold.
+- **Metrics:** Hybrid query latency (vector + SQL); cache hit sensitivity (reader analysis: cold path still RA-limited).
 
 #### DSANN (arXiv 2025)
 
-- **Category:** Graph + cluster on **distributed file system**
-- **RA source:** B (hop chain on slow DFS), D
-- **Local PDF:** [`dsann.pdf`](../related-work/pdfs/read-amp-related/dsann.pdf)
-- **Technique:** Point Aggregation Graph — sample aggregation points in memory; async overlap DFS reads for residuals.
-- **RA story:** DiskANN/SPANN RA **worse on DFS** (0.1–10 ms I/O); PAG limits **sequential blocking reads** of whole lists/hops.
+- **Category:** Graph on **distributed file system** · **§3:** B, D · **PDF:** [`dsann.pdf`](../related-work/pdfs/read-amp-related/dsann.pdf)
+- **RA definition:** **DFS read latency** (0.1–10 ms vs local NVMe) amplifies cost of each hop/list read; blocking reads of whole graph segments or lists.
+- **Root cause:** DiskANN/SPANN designs assume fast local SSD; hop chains on DFS (**B**, **D**).
+- **How handled:** **Point Aggregation Graph (PAG)** — sample aggregation points in memory for most traversal; **async overlap** for residual vectors on DFS; reduces blocking round-trips.
+- **Metrics:** QPS/latency on Pangu-class DFS vs replicated local DiskANN/SPANN.
 
 ---
 
-### 5.4 Systems-layer / cloud disaggregation (segment & object RA)
+### 5.4 Systems layer — segment / object granularity
 
-#### Milvus 2.x / segments
+#### Milvus 2.x (SIGMOD 2021)
 
-- **Category:** Systems (#1 partition → local index)
-- **RA source:** D
-- **Local PDF:** [`milvus.pdf`](../related-work/pdfs/read-amp-related/milvus.pdf) (SIGMOD paper); prod docs not archived
-- **Technique:** Sealed **segments** (~512 MB) with local IVF/HNSW; object storage backing.
-- **RA story:** Cold query may load **whole segment**; IVF inside may need only **nprobe ≪ nlist** clusters → segment-level RA persists (reviewer attack note in `discussions/2026-06-04-reviewer-attacks.md`).
+- **Category:** Systems · **§3:** D · **PDF:** [`milvus.pdf`](../related-work/pdfs/read-amp-related/milvus.pdf)
+- **RA definition:** Not named “read amplification” in the paper. Implicit: **sealed segment** (~512 MB) is the load/cache unit from object storage, while a query may need only **nprobe** IVF partitions or a **small graph subset** inside the segment.
+- **Root cause:** Coarse **segment object** vs fine probe working set (**D**).
+- **How handled:** Segment **cache on QueryNode** (hide RA on warm path); per-segment local IVF/HNSW/DiskANN — does **not** right-size object to probed lists. Tiered storage (2.6.4+) adds **lazy chunk/index fetch** but still segment-scoped.
+- **Metrics:** Throughput, latency; segment load time (see `summaries/cold-hot-query-paths.md`).
 
-#### Pinecone serverless · Turbopuffer (product pattern)
+#### Pinecone serverless · Turbopuffer (product / industry)
 
-- **Category:** Systems
-- **RA source:** D ↔ **request amplification** trade-off
-- **Local PDF:** [`pinecone.pdf`](../related-work/pdfs/read-amp-related/pinecone.pdf) (HTML snapshot)
-- **Technique:** Pinecone: geometric partitions + **slabs**; Turbopuffer: **per-cluster S3 objects**.
-- **RA story:** Turbopuffer **low bytes RA**, **high nprobe request count**; Pinecone slab middle ground.
+- **Category:** Systems · **§3:** D · **PDF:** [`pinecone.pdf`](../related-work/pdfs/read-amp-related/pinecone.pdf) (HTML snapshot)
+- **RA definition:** **Slab/object size vs probed IVF clusters** — loading a slab or object pulls bytes beyond the query’s logical working set.
+- **Root cause:** LSM **slab** compaction units (Pinecone) or **per-cluster objects** (Turbopuffer) vs nprobe (**D**).
+- **How handled:**
+  - **Pinecone:** slabs at multiple tiers; IVF inside large slabs; mitigates via **executor cache**, not smaller cold unit.
+  - **Turbopuffer:** **one object per cluster** — low **byte RA**, higher **request amplification** (nprobe GETs).
+- **Metrics:** Industry latency/recall; bytes vs GET count trade-off (§7).
 
-#### AnyBlob (PVLDB 2023) — OLAP on object storage (contrast)
+#### AnyBlob (PVLDB 2023) — contrast (not ANN)
 
-- **Category:** Not vector — **counterexample**
-- **Local PDF:** [`anyblob-vldb2023.pdf`](../related-work/pdfs/read-amp-related/anyblob-vldb2023.pdf) · notes in [`related-work/anyblob-vldb2023.md`](../related-work/anyblob-vldb2023.md)
-- **RA story:** Bulk parallel GETs achieve bandwidth but **read much unused data** — poor fit for **random IVF/graph** unless accepting RA (`discussions/2026-06-03-s3-high-bandwidth-vs-vector-search.md`).
+- **Category:** OLAP on object storage · **PDF:** [`anyblob-vldb2023.pdf`](../related-work/pdfs/read-amp-related/anyblob-vldb2023.pdf)
+- **RA definition:** **Bulk parallel GET** reads far more data than a point query needs — acceptable for scan, unacceptable for ANN.
+- **How handled:** Intentionally high RA for bandwidth; **counterexample** for vector cold path (`discussions/2026-06-03-s3-high-bandwidth-vs-vector-search.md`).
 
 ---
 
-### 5.5 I/O measurement & characterization
+### 5.5 Measurement and characterization
 
-#### IISWC 2025 — Storage-Based Approximate Nearest Neighbor (AtLarge)
+#### IISWC 2025 — Storage-Based ANN (AtLarge)
 
-- **Category:** Measurement (DiskANN on NVMe)
-- **RA source:** All (empirical I/O profiling)
-- **Local PDF:** [`iiswc2025-storage-based-ann.pdf`](../related-work/pdfs/read-amp-related/iiswc2025-storage-based-ann.pdf)
-- **Technique:** Reproducible characterization of **DiskANN** on modern SSDs — per-query bandwidth vs concurrency, dataset scale, `search_list` sweep.
-- **RA story:** Quantifies how **larger datasets and higher search_list** increase **per-query read bandwidth** and I/O overhead; useful baseline for normalized RA benchmarking (§8 gap).
+- **Category:** Measurement · **§3:** all · **PDF:** [`iiswc2025-storage-based-ann.pdf`](../related-work/pdfs/read-amp-related/iiswc2025-storage-based-ann.pdf)
+- **RA definition:** Empirical **per-query read bandwidth** and I/O overhead for **DiskANN** on modern NVMe — not normalized `bytes_read/useful_bytes`, but profiles how **dataset scale** and **`search_list`** inflate bytes moved.
+- **How handled:** N/A (characterization); informs RA benchmarking gap in §8.
+- **Metrics:** Read bandwidth vs concurrency, search_list sweep, I/O time share.
 
-**Survey gap note:** Papers above (PageANN, OctopusANN, LAANN, Gorgeous) post-date or extend the IISWC study; no unified cross-family RA ratio table exists yet.
+**Survey gap:** No paper in this catalog reports a unified **RA ratio** across graph and IVF on identical hardware; OctopusANN/LAANN/Gorgeous post-date IISWC 2025.
 
 ---
 
@@ -597,3 +671,4 @@ On **S3-class** storage, the bottleneck is often **per-GET latency**, not bandwi
 | 2026-06-16 | Added §4 solution catalog: six approach families, eleven fix strategies, RA-source mapping |
 | 2026-06-17 | §5 PDFs collected in `related-work/pdfs/read-amp-related/`; Local PDF links updated; AnyBlob downloaded |
 | 2026-06-17 | Relocated manual AnyBlob/LindormVector PDFs; added Gorgeous, LAANN, VeloANN, B+ANN, IISWC 2025 to §5 catalog |
+| 2026-06-18 | §5 rewritten: per-paper **RA definition**, root cause, handling mechanism, and evaluation metrics (24 papers) |
