@@ -1,6 +1,6 @@
 # Distributed ANNS — Taxonomy (Survey Draft v6)
 
-**Updated:** 2026-06-23 (fact-check corrections applied)  
+**Updated:** 2026-06-23 (fact-check corrections applied; v6.1 — added DistVS NSDI'26; flagged Pinecone/DSANN nuances)  
 **Principle:** Distilled vocabulary; **main index type** only; decision tree lists **system names only**; no empty leaves.
 
 ---
@@ -46,9 +46,12 @@ Both branches use node placement strategy; only **placement-first** makes placem
 | **Harmony — runtime steering** | Also picks vector vs dimension mode **per query** via cost model (complements offline `B_vec` refinement from past queries). |
 | **Harmony — index type** | Distributed **partial-distance scan**, not classic inverted-file or LSH; grouped under IVF/LSH as closest bucket. |
 | **CXL-ANNS** | Index-first **global graph**; nodes hold **dimension columns** across CXL expanders — **dimension split**, not spatial colocation. |
+| **DistVS (NSDI'26)** | Index-first **IVF/LSH** + **compute-memory disaggregation**; 3-tier precision (compute=low / memory server=index+high / SSD=full), PRESS coarse-to-fine, **single shared index**, **argues partitioning harms pruning**. Placement is disaggregation-defined, not random/spatial/query-history. Peer-reviewed (unlike SPIRE arXiv). |
 | **SPIRE — index vs node** | Hierarchical k-means is **index geometry**; partitions are **hash-shuffled** to storage nodes (anti hot-spot). |
 | **HAKES — refine tier** | FilterWorkers use k-means IVF (spatial); RefineWorkers shard by **vector ID** (random). |
 | **Pyramid — optional weights** | Sample-query vertex weights on meta-HNSW; weaker than SPANN §4.3 — stays spatial leaf only. |
+| **Pinecone — placement nuance (flagged 2026-06-23)** | Slabs are geometry-built, but queries **fan out to all slabs** (no subset routing); slab→compute map not documented as geometry-aware. Leaf **kept spatial**; may be closer to random/fan-out. |
+| **DSANN — org nuance (flagged 2026-06-23)** | Repo note reads "cluster layer for placement + Point-Aggregation-Graph inside" → looks **placement-first**. Leaf **kept index-first/Graph** pending paper recheck. |
 
 ---
 
@@ -102,6 +105,9 @@ DISTRIBUTED ANNS
         │
         └─ Query-history-aware placement
               SPANN, SABBSR, Harmony
+
+        (+ DistVS — index-first IVF/LSH, compute-memory disaggregation,
+           single shared index, anti-partitioning; NSDI'26 — sidenote)
 ```
 
 ---
@@ -169,6 +175,12 @@ netanns.pdf — in-network accelerator; assumes existing partitioned backend.
 
 MemANNS, BLISS (query-history-aware IVF research); Elasticsearch, pgvector+Citus, LanceDB (products, same models as in-tree cousins).
 
+### 3.7 Added 2026-06-23 fact-check (external, no repo PDF yet)
+
+| System | Leaf | Note |
+|--------|------|------|
+| **DistVS** (NSDI'26) | Index-first → IVF/LSH (disaggregation sidenote) | Compute-memory disaggregation, 3-tier precision (compute=low / memory=index+high / SSD=full), PRESS coarse-to-fine, single shared index, **argues partitioning harms pruning**. Peer-reviewed (NSDI'26), unlike SPIRE (arXiv). |
+
 ---
 
 ## 4. Main-index reclassification (no “hybrid”)
@@ -183,6 +195,7 @@ MemANNS, BLISS (query-history-aware IVF research); Elasticsearch, pgvector+Citus
 | CoTra, RED-ANNS, SHINE, d-HNSW, BatANN, DSANN | **Graph** | Spatial colocation |
 | GP-ANN, Pyramid | **Graph** | Spatial colocation (placement-first) |
 | CXL-ANNS | **Graph** | Dimension split (sidenote) |
+| DistVS | **IVF / LSH** | Compute-memory disaggregation; single shared index (sidenote) |
 
 ---
 
