@@ -1,26 +1,22 @@
-# Local PDF Inventory (Partition / Sharding Survey)
+# Local PDF Inventory
 
-Working copies of papers referenced in [`summaries/partition-sharding-vector-search-survey.md`](../../summaries/partition-sharding-vector-search-survey.md).
+Single flat directory of working PDF copies for Ember paper surveys. **One file per paper** — category membership is in [`categories.md`](categories.md) / [`categories.tsv`](categories.tsv).
 
-## Usage
+**Industrial systems** (no academic PDF): in-depth analyses in [`../industrial/`](../industrial/) — listed in `categories.tsv` as `industrial/*.md`.
 
-- Each survey entry lists **Local PDF** when a file exists here.
-- **§4 papers** (centroid/bucket spatial proximity) live in [`spatial-related/`](spatial-related/) — see [`spatial-related/README.md`](spatial-related/README.md).
-- **Read-amplification survey (§5)** papers live in [`read-amp-related/`](read-amp-related/) — see [`read-amp-related/README.md`](read-amp-related/README.md).
-- **Parallel-or-not classics** (Amdahl, Gustafson, Lamport, …) live in [`parallel-or-not/`](parallel-or-not/) — see [`parallel-or-not/README.md`](parallel-or-not/README.md) and [`../parallel-or-not-report.md`](../parallel-or-not-report.md).
-- If download failed (ACM 403, blog-only source, etc.), the entry says `NOT_DOWNLOADED` and keeps the online **PDF** link.
-- HTML snapshots (product docs) are saved as `.pdf` for reference only — not academic PDFs.
+## Categories
+
+| Category | Purpose |
+|----------|---------|
+| [`distributed-anns-related`](categories.md#distributed-anns-related) | Distributed ANNS (papers + industrial docs) |
+| [`spatial-related`](categories.md#spatial-related) | Spatial colocation (partition survey §4) |
+| [`read-amp-related`](categories.md#read-amp-related) | Read amplification (read-amp survey §5) |
+| [`parallel-or-not`](categories.md#parallel-or-not) | Classical scaling laws |
 
 ## Status (2026-06-16)
 
-| Status | Count | Notes |
-|--------|-------|-------|
-| Downloaded | ~48 peer-reviewed PDFs | arXiv, PVLDB, USENIX, author mirrors |
-| NOT_DOWNLOADED | LindormVector, Distributed LSH (ACM), C-SPANN (blog), Milvus prod docs | Use online links in survey |
-| HTML snapshot | Pinecone, Weaviate, Qdrant, OpenSearch | Not paper PDFs |
+- **66** peer-reviewed PDFs in this folder
+- **6** industrial analyses in `../industrial/`
+- Academic Milvus: `milvus.pdf` (SIGMOD 2021); production: `../industrial/milvus.md`
 
-See [`manifest.tsv`](manifest.tsv) for title → file mapping from the batch download run.
-
-## Naming
-
-`{short-slug}.pdf` derived from paper title (e.g. `spann.pdf`, `analyticdb-v.pdf`).
+See [`manifest.tsv`](manifest.tsv) for download URLs and status.

@@ -34,7 +34,7 @@ This note catalogs research papers and industry systems where **partitioning or 
 | **Scale-out-ready layout** | Same unit becomes a cluster shard later | Weaviate/Milvus architecture |
 | **Build-time partition only** | Parallel index construction, not query routing | DiskANN k-means for parallel graph build |
 
-**Local PDFs:** Downloaded copies live in [`related-work/pdfs/`](../related-work/pdfs/) (see [`manifest.tsv`](../related-work/pdfs/manifest.tsv)). **§4 papers** are under [`related-work/pdfs/spatial-related/`](../related-work/pdfs/spatial-related/). Entries mark **Local PDF** path or `NOT_DOWNLOADED` if fetch failed.
+**Local PDFs:** Downloaded copies live in [`related-work/pdfs/`](../related-work/pdfs/) (see [`manifest.tsv`](../related-work/pdfs/manifest.tsv) and [`categories.md`](../related-work/pdfs/categories.md)). Category tags: `distributed-anns-related`, `spatial-related`, `read-amp-related`, `parallel-or-not`. Entries mark **Local PDF** path or `NOT_DOWNLOADED` if fetch failed.
 
 **Abstract policy:** Abstracts marked *(from docs)* or *(from wiki)* are from product documentation. Paper abstracts from arXiv are verbatim via API. Remaining PVLDB/SIGMOD/USENIX entries may still need manual publisher-page verification.
 
@@ -67,7 +67,7 @@ Production vector DBs most often follow this pattern: hash/range/semantic **data
 
 - **Category:** 1
 - **Deployment scope:** Multi-node (serverless functions)
-- **Local PDF:** [`spatial-related/vexless.pdf`](../related-work/pdfs/spatial-related/vexless.pdf)
+- **Local PDF:** [`vexless.pdf`](../related-work/pdfs/vexless.pdf)
 - **§4 centroid-locality:** covered in §4 deep dive
 - **Venue:** SIGMOD 2024 (PACMMOD)
 - **PDF:** [NSF PAR](https://par.nsf.gov/servlets/purl/10570270)
@@ -102,7 +102,7 @@ Production vector DBs most often follow this pattern: hash/range/semantic **data
 
 - **Category:** 1
 - **Deployment scope:** Multi-node (distributed tiered storage)
-- **Local PDF:** [`spatial-related/vstream.pdf`](../related-work/pdfs/spatial-related/vstream.pdf)
+- **Local PDF:** [`vstream.pdf`](../related-work/pdfs/vstream.pdf)
 - **§4 centroid-locality:** covered in §4
 - **Venue:** PVLDB 2025
 - **PDF:** [PVLDB](https://www.vldb.org/pvldb/vol18/p1593-gao.pdf)
@@ -154,7 +154,7 @@ Production vector DBs most often follow this pattern: hash/range/semantic **data
 
 - **Category:** 1
 - **Deployment scope:** Multi-node (shard-local HNSW)
-- **Local PDF:** [`spatial-related/gp-ann.pdf`](../related-work/pdfs/spatial-related/gp-ann.pdf) — see [`related-work/gp-ann.md`](../related-work/gp-ann.md)
+- **Local PDF:** [`gp-ann.pdf`](../related-work/pdfs/gp-ann.pdf) — see [`related-work/gp-ann.md`](../related-work/gp-ann.md)
 - **§4 centroid-locality:** covered in §4
 - **Venue:** PVLDB 2025
 - **PDF:** [PVLDB](https://www.vldb.org/pvldb/vol18/p1649-gottesbueren.pdf)
@@ -229,7 +229,7 @@ These systems keep **one index abstraction** (one IVF posting namespace, one nav
 
 - **Category:** 2
 - **Deployment scope:** Multi-node (Lindorm shards/ranges)
-- **Local PDF:** [`spatial-related/lindorm-vector.pdf`](../related-work/pdfs/spatial-related/lindorm-vector.pdf)
+- **Local PDF:** [`lindorm-vector.pdf`](../related-work/pdfs/lindorm-vector.pdf)
 - **Venue:** SIGMOD 2026 (Industry)
 - **PDF:** [ACM](https://dl.acm.org/doi/pdf/10.1145/3788853.3803088)
 - **Abstract:** LindormVector embeds distributed IVFPQ-based vector retrieval into Alibaba Lindorm multi-model NoSQL, with compute–storage separation, hybrid scalar/full-text/vector optimization, and production-scale VectorDBBench evaluation.
@@ -246,7 +246,7 @@ These systems keep **one index abstraction** (one IVF posting namespace, one nav
 
 - **Category:** 2
 - **Deployment scope:** Multi-node (16-node eval); optional k-means data sharding
-- **Local PDF:** [`spatial-related/analyticdb-v.pdf`](../related-work/pdfs/spatial-related/analyticdb-v.pdf)
+- **Local PDF:** [`analyticdb-v.pdf`](../related-work/pdfs/analyticdb-v.pdf)
 - **§4 centroid-locality:** covered in §4 deep dive
 - **Venue:** PVLDB 2020
 - **PDF:** [PVLDB](http://www.vldb.org/pvldb/vol13/p3152-wei.pdf)
@@ -264,7 +264,7 @@ These systems keep **one index abstraction** (one IVF posting namespace, one nav
 
 - **Category:** 2
 - **Deployment scope:** Multi-node (distance-based DN sharding)
-- **Local PDF:** [`spatial-related/gaussdb-vector.pdf`](../related-work/pdfs/spatial-related/gaussdb-vector.pdf)
+- **Local PDF:** [`gaussdb-vector.pdf`](../related-work/pdfs/gaussdb-vector.pdf)
 - **§4 centroid-locality:** covered in §4 deep dive
 - **Venue:** PVLDB 2025
 - **PDF:** [PVLDB](https://www.vldb.org/pvldb/vol18/p4951-sun.pdf)
@@ -316,7 +316,7 @@ These systems keep **one index abstraction** (one IVF posting namespace, one nav
 
 - **Category:** 2
 - **Deployment scope:** Multi-node (peer overlay)
-- **Local PDF:** `NOT_DOWNLOADED` → [`spatial-related/haghani-distributed-lsh-edbt-2009.pdf`](../related-work/pdfs/spatial-related/haghani-distributed-lsh-edbt-2009.pdf) (openproceedings mirror; use online PDF)
+- **Local PDF:** [`haghani-distributed-lsh-edbt-2009.pdf`](../related-work/pdfs/haghani-distributed-lsh-edbt-2009.pdf)
 - **§4 centroid-locality:** covered in §4 deep dive
 - **Venue:** EDBT 2009 (extends WebDB 2008 work; often cited in distributed LSH lineage)
 - **PDF:** [OpenProceedings](https://openproceedings.org/2009/conf/edbt/HaghaniMA09.pdf) · [ACM](https://dl.acm.org/doi/pdf/10.1145/1516360.1516446)
@@ -334,7 +334,7 @@ These systems keep **one index abstraction** (one IVF posting namespace, one nav
 
 - **Category:** 2
 - **Deployment scope:** Multi-node (46 nodes)
-- **Local PDF:** [`spatial-related/spire.pdf`](../related-work/pdfs/spatial-related/spire.pdf)
+- **Local PDF:** [`spire.pdf`](../related-work/pdfs/spire.pdf)
 - **§4 centroid-locality:** covered in §4
 - **Venue:** arXiv (VecDB @ ICML 2025 workshop)
 - **PDF:** [arXiv](https://arxiv.org/pdf/2512.17264.pdf)
@@ -382,7 +382,7 @@ These systems keep **one index abstraction** (one IVF posting namespace, one nav
 
 - **Category:** 2
 - **Deployment scope:** Multi-node (8–16 machines)
-- **Local PDF:** [`spatial-related/cotra.pdf`](../related-work/pdfs/spatial-related/cotra.pdf)
+- **Local PDF:** [`cotra.pdf`](../related-work/pdfs/cotra.pdf)
 - **§4 centroid-locality:** covered in §4 deep dive
 - **Venue:** arXiv (SIGMOD 2026 listed on some mirrors)
 - **PDF:** [arXiv](https://arxiv.org/pdf/2507.06653.pdf)
@@ -400,7 +400,7 @@ These systems keep **one index abstraction** (one IVF posting namespace, one nav
 
 - **Category:** 2
 - **Deployment scope:** Multi-node (RDMA cluster)
-- **Local PDF:** [`spatial-related/red-anns.pdf`](../related-work/pdfs/spatial-related/red-anns.pdf)
+- **Local PDF:** [`red-anns.pdf`](../related-work/pdfs/red-anns.pdf)
 - **§4 centroid-locality:** covered in §4
 - **Venue:** PVLDB 2026
 - **PDF:** [Author copy](https://kay21s.github.io/RED-ANNS-VLDB2026.pdf)
@@ -418,7 +418,7 @@ These systems keep **one index abstraction** (one IVF posting namespace, one nav
 
 - **Category:** 2
 - **Deployment scope:** Multi-node (disaggregated memory)
-- **Local PDF:** [`spatial-related/shine.pdf`](../related-work/pdfs/spatial-related/shine.pdf)
+- **Local PDF:** [`shine.pdf`](../related-work/pdfs/shine.pdf)
 - **§4 centroid-locality:** covered in §4 (logical k-means routing; graph-preserving)
 - **Venue:** arXiv
 - **PDF:** [arXiv](https://arxiv.org/pdf/2507.17647.pdf)
@@ -436,7 +436,7 @@ These systems keep **one index abstraction** (one IVF posting namespace, one nav
 
 - **Category:** 2
 - **Deployment scope:** Multi-node (disaggregated memory)
-- **Local PDF:** [`spatial-related/d-hnsw.pdf`](../related-work/pdfs/spatial-related/d-hnsw.pdf)
+- **Local PDF:** [`d-hnsw.pdf`](../related-work/pdfs/d-hnsw.pdf)
 - **§4 centroid-locality:** covered in §4 (balanced k-means sub-HNSW placement)
 - **Venue:** arXiv
 - **PDF:** [arXiv](https://arxiv.org/pdf/2603.13591.pdf)
@@ -454,7 +454,7 @@ These systems keep **one index abstraction** (one IVF posting namespace, one nav
 
 - **Category:** 2
 - **Deployment scope:** Multi-node (multi-server NVMe)
-- **Local PDF:** [`spatial-related/batann.pdf`](../related-work/pdfs/spatial-related/batann.pdf)
+- **Local PDF:** [`batann.pdf`](../related-work/pdfs/batann.pdf)
 - **§4 centroid-locality:** covered in §4 (graph / spatial partition)
 - **Venue:** arXiv
 - **PDF:** [arXiv](https://arxiv.org/pdf/2512.09331.pdf)
@@ -506,7 +506,7 @@ These systems keep **one index abstraction** (one IVF posting namespace, one nav
 
 - **Category:** 2
 - **Deployment scope:** Multi-node (KV ranges)
-- **Local PDF:** NOT_DOWNLOADED (blog only)
+- **Local analysis:** [`industrial/cockroachdb-c-spann.md`](../related-work/industrial/cockroachdb-c-spann.md)
 - **Venue:** Product / blog
 - **PDF / Source:** [Distributed vector indexing](https://www.cockroachlabs.com/blog/distributed-vector-indexing-cockroachdb/) · [Real-time indexing](https://www.cockroachlabs.com/blog/cspann-real-time-indexing-billions-vectors/)
 - **Abstract (from docs):** C-SPANN stores hierarchical k-means tree partitions as **KV ranges** that split/merge/rebalance like table data; SPANN/SPFresh-inspired posting layout on distributed storage.
@@ -547,7 +547,7 @@ Partitioning here is **inside the index**, not an external systems-layer shard. 
 
 - **Category:** 3
 - **Deployment scope:** Single-node (PostgreSQL)
-- **Local PDF:** [`pase-sigmod2020.pdf`](../related-work/pdfs/pase-sigmod2020.pdf)
+- **Local PDF:** [`pase.pdf`](../related-work/pdfs/pase.pdf)
 - **Venue:** SIGMOD 2020 (Industry)
 - **PDF:** [ACM](https://dl.acm.org/doi/pdf/10.1145/3318464.3386131)
 - **Abstract:** PASE is a PostgreSQL extension for ultra-high-dimensional ANN, integrating quantization-based and graph-based nearest-neighbor search under one framework so composite SQL vector queries can run on large datasets inside an RDBMS.
@@ -918,7 +918,7 @@ Partitioning here is **inside the index**, not an external systems-layer shard. 
 ---
 ## 4. Centroid / Bucket / Vector Spatial Locality for Systems Partitioning
 
-**Local PDFs:** [`related-work/pdfs/spatial-related/`](../related-work/pdfs/spatial-related/) · [`spatial-related/README.md`](../related-work/pdfs/spatial-related/README.md)
+**Local PDFs:** [`related-work/pdfs/`](../related-work/pdfs/) · [`categories.md`](../related-work/pdfs/categories.md)
 
 ### 4.1 What this section is
 
@@ -1020,7 +1020,7 @@ This is **different from partition-size balance** (equal vector count per k-mean
 
 #### SABES — Spatial-Aware Bucket Equal Split (Andrade, Teodoro, Ferreira; SBAC-PAD 2020)
 
-- **PDF:** [DOI](https://doi.org/10.1109/SBAC-PAD49847.2020.00027) · **Local:** [`spatial-related/sabes.pdf`](../related-work/pdfs/spatial-related/sabes.pdf)
+- **PDF:** [DOI](https://doi.org/10.1109/SBAC-PAD49847.2020.00027) · **Local:** [`sabes.pdf`](../related-work/pdfs/sabes.pdf)
 - **Hardware:** Multi-node distributed memory; up to **160 nodes**; buckets in **RAM**.
 - **Geometry signal:** After IVFADC/LSH indexing, **k-means on coarse centroids**; assign centroid groups to query-processing nodes so spatially close buckets colocate.
 - **Why colocate:** BES spreads buckets evenly across nodes but ignores that **multi-probe search visits neighboring buckets** — scattering neighbors → all-node traffic. SABES keeps co-probed buckets on one node (**2.4× vs DES @ 5 nodes**, **14.5× @ 160 nodes**).
@@ -1029,7 +1029,7 @@ This is **different from partition-size balance** (equal vector count per k-mean
 
 #### SABBS / SABBSR (Pereira, Barreiros Jr., Ferreira, Teodoro; Research Square 2024)
 
-- **PDF:** [Research Square](https://www.researchsquare.com/article/rs-4973077/v1) · **Local:** [`spatial-related/sabbsr.pdf`](../related-work/pdfs/spatial-related/sabbsr.pdf)
+- **PDF:** [Research Square](https://www.researchsquare.com/article/rs-4973077/v1) · **Local:** [`sabbsr.pdf`](../related-work/pdfs/sabbsr.pdf)
 - **Hardware:** Multi-node; weak scaling to **60 nodes**, **12B × 128-dim** descriptors; in-memory IVFADC.
 - **Geometry signal:** Same centroid-group colocation as SABES.
 - **Why colocate:** Same inter-node traffic argument as SABES.
@@ -1039,7 +1039,7 @@ This is **different from partition-size balance** (equal vector count per k-mean
 
 #### Distributed LSH (Haghani, Michel, Aberer; EDBT 2009)
 
-- **PDF:** [OpenProceedings](https://openproceedings.org/2009/conf/edbt/HaghaniMA09.pdf) · **Local:** `NOT_DOWNLOADED` → [`spatial-related/haghani-distributed-lsh-edbt-2009.pdf`](../related-work/pdfs/spatial-related/haghani-distributed-lsh-edbt-2009.pdf)
+- **PDF:** [OpenProceedings](https://openproceedings.org/2009/conf/edbt/HaghaniMA09.pdf) · **Local:** [`haghani-distributed-lsh-edbt-2009.pdf`](../related-work/pdfs/haghani-distributed-lsh-edbt-2009.pdf)
 - **Hardware:** P2P overlay; eval to **1M global peers**, **1000 peers/local DHT**; in-memory bucket scans.
 - **Geometry signal:** **ξ mapping** (sum or Cauchy LSH) from bucket label vectors to 1D peer IDs — small **L1 label distance** ⇒ similar data ⇒ same/adjacent Chord peers.
 - **Why colocate:** Multi-probe LSH jumps buckets; random peer mapping ⇒ **O(log n)** peer hops per jump. Linear ring forwarding visits **physically adjacent peers** for adjacent labels.
@@ -1048,7 +1048,7 @@ This is **different from partition-size balance** (equal vector count per k-mean
 
 #### AnalyticDB-V — ADBV (Wei et al.; PVLDB 2020)
 
-- **PDF:** [PVLDB](http://www.vldb.org/pvldb/vol13/p3152-wei.pdf) · **Local:** [`spatial-related/analyticdb-v.pdf`](../related-work/pdfs/spatial-related/analyticdb-v.pdf)
+- **PDF:** [PVLDB](http://www.vldb.org/pvldb/vol13/p3152-wei.pdf) · **Local:** [`analyticdb-v.pdf`](../related-work/pdfs/analyticdb-v.pdf)
 - **Hardware:** Multi-node Alibaba Cloud (**16 nodes** in eval); in-memory hybrid analytics.
 - **Geometry signal:** Optional **256 k-means sharding centroids** — each vector assigned to nearest centroid partition (**independent** of internal IVFPQ nlist).
 - **Why route (not full colocation):** Hash/range sharding requires all-node fan-out; **centroid-based partition pruning** sends query to **N nearest partitions** (512 partitions → **3 nodes** on Deep1B without recall loss).
@@ -1057,7 +1057,7 @@ This is **different from partition-size balance** (equal vector count per k-mean
 
 #### GaussDB-Vector (Sun et al.; PVLDB 2025)
 
-- **PDF:** [PVLDB](https://www.vldb.org/pvldb/vol18/p4951-sun.pdf) · **Local:** [`spatial-related/gaussdb-vector.pdf`](../related-work/pdfs/spatial-related/gaussdb-vector.pdf)
+- **PDF:** [PVLDB](https://www.vldb.org/pvldb/vol18/p4951-sun.pdf) · **Local:** [`gaussdb-vector.pdf`](../related-work/pdfs/gaussdb-vector.pdf)
 - **Hardware:** Multi-node production; **memory + page-based disk** persistence.
 - **Geometry signal:** **Two-layer k-means IVF** centroids for sharding; vectors on DN owning nearest cluster centroid.
 - **Why colocate/route:** Query routing to DNs whose centroids are near query; **boundary expansion** among selected centroids for recall at partition borders.
@@ -1065,7 +1065,7 @@ This is **different from partition-size balance** (equal vector count per k-mean
 
 #### CoTra (SIGMOD 2026 / arXiv 2025)
 
-- **PDF:** [arXiv](https://arxiv.org/pdf/2507.06653.pdf) · **Local:** [`spatial-related/cotra.pdf`](../related-work/pdfs/spatial-related/cotra.pdf)
+- **PDF:** [arXiv](https://arxiv.org/pdf/2507.06653.pdf) · **Local:** [`cotra.pdf`](../related-work/pdfs/cotra.pdf)
 - **Hardware:** **8–16 machine RDMA cluster**; vectors + **holistic proximity graph** in memory.
 - **Geometry signal:** **Balanced k-means on raw vectors** — one partition per machine, **no replication**.
 - **Why colocate:** Global graph spans machines; random sharding makes most graph hops **remote**. k-means puts similar vectors together so **~73.8%** of accessed vectors (avg over queries) sit on one partition → fewer RDMA hops (**9.8–13.4×** throughput vs single machine @ 16 nodes).
@@ -1074,7 +1074,7 @@ This is **different from partition-size balance** (equal vector count per k-mean
 
 #### Vexless (SIGMOD 2024)
 
-- **PDF:** [NSF PAR](https://par.nsf.gov/servlets/purl/10570270) · **Local:** [`spatial-related/vexless.pdf`](../related-work/pdfs/spatial-related/vexless.pdf)
+- **PDF:** [NSF PAR](https://par.nsf.gov/servlets/purl/10570270) · **Local:** [`vexless.pdf`](../related-work/pdfs/vexless.pdf)
 - **Hardware:** **Azure Functions**, ~**1.5 GB** RAM each; per-shard IVF/LSH/HNSW.
 - **Geometry signal:** **Constrained k-means** semantic shards; orchestrator activates shards whose **centroids within distance threshold** of query.
 - **Why colocate/route:** Serverless cost ∝ functions invoked; semantic routing beats hash all-shard probe under memory limits.
@@ -1082,7 +1082,7 @@ This is **different from partition-size balance** (equal vector count per k-mean
 
 #### SPIRE (arXiv 2025 / VecDB ICML 2025)
 
-- **PDF:** [arXiv](https://arxiv.org/pdf/2512.17264.pdf) · **Local:** [`spatial-related/spire.pdf`](../related-work/pdfs/spatial-related/spire.pdf)
+- **PDF:** [arXiv](https://arxiv.org/pdf/2512.17264.pdf) · **Local:** [`spire.pdf`](../related-work/pdfs/spire.pdf)
 - **Hardware:** **46 nodes**, up to **8B vectors**; disaggregated **memory index + SSD vectors**; stateless query engine tier.
 - **Geometry signal:** **Hierarchical k-means** — recursive clustering; upper levels route like IVF centroid trees; **spatial locality** reduces cross-node links vs naive graph shard.
 - **Why colocate:** Partition-based hierarchy: query descends **nearest centroids** level-by-level; colocating neighboring clusters avoids remote reads during descent.
@@ -1091,7 +1091,7 @@ This is **different from partition-size balance** (equal vector count per k-mean
 
 #### VStream (Gong et al.; PVLDB 2025)
 
-- **PDF:** [PVLDB](https://www.vldb.org/pvldb/vol18/p1593-gao.pdf) · **Local:** [`spatial-related/vstream.pdf`](../related-work/pdfs/spatial-related/vstream.pdf)
+- **PDF:** [PVLDB](https://www.vldb.org/pvldb/vol18/p1593-gao.pdf) · **Local:** [`vstream.pdf`](../related-work/pdfs/vstream.pdf)
 - **Hardware:** Multi-node; **four-tier** memory / local disk / remote disk; Flink streaming integration.
 - **Geometry signal:** **LSH** → low-dim hash space → **space-filling curve (Z-order/Hilbert/Peano)** → 1D partition ID. Neighboring vectors in embedding space → same/nearby partitions.
 - **Why colocate:** ID/hash partitioner destroys locality when streams drift; curve encoding preserves neighborhood; query scans **limited partition range** on 1D order.
@@ -1099,7 +1099,7 @@ This is **different from partition-size balance** (equal vector count per k-mean
 
 #### GP-ANN (Gottesbüren et al.; PVLDB 2025)
 
-- **PDF:** [PVLDB](https://www.vldb.org/pvldb/vol18/p1649-gottesbueren.pdf) · **Local:** [`spatial-related/gp-ann.pdf`](../related-work/pdfs/spatial-related/gp-ann.pdf) · **Notes:** [`related-work/gp-ann.md`](../related-work/gp-ann.md)
+- **PDF:** [PVLDB](https://www.vldb.org/pvldb/vol18/p1649-gottesbueren.pdf) · **Local:** [`gp-ann.pdf`](../related-work/pdfs/gp-ann.pdf) · **Notes:** [`related-work/gp-ann.md`](../related-work/gp-ann.md)
 - **Hardware:** Multi-node; **shard-local HNSW** per graph partition.
 - **Geometry signal:** **Balanced graph partition (METIS-style)** for data placement + modular routers **kRt** (hierarchical **k-means centers**) or **hRt** (**LSH**) to pick **few shards** near query.
 - **Why colocate:** Graph cut minimizes **cross-shard edges**; k-means/LSH routing sends query only to shards whose **representatives are near query** — up to **1.72× QPS @ 90% recall@10** vs prior billion-scale methods.
@@ -1107,7 +1107,7 @@ This is **different from partition-size balance** (equal vector count per k-mean
 
 #### RED-ANNS (PVLDB 2026)
 
-- **PDF:** [Author copy](https://kay21s.github.io/RED-ANNS-VLDB2026.pdf) · **Local:** [`spatial-related/red-anns.pdf`](../related-work/pdfs/spatial-related/red-anns.pdf) · **Notes:** [`related-work/red-anns-vldb2026.md`](../related-work/red-anns-vldb2026.md)
+- **PDF:** [Author copy](https://kay21s.github.io/RED-ANNS-VLDB2026.pdf) · **Local:** [`red-anns.pdf`](../related-work/pdfs/red-anns.pdf) · **Notes:** [`related-work/red-anns-vldb2026.md`](../related-work/red-anns-vldb2026.md)
 - **Hardware:** Multi-node **RDMA** disaggregated memory; logically **full graph** (GPS strategy).
 - **Geometry signal:** **Locality-aware placement** — vectors placed to preserve graph connectivity; **affinity scheduling** assigns query to node owning query-proximate vectors.
 - **Why colocate:** Avoid MapReduce-style graph cuts; RDMA makes remote hops cheap but locality still wins vs random placement.
@@ -1115,7 +1115,7 @@ This is **different from partition-size balance** (equal vector count per k-mean
 
 #### SHINE (arXiv)
 
-- **PDF:** [arXiv](https://arxiv.org/pdf/2507.17647.pdf) · **Local:** [`spatial-related/shine.pdf`](../related-work/pdfs/spatial-related/shine.pdf)
+- **PDF:** [arXiv](https://arxiv.org/pdf/2507.17647.pdf) · **Local:** [`shine.pdf`](../related-work/pdfs/shine.pdf)
 - **Hardware:** Disaggregated memory + RDMA; **global HNSW with all edges** (no graph cut).
 - **Geometry signal:** **Balanced k-means** clusters index **nodes** into logical partitions (one per compute node); **purely logical** — no data moved.
 - **Why route locally:** Joint cross-CN cache suffers **segmentation** under random query dispatch; routing query to CN whose partition centroid is nearest improves cache hits.
@@ -1123,7 +1123,7 @@ This is **different from partition-size balance** (equal vector count per k-mean
 
 #### d-HNSW (arXiv)
 
-- **PDF:** [arXiv](https://arxiv.org/pdf/2603.13591.pdf) · **Local:** [`spatial-related/d-hnsw.pdf`](../related-work/pdfs/spatial-related/d-hnsw.pdf)
+- **PDF:** [arXiv](https://arxiv.org/pdf/2603.13591.pdf) · **Local:** [`d-hnsw.pdf`](../related-work/pdfs/d-hnsw.pdf)
 - **Hardware:** Disaggregated memory + RDMA; **meta-HNSW + sub-HNSW per partition**.
 - **Geometry signal:** **Balanced k-means** (capacity-constrained) preserving **similarity within partitions**; lightweight meta-HNSW over centroids for routing.
 - **Why colocate:** Pointer-chasing over network is expensive; restrict search to **few relevant sub-HNSWs** fetched via RDMA. Splitting similar vectors across partitions **drops recall**.
@@ -1131,7 +1131,7 @@ This is **different from partition-size balance** (equal vector count per k-mean
 
 #### BatANN (arXiv)
 
-- **PDF:** [arXiv](https://arxiv.org/pdf/2512.09331.pdf) · **Local:** [`spatial-related/batann.pdf`](../related-work/pdfs/spatial-related/batann.pdf)
+- **PDF:** [arXiv](https://arxiv.org/pdf/2512.09331.pdf) · **Local:** [`batann.pdf`](../related-work/pdfs/batann.pdf)
 - **Hardware:** Multi-server NVMe; **single global disk graph**; TCP baton-passing.
 - **Geometry signal:** **Graph partitioning** (Gottesbüren et al.) or balanced k-means — **nearby points likely on same server**; preserves spatial relationships vs random shard.
 - **Why colocate:** Beam search hops stay local when neighborhood is co-located; **baton-passing** sends full query state to owning server instead of per-hop RPC.
@@ -1139,7 +1139,7 @@ This is **different from partition-size balance** (equal vector count per k-mean
 
 #### LindormVector (SIGMOD 2026 Industry)
 
-- **PDF:** [ACM](https://dl.acm.org/doi/pdf/10.1145/3788853.3803088) · **Local:** [`spatial-related/lindorm-vector.pdf`](../related-work/pdfs/spatial-related/lindorm-vector.pdf)
+- **PDF:** [ACM](https://dl.acm.org/doi/pdf/10.1145/3788853.3803088) · **Local:** [`lindorm-vector.pdf`](../related-work/pdfs/lindorm-vector.pdf)
 - **Hardware:** Multi-node Lindorm; compute–storage separation; SSD KV.
 - **Geometry signal:** **k-means IVFPQ** posting lists stored on **Lindorm shard/range boundaries** — vector index geometry aligned with existing KV partitioning.
 - **Why colocate:** Avoid separate routing layer; postings live where KV already shards.
@@ -1182,7 +1182,7 @@ Industry entries use official docs/blogs instead of PDFs where no paper exists.
 
 - **Category:** 1
 - **Deployment scope:** Multi-node (compute + object storage)
-- **Local PDF:** [`pinecone.pdf`](../related-work/pdfs/pinecone.pdf) (HTML snapshot)
+- **Local analysis:** [`industrial/pinecone.md`](../related-work/industrial/pinecone.md)
 - **Venue:** Product / blog (not a peer-reviewed paper)
 - **PDF / Source:** [Serverless Architecture](https://www.pinecone.io/blog/serverless-architecture/) · [Slab Architecture](https://www.pinecone.io/learn/slab-architecture/)
 - **Abstract (from docs):** Pinecone serverless separates compute from S3-backed vector storage. Indexes use geometric partitioning (IVF-like centroid hierarchy) split into immutable slabs that compact over time; namespaces provide hard multi-tenant isolation.
@@ -1199,7 +1199,7 @@ Industry entries use official docs/blogs instead of PDFs where no paper exists.
 
 - **Category:** 1
 - **Deployment scope:** Multi-node
-- **Local PDF:** docs only (no PDF)
+- **Local analysis:** [`industrial/milvus.md`](../related-work/industrial/milvus.md) · academic PDF [`milvus.pdf`](../related-work/pdfs/milvus.pdf)
 - **Venue:** Product documentation
 - **PDF / Source:** [Architecture](https://milvus.io/blog/deep-dive-1-milvus-architecture-overview.md) · [Partition key](https://milvus.io/docs/use-partition-key.md)
 - **Abstract (from docs):** Milvus scales via shards (hash on primary key), partitions (optional partition key buckets), and segments (~512 MB sealed units), each holding an independent IVF or HNSW index merged at query time.
@@ -1216,7 +1216,7 @@ Industry entries use official docs/blogs instead of PDFs where no paper exists.
 
 - **Category:** 1
 - **Deployment scope:** Multi-node
-- **Local PDF:** [`weaviate.pdf`](../related-work/pdfs/weaviate.pdf)
+- **Local analysis:** [`industrial/weaviate.md`](../related-work/industrial/weaviate.md)
 - **Venue:** Product documentation
 - **PDF / Source:** [Storage](https://docs.weaviate.io/weaviate/concepts/storage) · [Cluster](https://docs.weaviate.io/weaviate/concepts/cluster)
 - **Abstract (from docs):** Each shard is self-contained (objects + inverted index + one HNSW). Sharding uses UUID Murmur3 hash by default; multi-tenancy can use one shard per tenant.
@@ -1233,7 +1233,7 @@ Industry entries use official docs/blogs instead of PDFs where no paper exists.
 
 - **Category:** 1
 - **Deployment scope:** Multi-node
-- **Local PDF:** [`qdrant.pdf`](../related-work/pdfs/qdrant.pdf)
+- **Local analysis:** [`industrial/qdrant.md`](../related-work/industrial/qdrant.md)
 - **Venue:** Product documentation
 - **PDF / Source:** [Multitenancy & custom sharding](https://qdrant.tech/articles/multitenancy/)
 - **Abstract (from docs):** Qdrant distributes HNSW indexes across shards; supports custom shard keys for tenant/region pinning and payload-based multitenancy.
@@ -1250,7 +1250,7 @@ Industry entries use official docs/blogs instead of PDFs where no paper exists.
 
 - **Category:** 1
 - **Deployment scope:** Multi-node (search shards)
-- **Local PDF:** [`opensearch-k-nn.pdf`](../related-work/pdfs/opensearch-k-nn.pdf)
+- **Local analysis:** [`industrial/opensearch-knn.md`](../related-work/industrial/opensearch-knn.md)
 - **Venue:** Product documentation
 - **PDF / Source:** [k-NN methods](https://docs.opensearch.org/latest/mappings/supported-field-types/knn-methods-engines/)
 - **Abstract (from docs):** Vectors live in Lucene segments inside standard search shards; each segment may use HNSW or IVF (Faiss, nlist buckets). Coordinator merges top-k across shards.
@@ -1304,11 +1304,11 @@ Industry entries use official docs/blogs instead of PDFs where no paper exists.
 | 2026-06-16 | **Local PDF inventory** in `related-work/pdfs/`; Category + Deployment scope per entry; §4 expanded; #1+#2 unified as systems partition; replaced paraphrased abstracts with paper text where available |
 | 2026-06-16 | Removed Faiss 1T wiki (not a Faiss feature). SPANN → category #3, single-node paper only. DistributedANN: added "When #2 beats #1" Bing-scale table |
 | 2026-06-17 | §4: split SABES vs SABBS/SABBSR with correct PDFs; removed hash/block baseline row; replaced vague colocation column with placement/routing table |
-| 2026-06-17 | §4 PDFs moved to `related-work/pdfs/spatial-related/`; in-doc links updated |
+| 2026-06-17 | §4 PDFs moved to `related-work/pdfs/`; in-doc links updated |
 | 2026-06-17 | §4 full rewrite: 12 papers, master table, query-skew subsection (§4.3), self-contained per-paper entries; added SPIRE, VStream, Unleashing GP, RED-ANNS, LindormVector |
 | 2026-06-17 | Removed Quake from §4 (NUMA hardware affinity ≠ embedding-space cluster colocation); PDF in root `pdfs/` for §3 entry |
 | 2026-06-17 | Removed HARMONY from §4 (query-aware hybrid partitioning, not geometry-driven placement); PDF stays in root `pdfs/` for §2 entry |
-| 2026-06-18 | SABES PDF manually downloaded → `spatial-related/sabes.pdf`; §4.5 note that DES/BES are paper-local baseline names |
+| 2026-06-18 | SABES PDF manually downloaded → ` sabes.pdf`; §4.5 note that DES/BES are paper-local baseline names |
 | 2026-06-18 | Renamed PDFs: `sabes.pdf`, `sabbsr.pdf`, `lindorm-vector.pdf` (spatial + read-amp) |
-| 2026-06-18 | Moved SHINE, d-HNSW, BatANN PDFs to `spatial-related/`; added §4 entries (graph/locality line with CoTra/RED-ANNS) |
+| 2026-06-18 | Moved SHINE, d-HNSW, BatANN PDFs to ` `; added §4 entries (graph/locality line with CoTra/RED-ANNS) |
 | 2026-06-18 | Reading note: `serverless-block-partitioning-sigmod2025.md` |

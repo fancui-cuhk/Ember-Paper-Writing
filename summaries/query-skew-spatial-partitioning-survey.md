@@ -67,7 +67,7 @@
 
 **Attitude summary:** *Colocate for prune efficiency; balance clusters at ingest; assume representative/uniform query sampling in eval.*
 
-**Local PDF:** [`spatial-related/analyticdb-v.pdf`](../related-work/pdfs/spatial-related/analyticdb-v.pdf)
+**Local PDF:** [`analyticdb-v.pdf`](../related-work/pdfs/analyticdb-v.pdf)
 
 ---
 
@@ -93,7 +93,7 @@
 
 **Attitude summary:** *Spatial routing for recall/latency; rebalance **vectors** when cluster assignment drifts; **silent on query QPS skew**.*
 
-**Local PDF:** [`spatial-related/gaussdb-vector.pdf`](../related-work/pdfs/spatial-related/gaussdb-vector.pdf)
+**Local PDF:** [`gaussdb-vector.pdf`](../related-work/pdfs/gaussdb-vector.pdf)
 
 ---
 
@@ -123,7 +123,7 @@
 
 **Attitude summary:** *Accept fan-out; hide latency with caching and elastic compute; do not claim query-skew-aware spatial repartition at the architecture level.*
 
-**Source:** [Pinecone slab architecture blog](https://www.pinecone.io/learn/slab-architecture/) · local snapshot [`pinecone.pdf`](../related-work/pdfs/pinecone.pdf)
+**Source:** [Pinecone slab architecture blog](https://www.pinecone.io/learn/slab-architecture/) · [`industrial/pinecone.md`](../related-work/industrial/pinecone.md)
 
 ---
 
@@ -189,7 +189,7 @@
 
 **Attitude summary:** *Balance **shard memory** for FaaS limits; optimize **cost under burst/sparsity**; **no** "hot query region → repartition centroids" mechanism.*
 
-**Local PDF:** [`spatial-related/vexless.pdf`](../related-work/pdfs/spatial-related/vexless.pdf)
+**Local PDF:** [`vexless.pdf`](../related-work/pdfs/vexless.pdf)
 
 ---
 
@@ -219,7 +219,7 @@
 
 **See also:** **§9 SPANN** (primary source for query-access bin-packing).
 
-**Local PDF:** [`spatial-related/gp-ann.pdf`](../related-work/pdfs/spatial-related/gp-ann.pdf) · notes [`gp-ann.md`](../related-work/gp-ann.md)
+**Local PDF:** [`gp-ann.pdf`](../related-work/pdfs/gp-ann.pdf) · notes [`gp-ann.md`](../related-work/gp-ann.md)
 
 ---
 
@@ -247,7 +247,7 @@
 
 **Attitude summary:** *Colocate neighbors for query efficiency; **rebalance partition boundaries when data stream drifts** — closest §4 analog to **temporal** imbalance, but paper does **not** separate **query-only hotspot shift** with fixed data layout.*
 
-**Local PDF:** [`spatial-related/vstream.pdf`](../related-work/pdfs/spatial-related/vstream.pdf)
+**Local PDF:** [`vstream.pdf`](../related-work/pdfs/vstream.pdf)
 
 ---
 
@@ -281,7 +281,7 @@
 
 **Attitude summary:** *Assume **uniform query load** in spirit; optimize **co-probed bucket colocation**; **SABES++** = weighted k-means for **point counts**; **query-frequency** left to **SABBSR** (2024 follow-on).*
 
-**Local PDF:** [`spatial-related/sabes.pdf`](../related-work/pdfs/spatial-related/sabes.pdf)
+**Local PDF:** [`sabes.pdf`](../related-work/pdfs/sabes.pdf)
 
 ---
 
@@ -321,7 +321,7 @@
 
 **Attitude summary:** *Does **not** ignore skew in §4.3 — explicitly names hot-spot machines and uses **offline query-access history + bin-packing** after spatial clustering. Still **assumes training trace represents online load**; main paper body is single-node; distributed eval is an extension section, not the primary NeurIPS contribution.*
 
-**Source:** NeurIPS 2021 full paper §4.3 · [`read-amp-related/spann.pdf`](../related-work/pdfs/read-amp-related/spann.pdf) *(if present)* · [NeurIPS PDF](https://proceedings.neurips.cc/paper_files/paper/2021/file/299dc35e747eb77177d9cea10a802da2-Paper.pdf)
+**Source:** NeurIPS 2021 full paper §4.3 · [`spann.pdf`](../related-work/pdfs/spann.pdf) *(if present)* · [NeurIPS PDF](https://proceedings.neurips.cc/paper_files/paper/2021/file/299dc35e747eb77177d9cea10a802da2-Paper.pdf)
 
 ---
 
@@ -411,7 +411,7 @@
 
 **Attitude summary:** *Explicitly models **expected load = size × probe frequency**; still **offline** profiling — not online drift.*
 
-**Local PDF:** [`spatial-related/sabbsr.pdf`](../related-work/pdfs/spatial-related/sabbsr.pdf)
+**Local PDF:** [`sabbsr.pdf`](../related-work/pdfs/sabbsr.pdf)
 
 ---
 
@@ -505,7 +505,7 @@
 
 > "Stealing Module fetches queries from heavily loaded nodes … work stealing also prioritizes queries with a higher affinity for this node"
 
-**Local PDF:** [`spatial-related/red-anns.pdf`](../related-work/pdfs/spatial-related/red-anns.pdf)
+**Local PDF:** [`red-anns.pdf`](../related-work/pdfs/red-anns.pdf)
 
 ---
 
@@ -539,7 +539,7 @@
 
 > "workloads may exhibit skew. We model this by introducing a load-imbalance factor β … Skewness can be mitigated using … **caching** or **replication** … orthogonal to the design of SPIRE."
 
-**Local PDF:** [`spatial-related/spire.pdf`](../related-work/pdfs/spatial-related/spire.pdf)
+**Local PDF:** [`spire.pdf`](../related-work/pdfs/spire.pdf)
 
 ---
 
@@ -579,7 +579,7 @@
 
 > "Optimizes **expected bucket-label density** across peers … **hot-range replication** (Pitoura et al.) for access-heavy Chord arcs"
 
-**Target PDF:** `spatial-related/haghani-distributed-lsh-edbt-2009.pdf` *(NOT_DOWNLOADED)* · [OpenProceedings](https://openproceedings.org/2009/conf/edbt/HaghaniMA09.pdf)
+**Local PDF:** [`haghani-distributed-lsh-edbt-2009.pdf`](../related-work/pdfs/haghani-distributed-lsh-edbt-2009.pdf) · [OpenProceedings](https://openproceedings.org/2009/conf/edbt/HaghaniMA09.pdf)
 
 ---
 
@@ -593,7 +593,7 @@
 
 > "Each query is assigned to a machine for processing" *(coordinator = partition touching most vectors)* — no mention of rebalancing by query popularity.
 
-**Local PDF:** [`spatial-related/cotra.pdf`](../related-work/pdfs/spatial-related/cotra.pdf)
+**Local PDF:** [`cotra.pdf`](../related-work/pdfs/cotra.pdf)
 
 ---
 
@@ -734,7 +734,7 @@
 
 **Expansion iterations (2026-06-18):**
 
-1. Repo `partition-sharding-vector-search-survey.md` §4.3 query-skew table + PDF grep on all `spatial-related/` papers.
+1. Repo `partition-sharding-vector-search-survey.md` §4.3 query-skew table + PDF grep on all ` ` papers.
 2. Web: `"query skew" distributed vector search`, `hot partition ANN`, `Milvus hot shard`, `Pinecone hot slab`.
 3. Follow citations: **SPANN §4.3** (query-access bin-packing), **Pyramid** (sample-query vertex weights), GP-ANN related work; SABBSR from SABES line; DistributedANN §4.4.
 4. Same research group: **Quake**, **Ada-IVF** (Mohoney et al.).

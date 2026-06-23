@@ -9,7 +9,7 @@
 
 ## 完成工作
 
-1. 创建 `related-work/pdfs/parallel-or-not/`，下载 8 篇经典 PDF（Amdahl, Gustafson×2, Hill–Marty, Gunther USL, Lamport×2, Blumofe–Leiserson）
+1. 创建 `related-work/pdfs/`，下载 8 篇经典 PDF（Amdahl, Gustafson×2, Hill–Marty, Gunther USL, Lamport×2, Blumofe–Leiserson）
 2. 撰写 `related-work/parallel-or-not-report.md` — 经典定律 + 分布式 ANN 映射 + SABES vs BES 启发式
 3. 文件夹 README 记录未下载项（Lamport 1979 SC, Hennessy–Patterson 2019 CACM）
 

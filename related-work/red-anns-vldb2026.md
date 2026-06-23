@@ -8,7 +8,7 @@
 | **Authors** | Yue Chen, Kai Zhang, Sipeng Chen, Shihai Xiao, Xiaomin Zou, Ren Ren, Yinan Jing, X. Sean Wang, Li Cao, Mingxiang Wan |
 | **Venue** | PVLDB 19(3): 399–412, 2025 |
 | **DOI** | [10.14778/3778092.3778101](https://doi.org/10.14778/3778092.3778101) |
-| **PDF in repo** | [`pdfs/spatial-related/red-anns.pdf`](pdfs/spatial-related/red-anns.pdf) |
+| **PDF in repo** | [`pdfs/red-anns.pdf`](pdfs/red-anns.pdf) |
 | **Artifact** | [github.com/cheenyuee/RED-ANNS](https://github.com/cheenyuee/RED-ANNS.git) |
 | **Read date** | 2026-06-17 |
 

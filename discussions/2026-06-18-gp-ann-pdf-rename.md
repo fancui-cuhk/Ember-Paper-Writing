@@ -7,7 +7,7 @@
 
 - PDF：`spatial-related/gp-ann.pdf`
 - 阅读笔记：`related-work/gp-ann.md`（短名 **GP-ANN**）
-- 已更新：`manifest.tsv`、`spatial-related/README.md`、partition survey、`red-anns-vldb2026.md` 对比表、`related-work/README.md` 索引
+- 已更新：`manifest.tsv`、`categories.md`、partition survey、`red-anns-vldb2026.md` 对比表、`related-work/README.md` 索引
 
 ## 命名
 

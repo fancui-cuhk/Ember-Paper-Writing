@@ -1,6 +1,8 @@
 # Distributed Vector Search Related Work and Commercial Systems
 
 > **See also:** [partition-sharding-vector-search-survey.md](partition-sharding-vector-search-survey.md) — partition/sharding survey organized by architectural pattern; each entry includes venue, PDF, abstract, understanding, hardware, and partitioning strategy.
+>
+> **Local PDFs:** [`related-work/pdfs/`](../related-work/pdfs/) · category `distributed-anns-related` in [`categories.md`](../related-work/pdfs/categories.md) (**52** papers as of 2026-06-16).
 
 ## Scope
 

@@ -1,7 +1,7 @@
 # When to Parallelize — Classical Laws and Distributed Vector Search
 
 **Date:** 2026-06-18  
-**PDFs:** [`pdfs/parallel-or-not/`](pdfs/parallel-or-not/)  
+**PDFs:** [`pdfs/`](pdfs/) (category `parallel-or-not` in [`pdfs/categories.md`](pdfs/categories.md))  
 **Context:** User observation that parallel computing is not always suitable — if per-node work is small, a single node (or small fan-out) avoids network/scheduling tax; if work is super-intensive, parallelism pays off again. This report collects top-tier classical support and maps it to distributed ANN (SABES, SPANN, fan-out-all baselines).
 
 ---
@@ -18,7 +18,7 @@ This is not one paper but a stack of results from Amdahl (1967) through Gustafso
 
 ### 2.1 Gene Amdahl — *Validity of the Single Processor Approach* (1967)
 
-**Local PDF:** `pdfs/parallel-or-not/amdahl-1967.pdf`
+**Local PDF:** `pdfs/amdahl-1967.pdf`
 
 For fraction *s* of inherently serial work and parallel fraction *p* = 1 − *s* on *N* processors:
 
@@ -34,7 +34,7 @@ Even a **small serial part** (*s* → 0 still nonzero) caps speedup at **1/s**. 
 
 ### 2.2 John Gustafson — *Reevaluating Amdahl’s Law* (CACM 1988)
 
-**Local PDF:** `pdfs/parallel-or-not/gustafson-1988.pdf` (+ extended memo `gustafson-scaled-sized-1988.pdf`)
+**Local PDF:** `pdfs/gustafson-1988.pdf` (+ extended memo `gustafson-scaled-sized-1988.pdf`)
 
 Gustafson (Sandia, 1024-processor hypercube) argues Amdahl’s **fixed-problem-size** model is the wrong question for HPC: users **scale the problem** with machine size. **Scaled speedup**:
 
@@ -50,7 +50,7 @@ This is much more optimistic than Amdahl when **parallel work grows with *N***.
 
 ### 2.3 Mark Hill & Michael Marty — *Amdahl’s Law in the Multicore Era* (IEEE Computer 2008)
 
-**Local PDF:** `pdfs/parallel-or-not/hill-marty-2008.pdf`
+**Local PDF:** `pdfs/hill-marty-2008.pdf`
 
 Extends Amdahl with a **hardware budget model**: a chip has *n* base core equivalents (BCEs); using *r* BCEs for one “fatter” core yields perf(*r*) (Pollack’s rule: sublinear). Designers choose **many small cores vs fewer large cores** under a fixed resource envelope.
 
@@ -60,7 +60,7 @@ Extends Amdahl with a **hardware budget model**: a chip has *n* base core equiva
 
 ### 2.4 Neil Gunther — Universal Scalability Law (2009 book excerpt)
 
-**Local PDF:** `pdfs/parallel-or-not/gunther-usl-2009.pdf`
+**Local PDF:** `pdfs/gunther-usl-2009.pdf`
 
 \[
 C(N) = \frac{N}{1 + \alpha(N-1) + \beta N(N-1)}
@@ -88,7 +88,7 @@ Beyond Amdahl’s serial term, **α** captures **contention** (shared bottleneck
 
 ### 2.6 Blumofe & Leiserson — *Work Stealing* (JACM 1999)
 
-**Local PDF:** `pdfs/parallel-or-not/blumofe-leiserson-work-stealing-1999.pdf`  
+**Local PDF:** `pdfs/blumofe-leiserson-work-stealing-1999.pdf`  
 **Leiserson:** Turing Award 2019 (parallel and distributed computing).
 
 Provably efficient scheduling for strict multithreaded DAGs:

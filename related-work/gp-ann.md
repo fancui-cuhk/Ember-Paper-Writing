@@ -9,7 +9,7 @@
 | **Authors** | Lars Gottesbüren, Tobias Grohser, Sebastian Schlag, Christian Schulz, Henning Meyerhenke |
 | **Venue** | PVLDB 18(6): 1649–1662, 2025 |
 | **PDF** | [PVLDB](https://www.vldb.org/pvldb/vol18/p1649-gottesbueren.pdf) |
-| **PDF in repo** | [`pdfs/spatial-related/gp-ann.pdf`](pdfs/spatial-related/gp-ann.pdf) |
+| **PDF in repo** | [`pdfs/gp-ann.pdf`](pdfs/gp-ann.pdf) |
 | **Read date** | 2026-06-17 |
 
 ---

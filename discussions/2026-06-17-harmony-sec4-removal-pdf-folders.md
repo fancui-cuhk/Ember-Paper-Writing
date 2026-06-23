@@ -17,8 +17,8 @@
 
 | 目录 | 用途 | 文件数 |
 |------|------|--------|
-| `related-work/pdfs/spatial-related/` | partition survey §4 | 10 PDF + README |
-| `related-work/pdfs/read-amp-related/` | read-amp survey §5 | 18 PDF + README |
+| `related-work/pdfs/` | partition survey §4 | 10 PDF + README |
+| `related-work/pdfs/` | read-amp survey §5 | 18 PDF + README |
 | `related-work/pdfs/` (root) | 全库 + §2 等非 §4 论文 | 含 `harmony.pdf` 等 |
 
 ### 下载状态

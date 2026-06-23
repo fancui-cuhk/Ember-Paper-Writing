@@ -7,7 +7,7 @@
 | **Title** | Scalable Distributed Vector Search via Accuracy Preserving Index Construction |
 | **Authors** | Yuming Xu, Qianxi Zhang, Qi Chen, Baotong Lu, Menghao Li, Philip Adams, Mingqin Li, Zengzhong Li, Jing Liu, Cheng Li, Fan Yang |
 | **Venue** | arXiv:2512.17264 (2025); VecDB @ ICML 2025 workshop |
-| **PDF in repo** | [`pdfs/spatial-related/spire.pdf`](pdfs/spatial-related/spire.pdf) |
+| **PDF in repo** | [`pdfs/spire.pdf`](pdfs/spire.pdf) |
 | **Read date** | 2026-06-17 |
 
 ---

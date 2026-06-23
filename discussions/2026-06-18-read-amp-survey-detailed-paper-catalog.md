@@ -20,4 +20,4 @@
 ## 关系
 
 - 延续 `discussions/2026-06-16-read-amplification-disk-vector-search-survey.md`
-- PDFs：`related-work/pdfs/read-amp-related/`
+- PDFs：`related-work/pdfs/`

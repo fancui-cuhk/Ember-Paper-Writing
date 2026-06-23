@@ -4,7 +4,7 @@
 
 ## PDF 迁移
 
-`shine.pdf`, `d-hnsw.pdf`, `batann.pdf` → `related-work/pdfs/spatial-related/`（与 CoTra、RED-ANNS 同目录）
+`shine.pdf`, `d-hnsw.pdf`, `batann.pdf` → `related-work/pdfs/`（与 CoTra、RED-ANNS 同目录）
 
 已更新：manifest、spatial-related/README、partition survey §2 条目 + §4 master table + §4.4 深读条目。
 

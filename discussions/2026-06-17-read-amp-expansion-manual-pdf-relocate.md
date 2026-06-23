@@ -9,7 +9,7 @@
 
 | 原路径 | 新路径 |
 |--------|--------|
-| `related-work/anyblob.pdf` | `related-work/pdfs/read-amp-related/anyblob-vldb2023.pdf` |
+| `related-work/anyblob.pdf` | `related-work/pdfs/anyblob-vldb2023.pdf` |
 | `related-work/lindormvector.pdf` | `read-amp-related/lindormvector-sigmod2026.pdf` + `spatial-related/lindormvector-sigmod2026.pdf` |
 
 根目录副本已删除；`anyblob-vldb2023.md` / `lindorm-vector-sigmod2026.md` 已更新 PDF 路径。Partition survey §2 + §4 LindormVector 改为已下载。

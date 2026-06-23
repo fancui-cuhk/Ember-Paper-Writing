@@ -27,5 +27,6 @@ Example: `lindorm-vector-sigmod2026.md`
 | [gp-ann.md](gp-ann.md) | GP-ANN / Unleashing Graph Partitioning (PVLDB 2025) | 2026-06-17 |
 | [lindorm-vector-sigmod2026.md](lindorm-vector-sigmod2026.md) | LindormVector (SIGMOD 2026 Industry) | 2026-05-28 |
 | [anyblob-vldb2023.md](anyblob-vldb2023.md) | AnyBlob / S3 OLAP performance (PVLDB 2023) | 2026-06-03 |
-| [pdfs/](pdfs/) | Local PDF inventory for partition/sharding survey (~48 papers); §4 subset in `pdfs/spatial-related/`; read-amp survey in `pdfs/read-amp-related/` | 2026-06-17 |
+| [industrial/](industrial/) | Docs-based architecture analyses (Milvus, Pinecone, Weaviate, Qdrant, OpenSearch, C-SPANN) | 2026-06-16 |
+| [pdfs/](pdfs/) | Flat local PDF inventory (**66** files); category index [`pdfs/categories.md`](pdfs/categories.md) | 2026-06-16 |
 | [discussions/2026-06-16-leann-mlsys2026-reading.md](../discussions/2026-06-16-leann-mlsys2026-reading.md) | LEANN (MLSys 2026) | 2026-06-16 |

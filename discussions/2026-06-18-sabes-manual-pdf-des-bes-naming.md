@@ -2,8 +2,8 @@
 
 ## SABES PDF
 
-- 用户手动下载 → `related-work/pdfs/spatial-related/andrade-sabes-sbac-pad-2020.pdf`（自 `sabes.pdf` 重命名）
-- 更新：`manifest.tsv`, `spatial-related/README.md`, partition survey §4.4 SABES entry
+- 用户手动下载 → `related-work/pdfs/andrade-sabes-sbac-pad-2020.pdf`（自 `sabes.pdf` 重命名）
+- 更新：`manifest.tsv`, `categories.md`, partition survey §4.4 SABES entry
 
 ## DES / BES 是否标准名？
 

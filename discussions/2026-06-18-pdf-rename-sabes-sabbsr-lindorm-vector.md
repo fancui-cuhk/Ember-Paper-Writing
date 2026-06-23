@@ -14,8 +14,8 @@
 ## 已更新引用
 
 - `related-work/pdfs/manifest.tsv`
-- `related-work/pdfs/spatial-related/README.md`
-- `related-work/pdfs/read-amp-related/README.md`
+- `related-work/pdfs/README.md`
+- `related-work/pdfs/README.md`
 - `summaries/partition-sharding-vector-search-survey.md`
 - `summaries/read-amplification-disk-vector-search-survey.md`
 - `related-work/lindorm-vector-sigmod2026.md`

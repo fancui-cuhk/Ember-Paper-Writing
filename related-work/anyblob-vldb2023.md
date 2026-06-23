@@ -8,7 +8,7 @@
 | **Authors** | Dominik Durner, Viktor Leis, Thomas Neumann |
 | **Venue** | PVLDB 16(11): 2769–2782, 2023 (VLDB 2023) |
 | **DOI** | [10.14778/3611479.3611486](https://doi.org/10.14778/3611479.3611486) |
-| **PDF in repo** | [`pdfs/read-amp-related/anyblob-vldb2023.pdf`](pdfs/read-amp-related/anyblob-vldb2023.pdf) (relocated from `related-work/anyblob.pdf`) |
+| **PDF in repo** | [`pdfs/anyblob-vldb2023.pdf`](pdfs/anyblob-vldb2023.pdf) (relocated from `related-work/anyblob.pdf`) |
 | **Artifact** | [github.com/durner/AnyBlob](https://github.com/durner/AnyBlob) |
 | **Read date** | 2026-06-03 |
 
